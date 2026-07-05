@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 export interface User {
   id: string;
@@ -181,7 +181,7 @@ export async function fetchApi<T>(
     res = await fetch(`${API_URL}${path}`, { ...options, headers });
   } catch {
     throw new Error(
-      'Unable to reach the API. Make sure the backend is running on port 3001.',
+      'Unable to reach the API. Make sure the backend is running on port 8001.',
     );
   }
 
@@ -217,7 +217,7 @@ export async function uploadFileApi<T>(
     });
   } catch {
     throw new Error(
-      'Unable to reach the API. Make sure the backend is running on port 3001.',
+      'Unable to reach the API. Make sure the backend is running on port 8001.',
     );
   }
 

@@ -1,6 +1,6 @@
 import { Event } from './api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 export async function getEvents(options?: { fresh?: boolean }): Promise<Event[]> {
   try {
