@@ -5,10 +5,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  BookOpen,
   Loader2,
   Sparkles,
-  Video,
 } from 'lucide-react';
 import { AdminDetailLayout } from '@/components/admin/AdminDetailLayout';
 import { EventImageGalleryUpload } from '@/components/admin/EventImageGalleryUpload';
@@ -85,17 +83,6 @@ const emptyForm: EventFormState = {
   meetingLink: '',
   status: 'DRAFT',
 };
-
-function formatDateLabel(dateStart: string) {
-  if (!dateStart) return 'TBD';
-  const date = new Date(dateStart);
-  if (Number.isNaN(date.getTime())) return 'TBD';
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -214,8 +201,7 @@ export default function CreateEventPage() {
       title="Create Event"
     >
       <form id="event-create-form" onSubmit={handleSave}>
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px] xl:items-start">
-          <div className="space-y-6">
+        <div className="space-y-6">
             <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <h2 className="text-base font-semibold text-purple-deep">Core event info</h2>
@@ -492,74 +478,19 @@ export default function CreateEventPage() {
                 </div>
               </div>
             </section>
+
+          <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-end">
+            <Button asChild variant="outline" className="border-gray-200">
+              <Link href="/admin/events">Cancel</Link>
+            </Button>
+            <Button type="submit" disabled={saving} className="btn-primary min-w-[140px]">
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Create event'
+              )}
+            </Button>
           </div>
-
-          <aside className="space-y-6 xl:sticky xl:top-24">
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <div className="mb-4 flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-purple-deep" />
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-purple-deep/70">
-                  Event snapshot
-                </p>
-              </div>
-              <dl className="space-y-4 text-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-gray-500">Title</dt>
-                  <dd className="text-right font-medium text-gray-900">
-                    {form.title || 'Untitled event'}
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-gray-500">Format</dt>
-                  <dd className="text-right font-medium text-gray-900">{form.type}</dd>
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-gray-500">Instructor</dt>
-                  <dd className="text-right font-medium text-gray-900">
-                    {form.speakerName || 'Manual instructor'}
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-gray-500">Date</dt>
-                  <dd className="text-right font-medium text-gray-900">
-                    {formatDateLabel(form.dateStart)}
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-gray-500">Images</dt>
-                  <dd className="text-right font-medium text-gray-900">
-                    {form.imageUrls.length || 0}
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-gray-500">Status</dt>
-                  <dd className="text-right font-medium text-gray-900">{form.status}</dd>
-                </div>
-              </dl>
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold text-purple-deep">Actions</p>
-              <p className="mt-2 text-sm text-gray-600">
-                Save the draft or publish when the event is ready.
-              </p>
-              <div className="mt-4 flex flex-col gap-3">
-                <Button type="submit" form="event-create-form" disabled={saving} className="btn-primary w-full">
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Video className="mr-2 h-4 w-4" />
-                      Create event
-                    </>
-                  )}
-                </Button>
-                <Button asChild variant="outline" className="w-full border-gray-200">
-                  <Link href="/admin/events">Cancel</Link>
-                </Button>
-              </div>
-            </div>
-          </aside>
         </div>
       </form>
     </AdminDetailLayout>
