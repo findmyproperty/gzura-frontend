@@ -4,10 +4,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Loader2,
-  Sparkles,
-} from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { AdminDetailLayout } from '@/components/admin/AdminDetailLayout';
 import { EventImageGalleryUpload } from '@/components/admin/EventImageGalleryUpload';
 import TimeRangePicker from '@/components/admin/TimeRangePicker';
@@ -442,33 +439,22 @@ export default function CreateEventPage() {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <h2 className="mb-4 text-base font-semibold text-purple-deep">Visibility</h2>
-              <div className="grid gap-4 sm:grid-cols-[minmax(0,280px)_1fr] sm:items-start">
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select
-                    value={form.status}
-                    onValueChange={(value) =>
-                      setForm({ ...form, status: value as 'DRAFT' | 'PUBLISHED' })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="DRAFT">Draft</SelectItem>
-                      <SelectItem value="PUBLISHED">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-purple-deep">
-                    <Sparkles className="h-4 w-4 text-gold-royal" />
-                    Ready to publish
-                  </div>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Review the form, then save the event to continue to the detail page and manage course content.
-                  </p>
-                </div>
+              <div className="space-y-2 sm:max-w-xs">
+                <Label>Status</Label>
+                <Select
+                  value={form.status}
+                  onValueChange={(value) =>
+                    setForm({ ...form, status: value as 'DRAFT' | 'PUBLISHED' })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DRAFT">Draft</SelectItem>
+                    <SelectItem value="PUBLISHED">Published</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </section>
 
