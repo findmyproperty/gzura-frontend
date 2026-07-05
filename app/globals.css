@@ -1,0 +1,314 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 270 75% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 270 75% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 75% 12%;
+    --primary: 270 75% 18%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 43 68% 47%;
+    --secondary-foreground: 270 75% 12%;
+    --muted: 270 20% 96%;
+    --muted-foreground: 270 20% 40%;
+    --accent: 43 68% 47%;
+    --accent-foreground: 270 75% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 270 20% 90%;
+    --input: 270 20% 90%;
+    --ring: 270 75% 18%;
+    --chart-1: 263 70% 42%;
+    --chart-2: 45 96% 53%;
+    --chart-3: 270 50% 60%;
+    --chart-4: 45 80% 60%;
+    --chart-5: 270 70% 50%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 270 50% 5%;
+    --foreground: 0 0% 98%;
+    --card: 270 50% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 270 50% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 263 70% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 96% 53%;
+    --secondary-foreground: 270 50% 5%;
+    --muted: 270 30% 15%;
+    --muted-foreground: 270 30% 65%;
+    --accent: 45 96% 53%;
+    --accent-foreground: 270 50% 5%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 270 30% 20%;
+    --input: 270 30% 20%;
+    --ring: 263 70% 48%;
+    --chart-1: 263 70% 48%;
+    --chart-2: 45 80% 55%;
+    --chart-3: 270 60% 65%;
+    --chart-4: 45 70% 60%;
+    --chart-5: 270 80% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .gzura-meeting-frame,
+  .gzura-meeting-frame > div,
+  .gzura-meeting-frame iframe {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-deep via-purple-600 to-gold-500 bg-clip-text text-transparent;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-br from-purple-deep via-purple-800 to-purple-950;
+  }
+
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-purple-950/50 backdrop-blur-xl border border-purple-800/30;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-deep to-purple-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 hover:from-purple-800 hover:to-purple-900 hover:shadow-lg hover:shadow-purple-500/25;
+  }
+
+  .btn-secondary {
+    @apply bg-gradient-to-r from-gold-royal to-gold-400 text-purple-950 font-semibold px-8 py-3 rounded-lg transition-all duration-300 hover:from-gold-400 hover:to-gold-300 hover:shadow-lg hover:shadow-gold-500/25;
+  }
+
+  .section-padding {
+    @apply py-20 md:py-28 lg:py-32;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .heading-xl {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight;
+  }
+
+  .heading-lg {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight;
+  }
+
+  .heading-md {
+    @apply text-2xl sm:text-3xl font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+  .animate-spin-slow {
+    animation: spin 20s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
+.animate-slide-left {
+  animation: slide-in-left 0.6s ease-out forwards;
+}
+
+.animate-slide-right {
+  animation: slide-in-right 0.6s ease-out forwards;
+}
+
+/* Scroll Animation Classes */
+.scroll-animate {
+  opacity: 0;
+}
+
+.scroll-animate.is-visible {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+.scroll-animate-left.is-visible {
+  animation: slide-in-left 0.6s ease-out forwards;
+}
+
+.scroll-animate-right.is-visible {
+  animation: slide-in-right 0.6s ease-out forwards;
+}
+
+.scroll-animate-scale.is-visible {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
+/* Tiptap rich text editor */
+.ProseMirror {
+  min-height: 160px;
+  padding: 0.75rem;
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: hsl(var(--muted-foreground));
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.ProseMirror ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.5rem;
+}
