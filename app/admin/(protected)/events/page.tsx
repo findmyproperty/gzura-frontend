@@ -33,6 +33,16 @@ import {
   PillBadge,
   StatusBadge,
 } from '@/components/admin/AdminDataTable';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -123,6 +133,11 @@ export default function AdminEventsPage() {
     totalSeats?: number | null;
     seatsRemaining?: number | null;
   }>({});
+  const [eventToDelete, setEventToDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadEvents = () => {
     setLoading(true);
@@ -311,14 +326,19 @@ export default function AdminEventsPage() {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Delete event "${title}"?`)) return;
+  const confirmDelete = async () => {
+    if (!eventToDelete) return;
+
+    setDeleting(true);
     try {
-      await api.deleteEvent(id);
+      await api.deleteEvent(eventToDelete.id);
       toast({ title: 'Event deleted' });
+      setEventToDelete(null);
       loadEvents();
     } catch {
       toast({ title: 'Delete failed', variant: 'destructive' });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -433,7 +453,9 @@ export default function AdminEventsPage() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-red-600 focus:text-red-600"
-                        onClick={() => handleDelete(event.id, event.title)}
+                        onClick={() =>
+                          setEventToDelete({ id: event.id, title: event.title })
+                        }
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete event
@@ -835,6 +857,48 @@ export default function AdminEventsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!eventToDelete}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setEventToDelete(null);
+        }}
+      >
+        <AlertDialogContent className="border-purple-100">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-purple-deep">
+              Delete event?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete{' '}
+              <span className="font-medium text-gray-900">
+                {eventToDelete?.title}
+              </span>
+              . This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmDelete();
+              }}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                'Delete event'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
