@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { Award, BookOpen, Calendar, Clock, MapPin, User } from 'lucide-react';
+import { BookOpen, Calendar, Clock, MapPin, User } from 'lucide-react';
 import EventDetailActions from '@/components/events/EventDetailActions';
 import EventContentViewer from '@/components/events/EventContentViewer';
 import RichTextContent from '@/components/ui/rich-text-content';
 import { Event } from '@/lib/api';
 import { getEventImages } from '@/lib/event-images';
+import { formatEventPrice } from '@/lib/price';
 import { cn } from '@/lib/utils';
 
 type EventDetailViewProps = {
@@ -21,7 +22,8 @@ export default function EventDetailView({
   shell,
 }: EventDetailViewProps) {
   const price = Number(event.price);
-  const memberPrice = event.memberPrice ? Number(event.memberPrice) : null;
+  const memberPrice =
+    event.memberPrice != null ? Number(event.memberPrice) : null;
   const isMemberShell = shell === 'member';
   const images = getEventImages(event);
 
@@ -115,27 +117,6 @@ export default function EventDetailView({
                 ) : null}
               </div>
             ) : null}
-            <div className="rounded-2xl border border-gold-100 bg-gradient-to-br from-gold-50/70 via-white to-purple-50/40 p-6">
-              <div className="mb-4 flex items-center gap-3">
-                <Award className="h-5 w-5 text-gold-royal" />
-                <h3 className="font-semibold text-purple-deep">Certificate Sample</h3>
-              </div>
-              <div className="rounded-3xl border border-dashed border-gold-200 bg-white p-6 text-center shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-royal">
-                  Sample only
-                </p>
-                <p className="mt-4 font-display text-2xl text-purple-deep">
-                  Certificate of Completion
-                </p>
-                <p className="mt-3 text-sm text-gray-600">
-                  Presented to learners who complete the course.
-                </p>
-                <p className="mt-4 text-lg font-semibold text-gray-900">{event.title}</p>
-                <p className="mt-2 text-sm text-gray-600">
-                  {event.speakerName || 'GZURA Faculty'}
-                </p>
-              </div>
-            </div>
             {event.courseOutline ? (
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center gap-3">
@@ -153,13 +134,13 @@ export default function EventDetailView({
           <div>
             <div className="sticky top-24 rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
               <div className="mb-6">
-                <p className="mb-1 text-sm text-gray-500">Ticket Price</p>
+                <p className="mb-1 text-sm text-gray-500">Enrollment</p>
                 <p className="text-3xl font-bold text-purple-deep">
-                  {price === 0 ? 'Free' : `$${price}`}
+                  {formatEventPrice(event.price)}
                 </p>
                 {memberPrice !== null && memberPrice < price ? (
                   <p className="mt-1 text-sm font-medium text-gold-royal">
-                    Member price: {memberPrice === 0 ? 'Free' : `$${memberPrice}`}
+                    Member price: {formatEventPrice(event.memberPrice)}
                   </p>
                 ) : null}
               </div>

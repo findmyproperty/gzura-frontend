@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { formatEventPrice, isFreeEventPrice } from '@/lib/price';
 
 export default function EventRegisterPage() {
   const { id } = useParams<{ id: string }>();
@@ -79,6 +80,8 @@ export default function EventRegisterPage() {
     );
   }
 
+  const isFree = isFreeEventPrice(event?.price);
+
   if (success) {
     return (
       <section className="min-h-screen gradient-bg flex items-center justify-center px-4">
@@ -108,8 +111,16 @@ export default function EventRegisterPage() {
           </Link>
           <h1 className="text-3xl font-bold text-white">Join {event?.title}</h1>
           <p className="text-white/80 mt-2 text-sm">
-            Complete your enrollment to access this course in My Learnings.
+            {isFree
+              ? 'This course is free — complete enrollment to access it in My Learnings.'
+              : 'Complete your enrollment to access this course in My Learnings.'}
           </p>
+          {event ? (
+            <p className="mt-3 text-lg font-semibold text-gold-royal">
+              {formatEventPrice(event.price)}
+              {isFree ? ' enrollment' : ''}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -139,7 +150,13 @@ export default function EventRegisterPage() {
               </div>
             </div>
             <Button type="submit" disabled={submitting} className="btn-secondary w-full">
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join Course'}
+              {submitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isFree ? (
+                'Join for free'
+              ) : (
+                'Join Course'
+              )}
             </Button>
           </form>
         </div>

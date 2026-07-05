@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle2, Loader2, Video } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { api, Event } from '@/lib/api';
+import { isFreeEventPrice } from '@/lib/price';
 
 export default function EventDetailActions({ event }: { event: Event }) {
   const { user, loading: authLoading } = useAuth();
@@ -64,10 +65,12 @@ export default function EventDetailActions({ event }: { event: Event }) {
     );
   }
 
+  const isFree = isFreeEventPrice(event.price);
+
   return (
     <Link href={`/events/${event.id}/register`}>
       <Button className="btn-secondary w-full">
-        Join Course
+        {isFree ? 'Join for free' : 'Join Course'}
         <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
     </Link>

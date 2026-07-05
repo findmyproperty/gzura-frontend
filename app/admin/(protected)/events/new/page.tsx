@@ -17,6 +17,7 @@ import { toast } from '@/hooks/use-toast';
 import { api, Event } from '@/lib/api';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import { normalizeRichText } from '@/lib/rich-text';
+import { parseEventPrice } from '@/lib/price';
 import { slugify } from '@/lib/slug';
 
 const LocationMapPicker = dynamic(
@@ -150,7 +151,7 @@ export default function CreateEventPage() {
         speakerBio: form.speakerBio.trim() || undefined,
         galleryImages: form.imageUrls.length ? form.imageUrls : undefined,
         imageUrl: form.imageUrls[0] || undefined,
-        price: parseFloat(form.price),
+        price: parseEventPrice(form.price),
         maxAttendees:
           form.type === 'Online'
             ? parseInt(form.maxAttendees, 10)
@@ -179,7 +180,13 @@ export default function CreateEventPage() {
       };
       const saved: Event = await api.createEvent(savePayload);
       toast({ title: 'Event created' });
-      router.replace(`/admin/events/${saved.id}`);
+
+      if (saved?.id) {
+        router.push(`/admin/events/${saved.id}`);
+        return;
+      }
+
+      router.push('/admin/events');
     } catch (err) {
       toast({
         title: 'Could not create event',
@@ -243,9 +250,13 @@ export default function CreateEventPage() {
                   <Input
                     type="number"
                     min={0}
+                    step="0.01"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
                   />
+                  <p className="text-xs text-gray-500">
+                    Set to 0 for free enrollment — users can join without payment.
+                  </p>
                 </div>
                 </div>
               </div>

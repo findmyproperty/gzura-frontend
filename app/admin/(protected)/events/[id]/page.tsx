@@ -15,6 +15,7 @@ import EventContentManager from '@/components/admin/EventContentManager';
 import RichTextContent from '@/components/ui/rich-text-content';
 import { Button } from '@/components/ui/button';
 import { api, Event } from '@/lib/api';
+import { formatEventPrice } from '@/lib/price';
 
 export default function AdminEventViewPage() {
   const params = useParams();
@@ -127,15 +128,12 @@ export default function AdminEventViewPage() {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
               <DetailField label="Start Date" value={formatAdminDate(event.dateStart)} />
               <DetailField label="End Date" value={formatAdminDate(event.dateEnd)} />
-              <DetailField
-                label="Price"
-                value={`₹${Number(event.price).toLocaleString('en-IN')}`}
-              />
+              <DetailField label="Price" value={formatEventPrice(event.price)} />
               <DetailField
                 label="Member Price"
                 value={
                   event.memberPrice != null
-                    ? `₹${Number(event.memberPrice).toLocaleString('en-IN')}`
+                    ? formatEventPrice(event.memberPrice)
                     : '—'
                 }
               />

@@ -3,11 +3,7 @@ import { Calendar, ChevronRight, MapPin, Sparkles, TrendingUp } from 'lucide-rea
 import RecommendedEvents from '@/components/member/RecommendedEvents';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/lib/api';
-
-function formatPrice(price: string | number) {
-  const n = Number(price);
-  return n === 0 ? 'Free' : `$${n}`;
-}
+import { formatEventPrice } from '@/lib/price';
 
 export default function MemberCoursesHome({ events }: { events: Event[] }) {
   const trending = events.slice(0, 8);
@@ -121,7 +117,7 @@ export default function MemberCoursesHome({ events }: { events: Event[] }) {
                       {event.location}
                     </div>
                     <p className="mt-auto pt-3 font-bold text-sm text-gray-900">
-                      {formatPrice(event.price)}
+                      {formatEventPrice(event.price)}
                     </p>
                   </div>
                 </article>

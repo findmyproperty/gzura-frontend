@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getEvents } from '@/lib/events-server';
+import { formatEventPrice } from '@/lib/price';
 import { richTextExcerpt } from '@/lib/rich-text';
 
 export const metadata: Metadata = {
@@ -82,7 +83,7 @@ export default async function EventsPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-purple-deep">
-                        {Number(event.price) === 0 ? 'Free' : `$${event.price}`}
+                        {formatEventPrice(event.price)}
                       </span>
                       <Link href={`/events/${event.id}`}>
                         <Button size="sm" className="btn-primary">

@@ -59,6 +59,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { parseEventPrice } from '@/lib/price';
 import { normalizeRichText } from '@/lib/rich-text';
 import { slugify } from '@/lib/slug';
 import {
@@ -260,7 +261,7 @@ export default function AdminEventsPage() {
         speakerBio: form.speakerBio.trim() || undefined,
         galleryImages: form.imageUrls.length ? form.imageUrls : undefined,
         imageUrl: form.imageUrls[0] || undefined,
-        price: parseFloat(form.price),
+        price: parseEventPrice(form.price),
         maxAttendees:
           form.type === 'Online'
             ? parseInt(form.maxAttendees, 10)
@@ -290,31 +291,23 @@ export default function AdminEventsPage() {
       if (editingId) {
         saved = await api.updateEvent(editingId, savePayload);
         toast({ title: 'Event updated' });
-      } else {
-        saved = await api.createEvent({
-          ...savePayload,
-          slug: slugify(form.title),
-        });
-        toast({ title: 'Event created' });
+        setDialogOpen(false);
+        loadEvents();
+        return;
       }
 
-      if (saved.type === 'Online') {
-        setEditingId(saved.id);
-        setMeetingMeta({
-          meetLink: saved.meetingUrl || saved.meetingRoomId,
-          totalSeats: saved.maxAttendees,
-          seatsRemaining: saved.seatsRemaining,
-        });
-        toast({
-          title: 'Google Meet ready',
-          description: 'Copy the Meet link below and share it with participants.',
-        });
-      } else {
-        setMeetingMeta({});
-        setForm(emptyForm);
-        setEditingId(null);
-        setDialogOpen(false);
+      saved = await api.createEvent({
+        ...savePayload,
+        slug: slugify(form.title),
+      });
+      toast({ title: 'Event created' });
+
+      if (saved?.id) {
+        router.push(`/admin/events/${saved.id}`);
+        return;
       }
+
+      setDialogOpen(false);
       loadEvents();
     } catch (err) {
       toast({
@@ -548,9 +541,14 @@ export default function AdminEventsPage() {
                 <Label>Price (₹)</Label>
                 <Input
                   type="number"
+                  min={0}
+                  step="0.01"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                 />
+                <p className="text-xs text-gray-500">
+                  Set to 0 for free enrollment — users can join without payment.
+                </p>
               </div>
             </div>
 
