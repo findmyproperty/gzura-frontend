@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Award,
   BookOpen,
   Loader2,
   Sparkles,
@@ -342,36 +341,14 @@ export default function CreateEventPage() {
                   />
                 </div>
               </div>
-              <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
-                <div className="space-y-2">
-                  <Label>Instructor details</Label>
-                  <Textarea
-                    value={form.speakerBio}
-                    onChange={(e) => setForm({ ...form, speakerBio: e.target.value })}
-                    placeholder="Short bio, expertise, teaching background, or speaking experience."
-                    rows={4}
-                  />
-                </div>
-                <div className="space-y-2 lg:min-w-[260px]">
-                  <Label>Certificate sample</Label>
-                  <div className="rounded-2xl border border-gold-100 bg-gradient-to-br from-gold-50/70 via-white to-purple-50/40 p-4">
-                    <div className="rounded-2xl border border-dashed border-gold-200 bg-white px-4 py-5 text-center shadow-sm">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gold-royal">
-                        Sample only
-                      </p>
-                      <Award className="mx-auto mt-3 h-8 w-8 text-gold-royal" />
-                      <p className="mt-3 font-display text-xl leading-tight text-purple-deep">
-                        Certificate of Completion
-                      </p>
-                      <p className="mt-2 text-sm text-gray-600">
-                        {form.title || 'Your course title'}
-                      </p>
-                      <p className="mt-4 text-sm font-semibold text-gray-900">
-                        {form.speakerName || 'Selected instructor'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label>Instructor details</Label>
+                <Textarea
+                  value={form.speakerBio}
+                  onChange={(e) => setForm({ ...form, speakerBio: e.target.value })}
+                  placeholder="Short bio, expertise, teaching background, or speaking experience."
+                  rows={4}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Course summary</Label>
@@ -518,37 +495,6 @@ export default function CreateEventPage() {
           </div>
 
           <aside className="space-y-6 xl:sticky xl:top-24">
-            <div className="rounded-2xl border border-gold-100 bg-gradient-to-br from-gold-50/70 via-white to-purple-50/40 p-5 shadow-sm">
-              <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-gold-royal shadow-sm">
-                  <Award className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-gold-royal">
-                    Certificate sample
-                  </p>
-                  <p className="text-sm text-gray-500">Preview of the learner certificate</p>
-                </div>
-              </div>
-              <div className="rounded-3xl border border-dashed border-gold-200 bg-white px-5 py-6 text-center shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-gold-royal">
-                  Sample only
-                </p>
-                <p className="mt-3 font-display text-2xl leading-tight text-purple-deep">
-                  Certificate of Completion
-                </p>
-                <p className="mt-2 text-sm text-gray-600">
-                  {form.title || 'Your course title'}
-                </p>
-                <div className="mt-5 rounded-2xl bg-purple-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {form.speakerName || 'Selected instructor'}
-                  </p>
-                  <p className="text-xs text-gray-500">Instructor</p>
-                </div>
-              </div>
-            </div>
-
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-purple-deep" />

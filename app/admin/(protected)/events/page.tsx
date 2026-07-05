@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Award,
   Calendar,
   BookOpen,
   Loader2,
@@ -643,34 +642,6 @@ export default function AdminEventsPage() {
                       placeholder={"Module 1 - ...\nModule 2 - ...\nModule 3 - ..."}
                       rows={6}
                     />
-                  </div>
-                </div>
-              </EventFormCard>
-
-              <EventFormCard
-                icon={<Award className="h-3.5 w-3.5 text-purple-deep" />}
-                title="Certificate sample"
-              >
-                <div className="rounded-2xl border border-dashed border-gold-200 bg-gradient-to-br from-gold-50/70 via-white to-purple-50/40 p-4">
-                  <div className="rounded-2xl border border-gold-100 bg-white p-4 text-center shadow-sm">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold-royal">
-                      Sample only
-                    </p>
-                    <p className="mt-4 font-display text-xl text-purple-deep">
-                      Certificate of Completion
-                    </p>
-                    <p className="mt-2 text-sm text-gray-600">
-                      Awarded to learners who complete
-                    </p>
-                    <p className="mt-2 text-base font-semibold text-gray-900">
-                      {form.title || 'Your course title'}
-                    </p>
-                    <div className="mt-5 rounded-xl bg-purple-50 px-4 py-3">
-                      <p className="text-sm font-medium text-gray-900">
-                        {form.speakerName || 'Selected instructor'}
-                      </p>
-                      <p className="text-xs text-gray-500">Instructor</p>
-                    </div>
                   </div>
                 </div>
               </EventFormCard>
