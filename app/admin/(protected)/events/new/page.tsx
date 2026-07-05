@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Award,
@@ -112,11 +112,6 @@ export default function CreateEventPage() {
       .catch(() => setHosts([]))
       .finally(() => setLoadingHosts(false));
   }, []);
-
-  const selectedHost = useMemo(
-    () => hosts.find((host) => host.id === form.hostId) ?? null,
-    [hosts, form.hostId],
-  );
 
   const handleHostChange = (hostId: string) => {
     const host = hosts.find((item) => item.id === hostId);
@@ -295,7 +290,7 @@ export default function CreateEventPage() {
               </h2>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Host</Label>
+                  <Label>Instructor</Label>
                   <Select
                     value={form.hostId}
                     onValueChange={(value) => {
@@ -310,10 +305,10 @@ export default function CreateEventPage() {
                       <SelectValue
                         placeholder={
                           loadingHosts
-                            ? 'Loading hosts…'
+                            ? 'Loading instructors…'
                             : hosts.length
-                              ? 'Select a host from users'
-                              : 'No host users found'
+                              ? 'Select an instructor from users'
+                              : 'No instructor users found'
                         }
                       />
                     </SelectTrigger>
@@ -328,7 +323,7 @@ export default function CreateEventPage() {
                   </Select>
                   {!loadingHosts && hosts.length === 0 ? (
                     <p className="text-xs text-gray-500">
-                      Add users with the Host role in{' '}
+                      Add users with the Instructor role in{' '}
                       <Link href="/admin/users" className="font-medium text-purple-deep underline">
                         Users
                       </Link>{' '}
@@ -347,13 +342,6 @@ export default function CreateEventPage() {
                   />
                 </div>
               </div>
-              {selectedHost ? (
-                <div className="rounded-xl border border-purple-100 bg-purple-50/70 px-4 py-3 text-sm text-gray-700">
-                  <span className="font-medium text-purple-deep">Selected host:</span>{' '}
-                  {selectedHost.profession || 'Host'}
-                  {selectedHost.city ? ` • ${selectedHost.city}` : ''}
-                </div>
-              ) : null}
               <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
                 <div className="space-y-2">
                   <Label>Instructor details</Label>
@@ -379,7 +367,7 @@ export default function CreateEventPage() {
                         {form.title || 'Your course title'}
                       </p>
                       <p className="mt-4 text-sm font-semibold text-gray-900">
-                        {form.speakerName || 'Selected host'}
+                        {form.speakerName || 'Selected instructor'}
                       </p>
                     </div>
                   </div>
@@ -554,7 +542,7 @@ export default function CreateEventPage() {
                 </p>
                 <div className="mt-5 rounded-2xl bg-purple-50 px-4 py-3">
                   <p className="text-sm font-semibold text-gray-900">
-                    {form.speakerName || 'Selected host'}
+                    {form.speakerName || 'Selected instructor'}
                   </p>
                   <p className="text-xs text-gray-500">Instructor</p>
                 </div>
@@ -580,7 +568,7 @@ export default function CreateEventPage() {
                   <dd className="text-right font-medium text-gray-900">{form.type}</dd>
                 </div>
                 <div className="flex items-start justify-between gap-4">
-                  <dt className="text-gray-500">Host</dt>
+                  <dt className="text-gray-500">Instructor</dt>
                   <dd className="text-right font-medium text-gray-900">
                     {form.speakerName || 'Manual instructor'}
                   </dd>

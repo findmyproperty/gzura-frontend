@@ -157,11 +157,6 @@ export default function AdminEventsPage() {
     }
   }, [searchParams, events, router]);
 
-  const selectedHost = useMemo(
-    () => hosts.find((host) => host.id === form.hostId) ?? null,
-    [hosts, form.hostId],
-  );
-
   const handleHostChange = (hostId: string) => {
     const host = hosts.find((item) => item.id === hostId);
     setForm((prev) => ({
@@ -559,7 +554,7 @@ export default function AdminEventsPage() {
                 <div className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Host</Label>
+                      <Label>Instructor</Label>
                       <Select
                         value={form.hostId}
                         onValueChange={(value) => {
@@ -574,8 +569,8 @@ export default function AdminEventsPage() {
                           <SelectValue
                             placeholder={
                               hosts.length
-                                ? 'Select a host from users'
-                                : 'No host users found'
+                                ? 'Select an instructor from users'
+                                : 'No instructor users found'
                             }
                           />
                         </SelectTrigger>
@@ -590,7 +585,7 @@ export default function AdminEventsPage() {
                       </Select>
                       {hosts.length === 0 ? (
                         <p className="text-xs text-gray-500">
-                          Add users with the Host role in{' '}
+                          Add users with the Instructor role in{' '}
                           <Link href="/admin/users" className="font-medium text-purple-deep underline">
                             Users
                           </Link>{' '}
@@ -609,12 +604,6 @@ export default function AdminEventsPage() {
                       />
                     </div>
                   </div>
-                  {selectedHost ? (
-                    <div className="rounded-xl border border-purple-100 bg-purple-50/60 px-3 py-2 text-xs text-gray-600">
-                      Selected host profile: {selectedHost.profession || 'Host'}{' '}
-                      {selectedHost.city ? `• ${selectedHost.city}` : ''}
-                    </div>
-                  ) : null}
                   <div className="space-y-2">
                     <Label>Instructor details</Label>
                     <Textarea
@@ -656,7 +645,7 @@ export default function AdminEventsPage() {
                     </p>
                     <div className="mt-5 rounded-xl bg-purple-50 px-4 py-3">
                       <p className="text-sm font-medium text-gray-900">
-                        {form.speakerName || 'Selected host'}
+                        {form.speakerName || 'Selected instructor'}
                       </p>
                       <p className="text-xs text-gray-500">Instructor</p>
                     </div>
