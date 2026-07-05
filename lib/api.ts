@@ -43,6 +43,8 @@ export interface Event {
   venue?: string | null;
   speakerName?: string | null;
   speakerBio?: string | null;
+  hostId?: string | null;
+  host?: User | null;
   courseOutline?: string | null;
   imageUrl?: string | null;
   galleryImages?: string[] | null;
@@ -373,6 +375,8 @@ export const api = {
     fetchApi<DashboardStats>('/admin/stats', {}, true),
 
   getUsers: () => fetchApi<User[]>('/users', {}, true),
+
+  getHostUsers: () => fetchApi<User[]>('/users/hosts', {}, true),
 
   getUser: (id: string) => fetchApi<User>(`/users/${id}`, {}, true),
 

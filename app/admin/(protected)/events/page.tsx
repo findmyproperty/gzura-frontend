@@ -18,6 +18,7 @@ import {
   Video,
 } from 'lucide-react';
 import { api, Event, User } from '@/lib/api';
+import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import {
   AdminDataTable,
   AdminEmptyRow,
@@ -143,10 +144,7 @@ export default function AdminEventsPage() {
   }, []);
 
   useEffect(() => {
-    api
-      .getUsers()
-      .then((users) => setHosts(users.filter((user) => user.role === 'HOST')))
-      .catch(() => setHosts([]));
+    api.getHostUsers().then(setHosts).catch(() => setHosts([]));
   }, []);
 
   useEffect(() => {
@@ -164,18 +162,13 @@ export default function AdminEventsPage() {
     [hosts, form.hostId],
   );
 
-  const hostLabel = (host: User) => `${host.firstName} ${host.lastName}`.trim();
-
   const handleHostChange = (hostId: string) => {
     const host = hosts.find((item) => item.id === hostId);
     setForm((prev) => ({
       ...prev,
       hostId,
-      speakerName: host ? hostLabel(host) : prev.speakerName,
-      speakerBio:
-        host && !prev.speakerBio
-          ? [host.profession, host.city].filter(Boolean).join(' • ')
-          : prev.speakerBio,
+      speakerName: host ? labelForHost(host) : prev.speakerName,
+      speakerBio: host && !prev.speakerBio ? bioForHost(host) : prev.speakerBio,
     }));
   };
 
@@ -196,7 +189,9 @@ export default function AdminEventsPage() {
   }, [events, search, statusFilter]);
 
   const openEdit = (event: Event) => {
-    const matchedHost = hosts.find((host) => hostLabel(host) === event.speakerName);
+    const matchedHost =
+      hosts.find((host) => host.id === event.hostId) ??
+      hosts.find((host) => labelForHost(host) === event.speakerName);
     setEditingId(event.id);
     setMeetingMeta({
       meetLink: event.meetingUrl || event.meetingRoomId,
@@ -217,7 +212,7 @@ export default function AdminEventsPage() {
       speakerName: event.speakerName || '',
       speakerBio: event.speakerBio || '',
       courseOutline: event.courseOutline || '',
-      hostId: matchedHost?.id || 'manual',
+      hostId: event.hostId || matchedHost?.id || 'manual',
       imageUrls: getEventImages(event),
       price: String(event.price),
       maxAttendees: event.maxAttendees ? String(event.maxAttendees) : '',
@@ -229,7 +224,7 @@ export default function AdminEventsPage() {
 
   useEffect(() => {
     if (!dialogOpen || !editingId || form.hostId !== 'manual' || !form.speakerName) return;
-    const matchedHost = hosts.find((host) => hostLabel(host) === form.speakerName);
+    const matchedHost = hosts.find((host) => labelForHost(host) === form.speakerName);
     if (matchedHost) {
       setForm((prev) => ({ ...prev, hostId: matchedHost.id }));
     }
@@ -278,7 +273,11 @@ export default function AdminEventsPage() {
             : undefined,
         featured: false,
       };
-      const { imageUrls, hostId, ...savePayload } = payload;
+      const { imageUrls, hostId, ...rest } = payload;
+      const savePayload = {
+        ...rest,
+        hostId: hostId !== 'manual' ? hostId : undefined,
+      };
       let saved: Event;
       if (editingId) {
         saved = await api.updateEvent(editingId, savePayload);
@@ -572,17 +571,32 @@ export default function AdminEventsPage() {
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a host" />
+                          <SelectValue
+                            placeholder={
+                              hosts.length
+                                ? 'Select a host from users'
+                                : 'No host users found'
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="manual">Manual instructor</SelectItem>
                           {hosts.map((host) => (
                             <SelectItem key={host.id} value={host.id}>
-                              {hostLabel(host)}
+                              {hostOptionLabel(host)}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      {hosts.length === 0 ? (
+                        <p className="text-xs text-gray-500">
+                          Add users with the Host role in{' '}
+                          <Link href="/admin/users" className="font-medium text-purple-deep underline">
+                            Users
+                          </Link>{' '}
+                          to populate this list.
+                        </p>
+                      ) : null}
                     </div>
                     <div className="space-y-2">
                       <Label>Instructor name</Label>
@@ -590,6 +604,7 @@ export default function AdminEventsPage() {
                         value={form.speakerName}
                         onChange={(e) => setForm({ ...form, speakerName: e.target.value })}
                         placeholder="Name shown on the course"
+                        readOnly={form.hostId !== 'manual'}
                         required
                       />
                     </div>

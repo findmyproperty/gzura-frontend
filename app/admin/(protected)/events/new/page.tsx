@@ -20,7 +20,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { api, Event, User } from '@/lib/api';
+import { api, Event } from '@/lib/api';
+import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import { normalizeRichText } from '@/lib/rich-text';
 
 const LocationMapPicker = dynamic(
@@ -86,10 +87,6 @@ const emptyForm: EventFormState = {
   status: 'DRAFT',
 };
 
-function labelForHost(host: User) {
-  return `${host.firstName} ${host.lastName}`.trim();
-}
-
 function formatDateLabel(dateStart: string) {
   if (!dateStart) return 'TBD';
   const date = new Date(dateStart);
@@ -103,15 +100,15 @@ function formatDateLabel(dateStart: string) {
 
 export default function CreateEventPage() {
   const router = useRouter();
-  const [hosts, setHosts] = useState<User[]>([]);
+  const [hosts, setHosts] = useState<Awaited<ReturnType<typeof api.getHostUsers>>>([]);
   const [loadingHosts, setLoadingHosts] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<EventFormState>(emptyForm);
 
   useEffect(() => {
     api
-      .getUsers()
-      .then((users) => setHosts(users.filter((user) => user.role === 'HOST')))
+      .getHostUsers()
+      .then(setHosts)
       .catch(() => setHosts([]))
       .finally(() => setLoadingHosts(false));
   }, []);
@@ -127,10 +124,7 @@ export default function CreateEventPage() {
       ...prev,
       hostId,
       speakerName: host ? labelForHost(host) : prev.speakerName,
-      speakerBio:
-        host && !prev.speakerBio
-          ? [host.profession, host.city].filter(Boolean).join(' • ')
-          : prev.speakerBio,
+      speakerBio: host && !prev.speakerBio ? bioForHost(host) : prev.speakerBio,
     }));
   };
 
@@ -200,7 +194,11 @@ export default function CreateEventPage() {
             : undefined,
         featured: false,
       };
-      const { imageUrls, hostId, ...savePayload } = payload;
+      const { imageUrls, hostId, ...rest } = payload;
+      const savePayload = {
+        ...rest,
+        hostId: hostId !== 'manual' ? hostId : undefined,
+      };
       const saved: Event = await api.createEvent(savePayload);
       toast({ title: 'Event created' });
       router.replace(`/admin/events/${saved.id}`);
@@ -309,17 +307,34 @@ export default function CreateEventPage() {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={loadingHosts ? 'Loading hosts…' : 'Select a host'} />
+                      <SelectValue
+                        placeholder={
+                          loadingHosts
+                            ? 'Loading hosts…'
+                            : hosts.length
+                              ? 'Select a host from users'
+                              : 'No host users found'
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="manual">Manual instructor</SelectItem>
                       {hosts.map((host) => (
                         <SelectItem key={host.id} value={host.id}>
-                          {labelForHost(host)}
+                          {hostOptionLabel(host)}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {!loadingHosts && hosts.length === 0 ? (
+                    <p className="text-xs text-gray-500">
+                      Add users with the Host role in{' '}
+                      <Link href="/admin/users" className="font-medium text-purple-deep underline">
+                        Users
+                      </Link>{' '}
+                      to populate this list.
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label>Instructor name</Label>
@@ -327,6 +342,7 @@ export default function CreateEventPage() {
                     value={form.speakerName}
                     onChange={(e) => setForm({ ...form, speakerName: e.target.value })}
                     placeholder="Dr. Angela Okonkwo"
+                    readOnly={form.hostId !== 'manual'}
                     required
                   />
                 </div>
