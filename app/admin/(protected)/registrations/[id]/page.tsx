@@ -53,7 +53,10 @@ export default function AdminRegistrationViewPage() {
       setRegistration(updated);
       toast({
         title: status === 'approved' ? 'Request approved' : 'Request rejected',
-        description: `${registration.fullName}'s host request has been ${status}.`,
+        description:
+          status === 'approved'
+            ? `${registration.fullName} is now listed in Users as an instructor.`
+            : `${registration.fullName}'s host request has been rejected.`,
       });
     } catch (err) {
       toast({

@@ -2,7 +2,7 @@ export type UserRole = 'MEMBER' | 'HOST' | 'ADMIN';
 
 export const USER_ROLE_OPTIONS = [
   { value: 'MEMBER', label: 'Member' },
-  { value: 'HOST', label: 'Host' },
+  { value: 'HOST', label: 'Instructor' },
   { value: 'ADMIN', label: 'Administrator' },
 ] as const satisfies ReadonlyArray<{ value: UserRole; label: string }>;
 

@@ -72,7 +72,10 @@ export default function AdminRegistrationsPage() {
       setRows((prev) => prev.map((row) => (row.id === id ? updated : row)));
       toast({
         title: status === 'approved' ? 'Request approved' : 'Request rejected',
-        description: `${fullName}'s host request has been ${status}.`,
+        description:
+          status === 'approved'
+            ? `${fullName} is now listed in Users as an instructor.`
+            : `${fullName}'s host request has been rejected.`,
       });
     } catch (err) {
       toast({
