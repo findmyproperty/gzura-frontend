@@ -60,6 +60,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { normalizeRichText } from '@/lib/rich-text';
+import { slugify } from '@/lib/slug';
 import {
   Select,
   SelectContent,
@@ -95,7 +96,6 @@ const RichTextEditor = dynamic(() => import('@/components/ui/rich-text-editor'),
 
 const emptyForm = {
   title: '',
-  slug: '',
   description: '',
   courseOutline: '',
   type: 'Offline' as 'Online' | 'Offline',
@@ -209,7 +209,6 @@ export default function AdminEventsPage() {
     });
     setForm({
       title: event.title,
-      slug: event.slug,
       description: event.description,
       type: event.type,
       dateStart: event.dateStart.split('T')[0],
@@ -292,7 +291,10 @@ export default function AdminEventsPage() {
         saved = await api.updateEvent(editingId, savePayload);
         toast({ title: 'Event updated' });
       } else {
-        saved = await api.createEvent(savePayload);
+        saved = await api.createEvent({
+          ...savePayload,
+          slug: slugify(form.title),
+        });
         toast({ title: 'Event created' });
       }
 
@@ -486,23 +488,13 @@ export default function AdminEventsPage() {
             </p>
           </DialogHeader>
           <form onSubmit={handleSave} className="min-w-0 space-y-5 pt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Slug</Label>
-                <Input
-                  value={form.slug}
-                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required
+              />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">

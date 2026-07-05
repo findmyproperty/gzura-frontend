@@ -110,7 +110,6 @@ export default function AdminEventViewPage() {
               <DetailField label="Venue" value={event.venue} />
               <DetailField label="Speaker" value={event.speakerName} />
               <DetailField label="Time" value={event.timeLabel} />
-              <DetailField label="Slug" value={event.slug} />
             </div>
           </DetailCard>
 

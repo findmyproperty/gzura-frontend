@@ -20,6 +20,7 @@ import { toast } from '@/hooks/use-toast';
 import { api, Event } from '@/lib/api';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import { normalizeRichText } from '@/lib/rich-text';
+import { slugify } from '@/lib/slug';
 
 const LocationMapPicker = dynamic(
   () => import('@/components/admin/LocationMapPicker'),
@@ -42,7 +43,6 @@ const RichTextEditor = dynamic(() => import('@/components/ui/rich-text-editor'),
 
 type EventFormState = {
   title: string;
-  slug: string;
   description: string;
   courseOutline: string;
   type: 'Online' | 'Offline';
@@ -64,7 +64,6 @@ type EventFormState = {
 
 const emptyForm: EventFormState = {
   title: '',
-  slug: '',
   description: '',
   courseOutline: '',
   type: 'Offline',
@@ -178,6 +177,7 @@ export default function CreateEventPage() {
       const { imageUrls, hostId, ...rest } = payload;
       const savePayload = {
         ...rest,
+        slug: slugify(form.title),
         hostId: hostId !== 'manual' ? hostId : undefined,
       };
       const saved: Event = await api.createEvent(savePayload);
@@ -209,8 +209,8 @@ export default function CreateEventPage() {
                   Basics
                 </p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <div className="space-y-2 sm:col-span-2 xl:col-span-2">
+              <div className="space-y-4">
+                <div className="space-y-2">
                   <Label>Title</Label>
                   <Input
                     value={form.title}
@@ -219,15 +219,7 @@ export default function CreateEventPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Slug</Label>
-                  <Input
-                    value={form.slug}
-                    onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                    placeholder="leadership-summit-2026"
-                    required
-                  />
-                </div>
+                <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
                   <Label>Type</Label>
                   <Select value={form.type} onValueChange={(value) => handleTypeChange(value as 'Online' | 'Offline')}>
@@ -257,6 +249,7 @@ export default function CreateEventPage() {
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
                   />
+                </div>
                 </div>
               </div>
             </section>
