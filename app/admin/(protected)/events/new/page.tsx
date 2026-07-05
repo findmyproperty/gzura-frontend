@@ -200,7 +200,7 @@ export default function CreateEventPage() {
             : undefined,
         featured: false,
       };
-      const { imageUrls, ...savePayload } = payload;
+      const { imageUrls, hostId, ...savePayload } = payload;
       const saved: Event = await api.createEvent(savePayload);
       toast({ title: 'Event created' });
       router.replace(`/admin/events/${saved.id}`);

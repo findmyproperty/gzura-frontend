@@ -278,7 +278,7 @@ export default function AdminEventsPage() {
             : undefined,
         featured: false,
       };
-      const { imageUrls, ...savePayload } = payload;
+      const { imageUrls, hostId, ...savePayload } = payload;
       let saved: Event;
       if (editingId) {
         saved = await api.updateEvent(editingId, savePayload);
