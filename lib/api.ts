@@ -69,6 +69,8 @@ export interface DashboardStats {
   topEvents: { title: string; registrations: number }[];
 }
 
+export type PaymentStatus = 'FREE' | 'PENDING' | 'PAID';
+
 export interface EventRegistration {
   id: string;
   eventId: string;
@@ -77,8 +79,36 @@ export interface EventRegistration {
   phone?: string | null;
   city?: string | null;
   profession?: string | null;
+  accessToken?: string;
+  passUrl?: string;
+  paymentStatus?: PaymentStatus;
+  amountPaid?: number | null;
+  checkedInAt?: string | null;
   createdAt: string;
   event?: Event;
+}
+
+export interface PassValidationResult {
+  valid: boolean;
+  status: 'enrolled' | 'checked_in' | 'invalid';
+  message: string;
+  attendee?: {
+    fullName: string;
+    email: string;
+    eventTitle: string;
+    venue: string;
+    eventDate: string;
+  };
+  checkedInAt?: string | null;
+}
+
+export interface RazorpayOrderResponse {
+  orderId: string;
+  amount: number;
+  currency: string;
+  keyId: string;
+  eventTitle: string;
+  price: number;
 }
 
 export type EventContentType = 'TEXT' | 'PDF' | 'WORD' | 'EXCEL';
@@ -247,6 +277,12 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
+  loginWithGoogle: (credential: string) =>
+    fetchApi<AuthResponse>('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    }),
+
   adminLogin: (email: string, password: string) =>
     fetchApi<AuthResponse>('/auth/admin/login', {
       method: 'POST',
@@ -321,6 +357,45 @@ export const api = {
   registerForEvent: (data: Record<string, string>) =>
     fetchApi<EventRegistration>(
       '/registrations',
+      { method: 'POST', body: JSON.stringify(data) },
+      true,
+    ),
+
+  joinEvent: (eventId: string) =>
+    fetchApi<EventRegistration>(
+      '/registrations/join',
+      { method: 'POST', body: JSON.stringify({ eventId }) },
+      true,
+    ),
+
+  validatePass: (accessToken: string) =>
+    fetchApi<PassValidationResult>('/registrations/validate-pass', {
+      method: 'POST',
+      body: JSON.stringify({ accessToken }),
+    }),
+
+  checkInPass: (accessToken: string) =>
+    fetchApi<PassValidationResult>(
+      '/registrations/check-in',
+      { method: 'POST', body: JSON.stringify({ accessToken }) },
+      true,
+    ),
+
+  createRazorpayOrder: (eventId: string) =>
+    fetchApi<RazorpayOrderResponse>(
+      '/payments/razorpay/order',
+      { method: 'POST', body: JSON.stringify({ eventId }) },
+      true,
+    ),
+
+  verifyRazorpayPayment: (data: {
+    eventId: string;
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }) =>
+    fetchApi<EventRegistration>(
+      '/payments/razorpay/verify',
       { method: 'POST', body: JSON.stringify(data) },
       true,
     ),

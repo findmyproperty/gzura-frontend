@@ -22,6 +22,7 @@ type LocationMapPickerProps = {
   /** Set when the picker is shown (e.g. dialog open) so the map can resize and recenter. */
   visible?: boolean;
   onLocationChange: (value: LocationSelection) => void;
+  onLocationTextChange?: (location: string) => void;
   onVenueChange?: (venue: string) => void;
 };
 
@@ -39,6 +40,7 @@ export default function LocationMapPicker({
   longitude,
   visible = true,
   onLocationChange,
+  onLocationTextChange,
   onVenueChange,
 }: LocationMapPickerProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
@@ -414,7 +416,9 @@ export default function LocationMapPicker({
     <div className="space-y-4">
       <div className="space-y-2" ref={searchContainerRef}>
         <div className="flex items-center justify-between gap-2">
-          <Label className="text-purple-deep/80">Search location</Label>
+          <Label className="text-purple-deep/80">
+            Search location <span className="font-normal text-gray-400">(optional)</span>
+          </Label>
           {hasPin ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 ring-1 ring-emerald-200/80">
               <Navigation className="h-3 w-3" />
@@ -510,7 +514,7 @@ export default function LocationMapPicker({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-purple-deep/25 to-transparent px-4 py-3">
           <p className="flex items-center gap-1.5 text-[11px] font-medium text-white drop-shadow-sm">
             <MapPin className="h-3.5 w-3.5 text-gold-300" />
-            Tap the map or pick a search result to drop your pin
+            Optional — tap the map or pick a search result to add a pin
           </p>
         </div>
       </div>
@@ -522,15 +526,14 @@ export default function LocationMapPicker({
               <MapPin className="h-3.5 w-3.5 text-purple-deep" />
             </div>
             <Label className="text-xs font-semibold uppercase tracking-wide text-purple-deep/70">
-              Location
+              Address
             </Label>
           </div>
           <Input
             value={location}
-            readOnly
-            placeholder="Select on map"
-            className="border-transparent bg-purple-50/50 text-sm text-gray-800 shadow-none focus-visible:ring-0"
-            required
+            onChange={(e) => onLocationTextChange?.(e.target.value)}
+            placeholder="Enter address or pick on map"
+            className="border-purple-100 bg-white text-sm text-gray-800 shadow-none focus-visible:border-purple-300 focus-visible:ring-purple-deep/15"
           />
         </div>
         <div className="rounded-xl border border-purple-100/80 bg-white/80 p-3 shadow-sm">

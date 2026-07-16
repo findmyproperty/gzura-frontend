@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   PanelLeftClose,
+  ScanLine,
   Settings,
   User,
   Users,
@@ -408,6 +409,12 @@ export default function AdminLayout({
                   <Link href="/admin/registrations" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     My Activity
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/qr-scanner" className="cursor-pointer">
+                    <ScanLine className="mr-2 h-4 w-4" />
+                    QR Scanner
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled>

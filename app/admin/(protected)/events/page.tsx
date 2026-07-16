@@ -242,10 +242,14 @@ export default function AdminEventsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.type === 'Offline' && !form.location.trim()) {
+    if (
+      form.type === 'Offline' &&
+      !form.location.trim() &&
+      !form.venue.trim()
+    ) {
       toast({
-        title: 'Location required',
-        description: 'Search or click the map to select an offline event location.',
+        title: 'Venue required',
+        description: 'Enter a venue name or address. The map pin is optional.',
         variant: 'destructive',
       });
       return;
@@ -253,8 +257,15 @@ export default function AdminEventsPage() {
 
     setSaving(true);
     try {
+      const offlineLocation =
+        form.location.trim() || form.venue.trim() || undefined;
+
       const payload = {
         ...form,
+        location:
+          form.type === 'Offline'
+            ? offlineLocation
+            : form.location,
         description: normalizeRichText(form.description) || undefined,
         courseOutline: form.courseOutline.trim() || undefined,
         speakerName: form.speakerName.trim() || undefined,
@@ -719,7 +730,9 @@ export default function AdminEventsPage() {
                     <p className="font-display text-lg font-semibold text-purple-deep">
                       Offline event details
                     </p>
-                    <p className="text-xs text-gray-500">Pin the venue and set capacity</p>
+                    <p className="text-xs text-gray-500">
+                      Enter venue details — map pin is optional
+                    </p>
                   </div>
                 </div>
                 <LocationMapPicker
@@ -736,6 +749,9 @@ export default function AdminEventsPage() {
                       latitude: String(value.latitude),
                       longitude: String(value.longitude),
                     }))
+                  }
+                  onLocationTextChange={(location) =>
+                    setForm((prev) => ({ ...prev, location }))
                   }
                   onVenueChange={(venue) => setForm((prev) => ({ ...prev, venue }))}
                 />

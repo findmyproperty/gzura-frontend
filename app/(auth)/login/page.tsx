@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -12,6 +12,7 @@ import { resolvePostLoginRedirect } from '@/lib/auth-utils';
 import { isOnboardingComplete } from '@/lib/member-onboarding';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,11 +28,8 @@ export default function LoginPage() {
     }
   }, [user, authLoading, router, searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await api.login(email.trim().toLowerCase(), password.trim());
+  const completeLogin = useCallback(
+    async (res: Awaited<ReturnType<typeof api.login>>) => {
       login(res.accessToken, res.user);
 
       let destination = resolvePostLoginRedirect(
@@ -49,6 +47,35 @@ export default function LoginPage() {
       });
 
       router.push(destination);
+    },
+    [login, router, searchParams],
+  );
+
+  const handleGoogleSuccess = useCallback(
+    async (credential: string) => {
+      setLoading(true);
+      try {
+        const res = await api.loginWithGoogle(credential);
+        await completeLogin(res);
+      } catch (err) {
+        toast({
+          title: 'Google sign-in failed',
+          description: err instanceof Error ? err.message : 'Please try again',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [completeLogin],
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.login(email.trim().toLowerCase(), password.trim());
+      await completeLogin(res);
     } catch (err) {
       toast({
         title: 'Login failed',
@@ -91,7 +118,29 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-5">
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={() =>
+                toast({
+                  title: 'Google sign-in unavailable',
+                  description: 'Could not load Google sign-in. Please try again.',
+                  variant: 'destructive',
+                })
+              }
+            />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-3 text-gray-500">or continue with email</span>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5 mt-5">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
