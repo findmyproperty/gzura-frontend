@@ -30,7 +30,10 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { Button } from '@/components/ui/button';
 import { api, DashboardStats } from '@/lib/api';
+import { isFullAdmin } from '@/lib/user-roles';
 
 const registrationChartConfig = {
   count: {
@@ -103,7 +106,63 @@ function StatCard({
   );
 }
 
-export default function AdminDashboardPage() {
+function InstructorDashboard() {
+  const { user } = useAuth();
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-purple-deep">Instructor dashboard</h1>
+        <p className="text-gray-600 mt-1">
+          Welcome{user?.firstName ? `, ${user.firstName}` : ''}. Create and manage
+          your events.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
+        <Link
+          href="/admin/events/new"
+          className="bg-gradient-to-br from-purple-deep to-purple-900 rounded-2xl p-8 shadow-sm card-hover group"
+        >
+          <Plus className="w-8 h-8 text-gold-royal mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Create Event</h2>
+          <p className="text-white/70 text-sm">
+            Publish a new workshop, course, or session
+          </p>
+        </Link>
+
+        <Link
+          href="/admin/events"
+          className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 card-hover group"
+        >
+          <Calendar className="w-8 h-8 text-purple-deep mb-4 group-hover:text-gold-royal transition-colors" />
+          <h2 className="text-xl font-semibold text-purple-deep mb-2">My Events</h2>
+          <p className="text-gray-600 text-sm">View and edit events you manage</p>
+        </Link>
+      </div>
+
+      <Card className="border-gray-100 shadow-sm max-w-3xl">
+        <CardHeader>
+          <CardTitle className="text-lg text-purple-deep">Quick start</CardTitle>
+          <CardDescription>
+            Use Create Event to set up title, schedule, venue or Meet link, pricing,
+            and publish when ready.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild className="bg-purple-deep hover:bg-purple-900">
+            <Link href="/admin/events/new">
+              <Plus className="w-4 h-4 mr-2" />
+              Create new event
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -340,7 +399,7 @@ export default function AdminDashboardPage() {
         </Link>
 
         <Link
-          href="/admin/events"
+          href="/admin/events/new"
           className="bg-gradient-to-br from-purple-deep to-purple-900 rounded-2xl p-8 shadow-sm card-hover group"
         >
           <Plus className="w-8 h-8 text-gold-royal mb-4" />
@@ -350,4 +409,25 @@ export default function AdminDashboardPage() {
       </div>
     </div>
   );
+}
+
+export default function AdminDashboardPage() {
+  const { user, loading } = useAuth();
+
+  if (loading || !user) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-purple-deep">Overview</h1>
+          <p className="text-gray-600 mt-1">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isFullAdmin(user.role)) {
+    return <InstructorDashboard />;
+  }
+
+  return <AdminDashboard />;
 }

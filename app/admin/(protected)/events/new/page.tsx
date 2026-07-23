@@ -13,9 +13,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/components/providers/AuthProvider';
 import { toast } from '@/hooks/use-toast';
 import { api, Event } from '@/lib/api';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
+import { isFullAdmin } from '@/lib/user-roles';
 import { normalizeRichText } from '@/lib/rich-text';
 import { parseEventPrice } from '@/lib/price';
 import { slugify } from '@/lib/slug';
@@ -83,18 +85,43 @@ const emptyForm: EventFormState = {
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [hosts, setHosts] = useState<Awaited<ReturnType<typeof api.getHostUsers>>>([]);
   const [loadingHosts, setLoadingHosts] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<EventFormState>(emptyForm);
+  const canPickAnyHost = user ? isFullAdmin(user.role) : false;
 
   useEffect(() => {
     api
       .getHostUsers()
-      .then(setHosts)
+      .then((list) => {
+        setHosts(list);
+        // Instructors default to themselves as the event host
+        if (user?.role === 'HOST') {
+          const self = list.find((h) => h.id === user.id);
+          if (self) {
+            setForm((prev) => ({
+              ...prev,
+              hostId: self.id,
+              speakerName: labelForHost(self),
+              speakerBio: prev.speakerBio || bioForHost(self),
+            }));
+          } else {
+            setForm((prev) => ({
+              ...prev,
+              hostId: user.id,
+              speakerName:
+                prev.speakerName ||
+                `${user.firstName} ${user.lastName}`.trim() ||
+                user.email,
+            }));
+          }
+        }
+      })
       .catch(() => setHosts([]))
       .finally(() => setLoadingHosts(false));
-  }, []);
+  }, [user]);
 
   const handleHostChange = (hostId: string) => {
     const host = hosts.find((item) => item.id === hostId);
@@ -288,45 +315,63 @@ export default function CreateEventPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Instructor</Label>
-                  <Select
-                    value={form.hostId}
-                    onValueChange={(value) => {
-                      if (value === 'manual') {
-                        setForm((prev) => ({ ...prev, hostId: 'manual' }));
-                        return;
-                      }
-                      handleHostChange(value);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          loadingHosts
-                            ? 'Loading instructors…'
-                            : hosts.length
-                              ? 'Select an instructor from users'
-                              : 'No instructor users found'
-                        }
+                  {canPickAnyHost ? (
+                    <>
+                      <Select
+                        value={form.hostId}
+                        onValueChange={(value) => {
+                          if (value === 'manual') {
+                            setForm((prev) => ({ ...prev, hostId: 'manual' }));
+                            return;
+                          }
+                          handleHostChange(value);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              loadingHosts
+                                ? 'Loading instructors…'
+                                : hosts.length
+                                  ? 'Select an instructor from users'
+                                  : 'No instructor users found'
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="manual">Manual instructor</SelectItem>
+                          {hosts.map((host) => (
+                            <SelectItem key={host.id} value={host.id}>
+                              {hostOptionLabel(host)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {!loadingHosts && hosts.length === 0 ? (
+                        <p className="text-xs text-gray-500">
+                          Add users with the Instructor role in{' '}
+                          <Link
+                            href="/admin/users"
+                            className="font-medium text-purple-deep underline"
+                          >
+                            Users
+                          </Link>{' '}
+                          to populate this list.
+                        </p>
+                      ) : null}
+                    </>
+                  ) : (
+                    <>
+                      <Input
+                        value={form.speakerName || 'You'}
+                        readOnly
+                        className="bg-gray-50"
                       />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manual">Manual instructor</SelectItem>
-                      {hosts.map((host) => (
-                        <SelectItem key={host.id} value={host.id}>
-                          {hostOptionLabel(host)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {!loadingHosts && hosts.length === 0 ? (
-                    <p className="text-xs text-gray-500">
-                      Add users with the Instructor role in{' '}
-                      <Link href="/admin/users" className="font-medium text-purple-deep underline">
-                        Users
-                      </Link>{' '}
-                      to populate this list.
-                    </p>
-                  ) : null}
+                      <p className="text-xs text-gray-500">
+                        You are set as the instructor for this event.
+                      </p>
+                    </>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Instructor name</Label>

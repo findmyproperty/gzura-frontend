@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { isAdminAreaRole } from '@/lib/user-roles';
 
 function AdminLoadingScreen() {
   return (
@@ -29,15 +30,20 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (loading) return;
-    if (!user) router.replace('/login?redirect=/admin');
-    else if (user.role !== 'ADMIN') router.replace('/home');
+    if (!user) {
+      router.replace('/login?redirect=/admin');
+      return;
+    }
+    if (!isAdminAreaRole(user.role)) {
+      router.replace('/home');
+    }
   }, [user, loading, router]);
 
   if (loading) {
     return <AdminLoadingScreen />;
   }
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || !isAdminAreaRole(user.role)) {
     return null;
   }
 

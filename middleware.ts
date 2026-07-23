@@ -11,7 +11,20 @@ type JwtPayload = {
 };
 
 function isMemberAreaRole(role?: string) {
-  return role === 'MEMBER' || role === 'HOST';
+  return role === 'MEMBER';
+}
+
+function isAdminAreaRole(role?: string) {
+  return role === 'ADMIN' || role === 'HOST';
+}
+
+/** Instructors may only use event routes under /admin */
+function isInstructorAdminPath(pathname: string) {
+  if (pathname === '/admin' || pathname === '/admin/') return true;
+  return (
+    pathname === '/admin/events' ||
+    pathname.startsWith('/admin/events/')
+  );
 }
 
 function decodeJwtPayload(token: string): JwtPayload | null {
@@ -40,7 +53,7 @@ export function middleware(request: NextRequest) {
 
   if (pathname === '/' && token) {
     const url = request.nextUrl.clone();
-    url.pathname = role === 'ADMIN' ? '/admin' : '/home';
+    url.pathname = isAdminAreaRole(role) ? '/admin' : '/home';
     return NextResponse.redirect(url);
   }
 
@@ -51,7 +64,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAuthPath(pathname)) {
-    if (token && role === 'ADMIN') {
+    if (token && isAdminAreaRole(role)) {
       const url = request.nextUrl.clone();
       url.pathname = '/admin';
       return NextResponse.redirect(url);
@@ -68,19 +81,27 @@ export function middleware(request: NextRequest) {
     if (!token) {
       return redirectToLogin(request, pathname);
     }
-    if (role !== 'ADMIN') {
-      const url = request.nextUrl.clone();
-      url.pathname = isMemberAreaRole(role) ? '/home' : '/';
-      return NextResponse.redirect(url);
+    if (role === 'ADMIN') {
+      return NextResponse.next();
     }
-    return NextResponse.next();
+    if (role === 'HOST') {
+      if (!isInstructorAdminPath(pathname)) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/events';
+        return NextResponse.redirect(url);
+      }
+      return NextResponse.next();
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = isMemberAreaRole(role) ? '/home' : '/';
+    return NextResponse.redirect(url);
   }
 
   if (isMemberPath(pathname)) {
     if (!token) {
       return redirectToLogin(request, pathname);
     }
-    if (role === 'ADMIN') {
+    if (isAdminAreaRole(role)) {
       const url = request.nextUrl.clone();
       url.pathname = '/admin';
       return NextResponse.redirect(url);

@@ -74,6 +74,8 @@ import { EventImageGalleryUpload } from '@/components/admin/EventImageGalleryUpl
 import { GoogleMeetFields } from '@/components/admin/GoogleMeetFields';
 import { getEventImages } from '@/lib/event-images';
 import TimeRangePicker from '@/components/admin/TimeRangePicker';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { isFullAdmin } from '@/lib/user-roles';
 import { toast } from '@/hooks/use-toast';
 
 const LocationMapPicker = dynamic(
@@ -119,6 +121,8 @@ const emptyForm = {
 export default function AdminEventsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const canPickAnyHost = user ? isFullAdmin(user.role) : false;
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -605,7 +609,7 @@ export default function AdminEventsPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      {hosts.length === 0 ? (
+                      {hosts.length === 0 && canPickAnyHost ? (
                         <p className="text-xs text-gray-500">
                           Add users with the Instructor role in{' '}
                           <Link href="/admin/users" className="font-medium text-purple-deep underline">

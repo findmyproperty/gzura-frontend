@@ -66,12 +66,8 @@ export default function OnboardingPage() {
       router.replace('/login?redirect=/onboarding');
       return;
     }
-    if (!loading && user?.role === 'ADMIN') {
+    if (!loading && (user?.role === 'ADMIN' || user?.role === 'HOST')) {
       router.replace('/admin');
-      return;
-    }
-    if (!loading && user?.role === 'HOST') {
-      router.replace('/home');
       return;
     }
     if (!loading && user && isOnboardingComplete(user)) {

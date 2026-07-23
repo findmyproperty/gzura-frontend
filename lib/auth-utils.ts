@@ -1,10 +1,31 @@
 import type { UserRole } from '@/lib/user-roles';
+import {
+  canManageEvents,
+  isAdminAreaRole,
+  isFullAdmin,
+} from '@/lib/user-roles';
 
 export type { UserRole } from '@/lib/user-roles';
-export { formatUserRole, isMemberAreaRole, USER_ROLE_OPTIONS } from '@/lib/user-roles';
+export {
+  canManageEvents,
+  formatUserRole,
+  isAdminAreaRole,
+  isFullAdmin,
+  isMemberAreaRole,
+  USER_ROLE_OPTIONS,
+} from '@/lib/user-roles';
 
 export function getDashboardPath(role: UserRole): string {
-  return role === 'ADMIN' ? '/admin' : '/home';
+  return isAdminAreaRole(role) ? '/admin' : '/home';
+}
+
+/** Paths instructors (HOST) may use inside /admin */
+export function isInstructorAdminPath(pathname: string): boolean {
+  if (pathname === '/admin' || pathname === '/admin/') return true;
+  return (
+    pathname === '/admin/events' ||
+    pathname.startsWith('/admin/events/')
+  );
 }
 
 export function resolvePostLoginRedirect(
@@ -15,15 +36,17 @@ export function resolvePostLoginRedirect(
     return getDashboardPath(role);
   }
 
-  if (redirect.startsWith('/admin') && role !== 'ADMIN') {
-    return '/home';
+  if (redirect.startsWith('/admin')) {
+    if (isFullAdmin(role)) return redirect;
+    if (canManageEvents(role) && isInstructorAdminPath(redirect)) return redirect;
+    return getDashboardPath(role);
   }
 
   if (
     (redirect.startsWith('/my-learnings') || redirect.startsWith('/dashboard')) &&
-    role === 'ADMIN'
+    isAdminAreaRole(role)
   ) {
-    return '/admin';
+    return getDashboardPath(role);
   }
 
   if (redirect.startsWith('/dashboard')) {

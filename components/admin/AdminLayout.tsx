@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   PanelLeftClose,
+  Plus,
   ScanLine,
   Settings,
   User,
@@ -35,13 +36,20 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { api, CommunityRegistration } from '@/lib/api';
+import { formatUserRole, isFullAdmin } from '@/lib/user-roles';
 import { cn } from '@/lib/utils';
 
-const navItems = [
+const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/events', label: 'Events', icon: Calendar },
   { href: '/admin/registrations', label: 'Host Requests', icon: ClipboardList },
   { href: '/admin/users', label: 'Users', icon: Users },
+];
+
+const instructorNavItems = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/admin/events', label: 'Events', icon: Calendar },
+  { href: '/admin/events/new', label: 'Create Event', icon: Plus, exact: true },
 ];
 
 const SIDEBAR_KEY = 'gzura_admin_sidebar_open';
@@ -59,6 +67,10 @@ export default function AdminLayout({
   const [mounted, setMounted] = useState(false);
   const [notifications, setNotifications] = useState<CommunityRegistration[]>([]);
 
+  const isAdmin = user ? isFullAdmin(user.role) : false;
+  const navItems = isAdmin ? adminNavItems : instructorNavItems;
+  const panelLabel = isAdmin ? 'Admin Panel' : 'Instructor Panel';
+
   useEffect(() => {
     const stored = localStorage.getItem(SIDEBAR_KEY);
     if (stored !== null) {
@@ -68,6 +80,10 @@ export default function AdminLayout({
   }, []);
 
   useEffect(() => {
+    if (!isAdmin) {
+      setNotifications([]);
+      return;
+    }
     api
       .getCommunityRegistrations()
       .then((regs) => {
@@ -80,7 +96,7 @@ export default function AdminLayout({
         setNotifications(recent);
       })
       .catch(() => setNotifications([]));
-  }, []);
+  }, [isAdmin]);
 
   const userInitials = user
     ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
@@ -106,15 +122,22 @@ export default function AdminLayout({
     router.push('/login');
   };
 
-  const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname.startsWith(href);
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) return pathname === href;
+    // Avoid marking "Events" active on "Create Event" and other non-list routes
+    // when a more specific nav item exists.
+    if (href === '/admin/events' && pathname === '/admin/events/new') {
+      return false;
+    }
+    return pathname.startsWith(href);
+  };
 
   const NavLink = ({
     item,
     collapsed = false,
     onNavigate,
   }: {
-    item: (typeof navItems)[0];
+    item: (typeof adminNavItems)[0];
     collapsed?: boolean;
     onNavigate?: () => void;
   }) => {
@@ -187,7 +210,7 @@ export default function AdminLayout({
               </div>
               <div className="min-w-0">
                 <p className="font-display font-bold text-lg leading-tight truncate">GZURA</p>
-                <p className="text-gold-400 text-xs font-medium">Admin Panel</p>
+                <p className="text-gold-400 text-xs font-medium">{panelLabel}</p>
               </div>
             </Link>
             <button
@@ -302,67 +325,69 @@ export default function AdminLayout({
             </button>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  className="relative p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                  aria-label="Notifications"
-                >
-                  <Bell className="w-5 h-5" />
-                  {newNotificationCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-royal px-1 text-[10px] font-bold text-purple-deep">
-                      {newNotificationCount > 9 ? '9+' : newNotificationCount}
-                    </span>
-                  )}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 p-0">
-                <div className="border-b px-4 py-3">
-                  <p className="font-semibold text-purple-deep">Notifications</p>
-                  <p className="text-xs text-gray-500">Recent host registration requests</p>
-                </div>
-                <div className="max-h-72 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <p className="px-4 py-8 text-center text-sm text-gray-500">
-                      No notifications yet
-                    </p>
-                  ) : (
-                    notifications.map((reg) => (
-                      <Link
-                        key={reg.id}
-                        href="/admin/registrations"
-                        className="flex flex-col gap-0.5 border-b border-gray-100 px-4 py-3 last:border-0 hover:bg-gray-50 transition-colors"
-                      >
-                        <p className="text-sm font-medium text-purple-deep">
-                          New host request
-                        </p>
-                        <p className="text-xs text-gray-600 truncate">
-                          {reg.fullName} wants to host on GZURA
-                        </p>
-                        <p className="text-[11px] text-gray-400">
-                          {new Date(reg.createdAt).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                      </Link>
-                    ))
-                  )}
-                </div>
-                {notifications.length > 0 && (
-                  <div className="border-t p-2">
-                    <Link
-                      href="/admin/registrations"
-                      className="block rounded-md px-3 py-2 text-center text-xs font-medium text-purple-deep hover:bg-purple-50 transition-colors"
-                    >
-                      View all host requests
-                    </Link>
+            {isAdmin && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className="relative p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label="Notifications"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {newNotificationCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-royal px-1 text-[10px] font-bold text-purple-deep">
+                        {newNotificationCount > 9 ? '9+' : newNotificationCount}
+                      </span>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-80 p-0">
+                  <div className="border-b px-4 py-3">
+                    <p className="font-semibold text-purple-deep">Notifications</p>
+                    <p className="text-xs text-gray-500">Recent host registration requests</p>
                   </div>
-                )}
-              </PopoverContent>
-            </Popover>
+                  <div className="max-h-72 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="px-4 py-8 text-center text-sm text-gray-500">
+                        No notifications yet
+                      </p>
+                    ) : (
+                      notifications.map((reg) => (
+                        <Link
+                          key={reg.id}
+                          href="/admin/registrations"
+                          className="flex flex-col gap-0.5 border-b border-gray-100 px-4 py-3 last:border-0 hover:bg-gray-50 transition-colors"
+                        >
+                          <p className="text-sm font-medium text-purple-deep">
+                            New host request
+                          </p>
+                          <p className="text-xs text-gray-600 truncate">
+                            {reg.fullName} wants to host on GZURA
+                          </p>
+                          <p className="text-[11px] text-gray-400">
+                            {new Date(reg.createdAt).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                  {notifications.length > 0 && (
+                    <div className="border-t p-2">
+                      <Link
+                        href="/admin/registrations"
+                        className="block rounded-md px-3 py-2 text-center text-xs font-medium text-purple-deep hover:bg-purple-50 transition-colors"
+                      >
+                        View all host requests
+                      </Link>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+            )}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -394,7 +419,7 @@ export default function AdminLayout({
                     </p>
                     <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                     <p className="text-[11px] text-gold-royal font-medium uppercase tracking-wide">
-                      {user?.role}
+                      {user ? formatUserRole(user.role) : ''}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -406,17 +431,33 @@ export default function AdminLayout({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/registrations" className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    My Activity
+                  <Link href="/admin/events" className="cursor-pointer">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Events
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/qr-scanner" className="cursor-pointer">
-                    <ScanLine className="mr-2 h-4 w-4" />
-                    QR Scanner
+                  <Link href="/admin/events/new" className="cursor-pointer">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Event
                   </Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/registrations" className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" />
+                        Host Requests
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/qr-scanner" className="cursor-pointer">
+                        <ScanLine className="mr-2 h-4 w-4" />
+                        QR Scanner
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuItem disabled>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings

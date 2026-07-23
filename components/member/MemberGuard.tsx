@@ -19,7 +19,7 @@ export default function MemberGuard({ children }: { children: React.ReactNode })
       return;
     }
 
-    if (user.role === 'ADMIN') {
+    if (user.role === 'ADMIN' || user.role === 'HOST') {
       router.replace('/admin');
       return;
     }
