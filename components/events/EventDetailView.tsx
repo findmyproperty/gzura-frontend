@@ -2,11 +2,13 @@ import Link from 'next/link';
 import { BookOpen, Calendar, Clock, MapPin, User } from 'lucide-react';
 import EventDetailActions from '@/components/events/EventDetailActions';
 import EventContentViewer from '@/components/events/EventContentViewer';
+import EventPassDownloadButton from '@/components/events/EventPassDownloadButton';
 import RichTextContent from '@/components/ui/rich-text-content';
 import { Event } from '@/lib/api';
 import { getEventImages } from '@/lib/event-images';
 import { formatEventPrice } from '@/lib/price';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 type EventDetailViewProps = {
   event: Event;
@@ -82,19 +84,38 @@ export default function EventDetailView({
                   images.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3',
                 )}
               >
-                {images.map((url, index) => (
-                  <img
-                    key={`${url}-${index}`}
-                    src={url}
-                    alt={`${event.title} image ${index + 1}`}
-                    className={cn(
-                      'w-full rounded-2xl object-cover shadow-xl',
-                      index === 0 && images.length > 1
-                        ? 'col-span-2 sm:col-span-2 aspect-[16/9]'
-                        : 'aspect-square',
-                    )}
-                  />
-                ))}
+                {images.map((url, index) => {
+                  const isPrimaryGalleryImage = index === 0 && images.length > 1;
+
+                  return (
+                    <div
+                      key={`${url}-${index}`}
+                      className={cn(
+                        'relative overflow-hidden rounded-2xl bg-gray-100 shadow-xl',
+                        isPrimaryGalleryImage
+                          ? 'col-span-2 aspect-[16/9] sm:col-span-2'
+                          : images.length === 1
+                            ? 'aspect-[16/9]'
+                            : 'aspect-square',
+                      )}
+                    >
+                      <Image
+                        src={url}
+                        alt={`${event.title} image ${index + 1}`}
+                        fill
+                        sizes={
+                          images.length === 1
+                            ? '(min-width: 1024px) 60vw, 100vw'
+                            : isPrimaryGalleryImage
+                              ? '(min-width: 640px) 66vw, 100vw'
+                              : '(min-width: 640px) 33vw, 50vw'
+                        }
+                        className="object-cover"
+                        priority={index === 0}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             ) : null}
             {event.description ? (
@@ -133,7 +154,8 @@ export default function EventDetailView({
 
           <div>
             <div className="sticky top-24 rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
-              <div className="mb-6">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <section>
                 <p className="mb-1 text-sm text-gray-500">Enrollment</p>
                 <p className="text-3xl font-bold text-purple-deep">
                   {formatEventPrice(event.price)}
@@ -143,6 +165,9 @@ export default function EventDetailView({
                     Member price: {formatEventPrice(event.memberPrice)}
                   </p>
                 ) : null}
+                </section>
+
+                <EventPassDownloadButton event={event} />
               </div>
               {event.venue ? (
                 <p className="mb-6 text-sm text-gray-600">

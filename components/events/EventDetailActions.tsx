@@ -175,6 +175,7 @@ export default function EventDetailActions({ event }: { event: Event }) {
                   </span>
                 </p>
               </div>
+              
               {registration.passUrl ? (
                 <EventPassQr passUrl={registration.passUrl} size={150} />
               ) : null}
@@ -208,8 +209,9 @@ export default function EventDetailActions({ event }: { event: Event }) {
             <CheckCircle2 className="h-4 w-4" />
             You&apos;re enrolled in this course
           </div>
-          <Link href="/my-learnings">
-            <Button variant="outline" className="w-full">
+
+          <Link href="/my-learnings" >
+            <Button variant="outline" className="w-full mt-2">
               View My Learnings
             </Button>
           </Link>

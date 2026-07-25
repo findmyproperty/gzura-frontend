@@ -26,12 +26,24 @@ export default function Header() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => {
+    const syncHeaderWithScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+
+    // Browsers can restore the scroll position after hydration without
+    // dispatching another scroll event. Sync now and on the next frame so the
+    // header never leaves white text over restored white page content.
+    syncHeaderWithScroll();
+    const frame = window.requestAnimationFrame(syncHeaderWithScroll);
+    window.addEventListener('scroll', syncHeaderWithScroll, { passive: true });
+    window.addEventListener('pageshow', syncHeaderWithScroll);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', syncHeaderWithScroll);
+      window.removeEventListener('pageshow', syncHeaderWithScroll);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     setMobileMenuOpen(false);

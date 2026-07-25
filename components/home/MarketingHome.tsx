@@ -7,6 +7,7 @@ import UpcomingEventsSection from '@/components/sections/UpcomingEventsSection';
 import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import CTASection from '@/components/sections/CTASection';
 
+
 export default function MarketingHome() {
   return (
     <>

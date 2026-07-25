@@ -479,27 +479,17 @@ export default function CreateEventPage() {
                     onVenueChange={(venue) => setForm((prev) => ({ ...prev, venue }))}
                   />
                   <p className="text-xs text-gray-500">
-                    Map pin is optional. Enter a venue name or address below to save without using the map.
+                    Map pin is optional. You can edit the address and venue fields above.
                   </p>
-                  <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-                    <div className="space-y-2">
-                      <Label>Venue</Label>
-                      <Input
-                        value={form.venue}
-                        onChange={(e) => setForm({ ...form, venue: e.target.value })}
-                        placeholder="Grand Convention Center"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Max attendees</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={form.maxAttendees}
-                        onChange={(e) => setForm({ ...form, maxAttendees: e.target.value })}
-                        placeholder="Leave empty for unlimited"
-                      />
-                    </div>
+                  <div className="space-y-2 lg:w-1/2 lg:pr-2">
+                    <Label>Max attendees</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={form.maxAttendees}
+                      onChange={(e) => setForm({ ...form, maxAttendees: e.target.value })}
+                      placeholder="Leave empty for unlimited"
+                    />
                   </div>
                   <TimeRangePicker
                     value={form.timeLabel}

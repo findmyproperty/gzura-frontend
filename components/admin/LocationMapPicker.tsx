@@ -6,6 +6,10 @@ import { Building2, Loader2, MapPin, Navigation, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  GeocodingResult,
+  searchLocations,
+} from '@/lib/geocoding';
 
 export type LocationSelection = {
   location: string;
@@ -27,6 +31,15 @@ type LocationMapPickerProps = {
 };
 
 type PlacePrediction = google.maps.places.PlacePrediction;
+type LegacyPlacePrediction = google.maps.places.AutocompletePrediction;
+type LocationSuggestion = {
+  id: string;
+  mainText: string;
+  secondaryText: string;
+  placePrediction?: PlacePrediction;
+  legacyPrediction?: LegacyPlacePrediction;
+  result?: GeocodingResult;
+};
 
 const libraries: ('places' | 'marker')[] = ['places', 'marker'];
 const DEFAULT_CENTER = { lat: 12.9716, lng: 77.5946 };
@@ -48,6 +61,8 @@ export default function LocationMapPicker({
   const sessionTokenRef =
     useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+  const legacyAutocompleteRef =
+    useRef<google.maps.places.AutocompleteService | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const advancedMarkerRef =
     useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
@@ -62,9 +77,10 @@ export default function LocationMapPicker({
   );
 
   const [searchQuery, setSearchQuery] = useState(location);
-  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [predictions, setPredictions] = useState<LocationSuggestion[]>([]);
   const [showPredictions, setShowPredictions] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [searchMessage, setSearchMessage] = useState('');
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const [mapZoom, setMapZoom] = useState(
     latitude != null && longitude != null ? 15 : 11,
@@ -161,6 +177,10 @@ export default function LocationMapPicker({
     }
     if (!sessionTokenRef.current) {
       sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+    }
+    if (!legacyAutocompleteRef.current) {
+      legacyAutocompleteRef.current =
+        new google.maps.places.AutocompleteService();
     }
   }, [isLoaded]);
 
@@ -263,46 +283,136 @@ export default function LocationMapPicker({
   );
 
   const fetchPredictions = useCallback(async (query: string) => {
-    if (!query.trim()) {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
       setPredictions([]);
       setShowPredictions(false);
+      setSearchMessage('');
       return;
     }
 
     setSearching(true);
+    setSearchMessage('');
     try {
-      const { AutocompleteSuggestion } = (await google.maps.importLibrary(
-        'places',
-      )) as google.maps.PlacesLibrary;
+      try {
+        const { AutocompleteSuggestion } = (await google.maps.importLibrary(
+          'places',
+        )) as google.maps.PlacesLibrary;
 
-      if (!sessionTokenRef.current) {
-        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+        if (!sessionTokenRef.current) {
+          sessionTokenRef.current =
+            new google.maps.places.AutocompleteSessionToken();
+        }
+
+        const { suggestions } =
+          await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+            input: trimmedQuery,
+            includedRegionCodes: ['in'],
+            sessionToken: sessionTokenRef.current,
+          });
+
+        const googlePredictions = suggestions
+          .map((suggestion) => suggestion.placePrediction)
+          .filter(
+            (prediction): prediction is PlacePrediction => prediction != null,
+          )
+          .map((prediction) => ({
+            id: prediction.placeId,
+            mainText: prediction.mainText?.text || prediction.text.text,
+            secondaryText: prediction.secondaryText?.text || '',
+            placePrediction: prediction,
+          }));
+
+        if (googlePredictions.length > 0) {
+          setPredictions(googlePredictions);
+          setShowPredictions(true);
+          return;
+        }
+      } catch {
+        // Places API (New) may be disabled or restricted. The backend search
+        // below also supports the legacy Google API and open-data providers.
       }
 
-      const { suggestions } =
-        await AutocompleteSuggestion.fetchAutocompleteSuggestions({
-          input: query,
-          includedRegionCodes: ['in'],
-          sessionToken: sessionTokenRef.current,
-        });
+      if (!legacyAutocompleteRef.current) {
+        legacyAutocompleteRef.current =
+          new google.maps.places.AutocompleteService();
+      }
 
-      const nextPredictions = suggestions
-        .map((suggestion) => suggestion.placePrediction)
-        .filter(
-          (prediction): prediction is PlacePrediction => prediction != null,
+      const legacyPredictions = await new Promise<LegacyPlacePrediction[]>(
+        (resolve, reject) => {
+          legacyAutocompleteRef.current?.getPlacePredictions(
+            {
+              input: trimmedQuery,
+              componentRestrictions: { country: 'in' },
+              bounds: mapRef.current?.getBounds() ?? undefined,
+              sessionToken: sessionTokenRef.current ?? undefined,
+            },
+            (results, status) => {
+              if (
+                status === google.maps.places.PlacesServiceStatus.OK &&
+                results
+              ) {
+                resolve(results);
+                return;
+              }
+              if (
+                status ===
+                google.maps.places.PlacesServiceStatus.ZERO_RESULTS
+              ) {
+                resolve([]);
+                return;
+              }
+              reject(new Error(`Google Places search failed (${status})`));
+            },
+          );
+        },
+      ).catch(() => []);
+
+      if (legacyPredictions.length > 0) {
+        setPredictions(
+          legacyPredictions.map((prediction) => ({
+            id: prediction.place_id,
+            mainText:
+              prediction.structured_formatting.main_text ||
+              prediction.description,
+            secondaryText:
+              prediction.structured_formatting.secondary_text || '',
+            legacyPrediction: prediction,
+          })),
         );
-
-      if (!nextPredictions.length) {
-        setPredictions([]);
-        setShowPredictions(false);
+        setShowPredictions(true);
         return;
       }
 
-      setPredictions(nextPredictions);
+      const center = mapRef.current?.getCenter();
+      const fallbackResults = await searchLocations(
+        trimmedQuery,
+        6,
+        center ? { lat: center.lat(), lon: center.lng() } : undefined,
+      );
+      const fallbackPredictions = fallbackResults.map((result, index) => {
+        const parts = result.displayName.split(',').map((part) => part.trim());
+        return {
+          id: `${result.latitude}:${result.longitude}:${index}`,
+          mainText: result.venue || parts[0] || result.displayName,
+          secondaryText: result.displayName,
+          result,
+        };
+      });
+
+      setPredictions(fallbackPredictions);
       setShowPredictions(true);
-    } catch {
+      if (fallbackPredictions.length === 0) {
+        setSearchMessage('No matching locations found. Try a more specific name.');
+      }
+    } catch (error) {
       setPredictions([]);
-      setShowPredictions(false);
+      setShowPredictions(true);
+      setSearchMessage(
+        error instanceof Error
+          ? error.message
+          : 'Location search is temporarily unavailable.',
+      );
     } finally {
       setSearching(false);
     }
@@ -322,9 +432,60 @@ export default function LocationMapPicker({
     return () => window.clearTimeout(timer);
   }, [searchQuery, isLoaded, fetchPredictions]);
 
-  const selectPrediction = async (prediction: PlacePrediction) => {
+  const selectPrediction = async (suggestion: LocationSuggestion) => {
+    if (suggestion.result) {
+      applySelection({
+        location: suggestion.result.displayName,
+        latitude: suggestion.result.latitude,
+        longitude: suggestion.result.longitude,
+        venue: suggestion.result.venue || venue,
+      });
+      setSearchMessage('');
+      return;
+    }
+
+    const prediction = suggestion.placePrediction;
+    const legacyPrediction = suggestion.legacyPrediction;
+    if (!prediction && !legacyPrediction) {
+      setSearchMessage('This location could not be selected. Please try again.');
+      return;
+    }
+
     setSearching(true);
     try {
+      if (legacyPrediction) {
+        if (!geocoderRef.current) {
+          geocoderRef.current = new google.maps.Geocoder();
+        }
+
+        const response = await geocoderRef.current.geocode({
+          placeId: legacyPrediction.place_id,
+        });
+        const result = response.results[0];
+        const resolvedLocation = result?.geometry.location;
+        if (!result || !resolvedLocation) {
+          setSearchMessage(
+            'Google did not return coordinates for this location.',
+          );
+          return;
+        }
+
+        applySelection(
+          {
+            location: result.formatted_address || legacyPrediction.description,
+            latitude: resolvedLocation.lat(),
+            longitude: resolvedLocation.lng(),
+            venue: suggestion.mainText || venue,
+          },
+          result.geometry.viewport,
+        );
+        sessionTokenRef.current =
+          new google.maps.places.AutocompleteSessionToken();
+        setSearchMessage('');
+        return;
+      }
+
+      if (!prediction) return;
       const place = prediction.toPlace();
       await place.fetchFields({
         fields: [
@@ -339,7 +500,10 @@ export default function LocationMapPicker({
       sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
 
       const location = place.location;
-      if (!location) return;
+      if (!location) {
+        setSearchMessage('Google did not return coordinates for this location.');
+        return;
+      }
 
       const position = {
         lat: location.lat(),
@@ -354,7 +518,7 @@ export default function LocationMapPicker({
           component.types.includes('point_of_interest'),
         )?.longText ||
         place.displayName ||
-        prediction.mainText?.text ||
+        suggestion.mainText ||
         venue;
 
       applySelection(
@@ -366,6 +530,9 @@ export default function LocationMapPicker({
         },
         place.viewport ?? undefined,
       );
+      setSearchMessage('');
+    } catch {
+      setSearchMessage('This location could not be loaded. Please try another result.');
     } finally {
       setSearching(false);
     }
@@ -433,16 +600,19 @@ export default function LocationMapPicker({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => {
-                if (predictions.length > 0) setShowPredictions(true);
+                if (predictions.length > 0 || searchMessage) {
+                  setShowPredictions(true);
+                }
               }}
               placeholder="Search business, address, or landmark"
               className="h-11 border-purple-100 bg-white pl-10 shadow-sm transition-all focus-visible:border-purple-300 focus-visible:ring-purple-deep/15"
             />
-            {showPredictions && predictions.length > 0 ? (
+            {showPredictions &&
+            (predictions.length > 0 || searchMessage) ? (
               <div className="absolute z-[200] mt-2 w-full overflow-hidden rounded-xl border border-purple-100 bg-white shadow-xl shadow-purple-500/10 max-h-56 overflow-y-auto">
                 {predictions.map((prediction) => (
                   <button
-                    key={prediction.placeId}
+                    key={prediction.id}
                     type="button"
                     className="group w-full border-b border-purple-50 text-left px-3.5 py-3 text-sm transition-colors last:border-b-0 hover:bg-purple-50/80"
                     onMouseDown={(e) => e.preventDefault()}
@@ -454,15 +624,20 @@ export default function LocationMapPicker({
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate font-medium text-gray-900">
-                          {prediction.mainText?.text || prediction.text.text}
+                          {prediction.mainText}
                         </span>
                         <span className="block truncate text-xs text-gray-500">
-                          {prediction.secondaryText?.text || ''}
+                          {prediction.secondaryText}
                         </span>
                       </span>
                     </span>
                   </button>
                 ))}
+                {searchMessage ? (
+                  <p className="px-4 py-3 text-sm text-amber-700">
+                    {searchMessage}
+                  </p>
+                ) : null}
               </div>
             ) : null}
           </div>

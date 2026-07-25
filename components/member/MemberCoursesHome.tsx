@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Calendar, ChevronRight, MapPin, Sparkles, TrendingUp } from 'lucide-react';
+import CourseCardImage from '@/components/member/CourseCardImage';
 import RecommendedEvents from '@/components/member/RecommendedEvents';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/lib/api';
@@ -89,19 +90,10 @@ export default function MemberCoursesHome({ events }: { events: Event[] }) {
                 className="group"
               >
                 <article className="bg-white border border-gray-200 rounded overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
-                  <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-                    {event.imageUrl ? (
-                      <img
-                        src={event.imageUrl}
-                        alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-purple-50">
-                        <Calendar className="w-10 h-10 text-purple-deep opacity-40" />
-                      </div>
-                    )}
-                  </div>
+                  <CourseCardImage
+                    imageUrl={event.imageUrl}
+                    title={event.title}
+                  />
                   <div className="p-3 flex-1 flex flex-col">
                     <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-snug min-h-[2.5rem]">
                       {event.title}

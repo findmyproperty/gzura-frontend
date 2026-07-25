@@ -61,11 +61,11 @@ export default function MemberShell({
 
             <div className="flex items-center gap-2 sm:gap-3">
               {showSearch && (
-                <div className="hidden lg:flex items-center w-64 xl:w-80 border border-gray-200 rounded-full overflow-hidden bg-white h-10">
+                <div className="hidden h-10 w-64 items-center overflow-hidden rounded-full border border-gray-200 bg-white transition-[border-color,box-shadow] focus-within:border-purple-300 focus-within:ring-2 focus-within:ring-purple-100 lg:flex xl:w-80">
                   <Search className="ml-3 w-4 h-4 text-gray-400 shrink-0" />
                   <Input
                     placeholder="What do you want to learn?"
-                    className="border-0 shadow-none focus-visible:ring-0 h-10 pl-2 pr-2 bg-transparent"
+                    className="h-10 border-0 bg-transparent pl-2 pr-2 shadow-none outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         router.push('/events');
