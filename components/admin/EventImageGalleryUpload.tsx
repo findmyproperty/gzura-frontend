@@ -3,7 +3,6 @@
 import { useRef, useState } from 'react';
 import { ImagePlus, Loader2, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -100,14 +99,13 @@ export function EventImageGalleryUpload({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <Label>Event images</Label>
-        <span className="text-xs text-gray-500">
+      <div className="flex items-center justify-end gap-3">
+        <span className="text-xs font-medium text-gray-500">
           {value.length}/{MAX_IMAGES} · first image is cover
         </span>
       </div>
 
-      <div className="rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50/30 via-white to-gold-50/20 p-4">
+      <div className="rounded-2xl border border-dashed border-purple-200 bg-gradient-to-br from-purple-50/40 via-white to-gold-50/25 p-4 sm:p-5">
         {value.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {value.map((url, index) => (

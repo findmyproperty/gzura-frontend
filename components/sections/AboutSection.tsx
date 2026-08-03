@@ -33,7 +33,7 @@ const values = [
 
 export default function AboutSection() {
   return (
-    <section className="section-padding bg-white relative overflow-hidden" aria-labelledby="about-heading">
+    <section className="pt-14 pb-20 md:pt-16 md:pb-28 lg:pt-20 lg:pb-32 bg-white relative overflow-hidden" aria-labelledby="about-heading">
       {/* Background Accent */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-purple-50 to-transparent" aria-hidden="true" />
 

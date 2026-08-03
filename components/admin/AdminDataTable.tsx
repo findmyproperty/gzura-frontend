@@ -66,6 +66,7 @@ export function AdminDataTable({
   actions,
   loading,
   emptyMessage,
+  footer,
   children,
 }: {
   search?: string;
@@ -75,6 +76,7 @@ export function AdminDataTable({
   actions?: React.ReactNode;
   loading?: boolean;
   emptyMessage?: string;
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -108,8 +110,116 @@ export function AdminDataTable({
       ) : (
         <div className="overflow-x-auto">{children}</div>
       )}
+
+      {!loading && !emptyMessage && footer ? (
+        <div className="border-t border-gray-100 px-4 py-3 md:px-5">{footer}</div>
+      ) : null}
     </div>
   );
+}
+
+/** Compact page controls for admin list tables */
+export function AdminTablePagination({
+  page,
+  totalPages,
+  totalItems,
+  pageSize,
+  onPageChange,
+  itemLabel = 'items',
+}: {
+  page: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  itemLabel?: string;
+}) {
+  if (totalItems === 0) return null;
+
+  const start = (page - 1) * pageSize + 1;
+  const end = Math.min(page * pageSize, totalItems);
+
+  const pages = getPaginationRange(page, totalPages);
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm text-gray-500">
+        Showing{' '}
+        <span className="font-medium text-gray-700">
+          {start}–{end}
+        </span>{' '}
+        of <span className="font-medium text-gray-700">{totalItems}</span> {itemLabel}
+      </p>
+
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1}
+          className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+        >
+          Previous
+        </button>
+
+        <div className="hidden items-center gap-1 sm:flex">
+          {pages.map((p, i) =>
+            p === '…' ? (
+              <span
+                key={`e-${i}`}
+                className="inline-flex h-9 w-9 items-center justify-center text-sm text-gray-400"
+              >
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPageChange(p)}
+                aria-current={p === page ? 'page' : undefined}
+                className={cn(
+                  'inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors',
+                  p === page
+                    ? 'bg-purple-deep text-white shadow-sm'
+                    : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                )}
+              >
+                {p}
+              </button>
+            )
+          )}
+        </div>
+
+        <span className="px-2 text-sm text-gray-500 sm:hidden">
+          Page {page} of {totalPages}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages}
+          className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function getPaginationRange(current: number, total: number): (number | '…')[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  if (current <= 3) {
+    return [1, 2, 3, 4, '…', total];
+  }
+
+  if (current >= total - 2) {
+    return [1, '…', total - 3, total - 2, total - 1, total];
+  }
+
+  return [1, '…', current - 1, current, current + 1, '…', total];
 }
 
 export function AdminTable({

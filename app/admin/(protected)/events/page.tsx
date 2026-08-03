@@ -27,6 +27,7 @@ import {
   AdminTableCell,
   AdminTableHead,
   AdminTableHeaderCell,
+  AdminTablePagination,
   AdminTableRow,
   formatAdminDate,
   PillBadge,
@@ -118,6 +119,8 @@ const emptyForm = {
   status: 'DRAFT' as 'DRAFT' | 'PUBLISHED',
 };
 
+const PAGE_SIZE = 10;
+
 export default function AdminEventsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -132,6 +135,7 @@ export default function AdminEventsPage() {
   const [hosts, setHosts] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [page, setPage] = useState(1);
   const [meetingMeta, setMeetingMeta] = useState<{
     meetLink?: string | null;
     totalSeats?: number | null;
@@ -201,6 +205,22 @@ export default function AdminEventsPage() {
       return matchesSearch && matchesStatus;
     });
   }, [events, search, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+
+  const paginatedEvents = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredEvents.slice(start, start + PAGE_SIZE);
+  }, [filteredEvents, page]);
+
+  // Reset to first page when filters change or current page is out of range
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   const openEdit = (event: Event) => {
     const matchedHost =
@@ -395,6 +415,18 @@ export default function AdminEventsPage() {
             </Link>
           </Button>
         }
+        footer={
+          filteredEvents.length > 0 ? (
+            <AdminTablePagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={filteredEvents.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+              itemLabel="events"
+            />
+          ) : null
+        }
       >
         <AdminTable minWidth="860px">
           <AdminTableHead>
@@ -406,7 +438,7 @@ export default function AdminEventsPage() {
             <AdminTableHeaderCell className="w-12" />
           </AdminTableHead>
           <AdminTableBody>
-            {filteredEvents.map((event) => (
+            {paginatedEvents.map((event) => (
               <AdminTableRow
                 key={event.id}
                 onClick={() => router.push(`/admin/events/${event.id}`)}

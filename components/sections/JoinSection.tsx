@@ -1,6 +1,7 @@
 'use client';
 
 import ScrollAnimate from '@/components/animations/ScrollAnimate';
+import Image from 'next/image';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,14 +10,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   CheckCircle2,
-  Users,
   ArrowRight,
   Loader2,
+  Clock,
+  Users,
   Star,
   ShieldCheck,
-  Users2,
   BadgeCheck,
-  Clock,
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
@@ -35,18 +35,21 @@ const interestOptions = [
   { value: 'personal_growth', label: 'Personal Development' },
 ];
 
-const trustPoints = [
-  { name: 'Community Support', description: 'Connect with like-minded individuals', icon: ShieldCheck },
-  { name: 'Leadership Opportunities', description: 'Develop skills that drive success', icon: BadgeCheck },
-  { name: 'Entrepreneur Network', description: 'Build valuable business relationships', icon: Users2 },
-  { name: 'Personal Growth', description: 'Transform your personal and professional life', icon: Star },
+const highlightStats = [
+  { value: '5K+', label: 'Members', icon: Users },
+  { value: '50+', label: 'Events', icon: BadgeCheck },
+  { value: '100+', label: 'Mentors', icon: Star },
 ];
 
-const highlightStats = [
-  { value: '5K+', label: 'Members' },
-  { value: '50+', label: 'Events' },
-  { value: '100+', label: 'Mentors' },
+const trustChips = [
+  { label: 'Community Support', icon: ShieldCheck },
+  { label: 'Leadership Growth', icon: BadgeCheck },
+  { label: 'Entrepreneur Network', icon: Users },
 ];
+
+/** Darker seminar stage — left side stays readable under purple wash */
+const HERO_IMAGE =
+  'https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1600';
 
 export default function JoinSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,30 +115,45 @@ export default function JoinSection() {
   if (isSuccess) {
     return (
       <section
+        id="register"
         className="section-padding scroll-mt-20 bg-gray-50 relative overflow-hidden"
         aria-labelledby="success-heading"
       >
         <div className="container-custom relative z-10">
-          <div className="max-w-xl mx-auto text-center">
-            <div className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-100 animate-scale-in">
-              <div
-                className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center"
-                aria-hidden="true"
-              >
-                <CheckCircle2 className="w-10 h-10 text-white" />
+          <div className="relative rounded-[1.75rem] md:rounded-[2rem] overflow-hidden min-h-[420px] shadow-2xl">
+            <Image
+              src={HERO_IMAGE}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              aria-hidden
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-purple-deep/95 via-purple-800/90 to-purple-950/85"
+              aria-hidden
+            />
+            <div className="relative z-10 flex items-center justify-center p-8 md:p-12 min-h-[420px]">
+              <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl max-w-md w-full text-center animate-scale-in">
+                <div
+                  className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <CheckCircle2 className="w-10 h-10 text-white" />
+                </div>
+                <h3 id="success-heading" className="heading-md text-gray-900 mb-4">
+                  Host application received!
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Our team will review your request and reach out about hosting on GZURA.
+                </p>
+                <Button
+                  onClick={() => setIsSuccess(false)}
+                  className="btn-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                >
+                  Submit another request
+                </Button>
               </div>
-              <h3 id="success-heading" className="heading-md text-gray-900 mb-4">
-                Host application received!
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Our team will review your request and reach out about hosting on GZURA.
-              </p>
-              <Button
-                onClick={() => setIsSuccess(false)}
-                className="btn-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-              >
-                Submit another request
-              </Button>
             </div>
           </div>
         </div>
@@ -149,220 +167,274 @@ export default function JoinSection() {
       className="scroll-mt-20 section-padding bg-gray-50 relative overflow-hidden"
       aria-labelledby="join-heading"
     >
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-purple-deep/5 to-gold-500/5"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-full blur-3xl"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-gold-500/10 to-transparent rounded-full blur-3xl"
-        aria-hidden="true"
-      />
-
       <div className="container-custom relative z-10">
         <ScrollAnimate animation="fade-up">
-          <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 bg-purple-100 rounded-full px-4 py-2 mb-6">
-              <Users className="w-4 h-4 text-purple-700" aria-hidden="true" />
-              <span className="text-purple-700 text-sm font-semibold">Teach on GZURA</span>
+          <div className="relative rounded-[1.75rem] md:rounded-[2rem] overflow-hidden shadow-2xl shadow-purple-900/20">
+            {/* Background image */}
+            <div className="absolute inset-0">
+              <Image
+                src={HERO_IMAGE}
+                alt="Speaker presenting at a leadership conference"
+                fill
+                className="object-cover object-[70%_center]"
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                priority={false}
+              />
+              {/* Heavy left wash so copy stays crisp; image shows on the right */}
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-purple-deep via-purple-deep/95 to-purple-deep/55"
+                aria-hidden
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-t from-purple-950/90 via-purple-deep/40 to-purple-deep/50"
+                aria-hidden
+              />
+              {/* Extra solid panel behind left text on large screens */}
+              <div
+                className="absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-purple-deep via-purple-deep/90 to-transparent lg:block"
+                aria-hidden
+              />
             </div>
-            <h2 id="join-heading" className="heading-lg text-gray-900 mb-4">
-              Host a <span className="gradient-text">Course</span> with GZURA
-            </h2>
-            <p className="text-gray-600 text-base md:text-lg leading-relaxed">
-              Share your expertise with our community. Apply to host workshops, programs, or courses
-              on a platform built for serious teaching.
-            </p>
+
+            <div className="relative z-10 grid lg:grid-cols-[1fr_minmax(0,26rem)] xl:grid-cols-[1fr_minmax(0,28rem)] gap-8 lg:gap-10 xl:gap-14 p-5 sm:p-7 md:p-10 lg:p-12 xl:p-14 min-h-[640px] lg:min-h-[680px]">
+              {/* Left: hero copy */}
+              <div className="flex flex-col justify-end order-2 lg:order-1 text-white lg:pr-4 lg:pb-2">
+                <div className="inline-flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/25 px-3.5 py-1.5 mb-5 w-fit shadow-lg">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" aria-hidden />
+                  <span className="text-gold-300 text-xs sm:text-sm font-semibold tracking-wide">
+                    Teach on GZURA
+                  </span>
+                </div>
+
+                <h2
+                  id="join-heading"
+                  className="text-3xl sm:text-4xl md:text-5xl xl:text-[3.25rem] font-bold leading-[1.1] tracking-tight mb-4 max-w-xl text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]"
+                >
+                  Share Your Expertise.
+                  <span className="block text-gold-400 mt-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+                    Host Your Dream Course
+                  </span>
+                </h2>
+
+                <p className="text-white text-sm sm:text-base md:text-lg leading-relaxed max-w-md mb-6 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)]">
+                  Whether you lead workshops, mentor entrepreneurs, or run leadership programs —
+                  we help you teach a community ready to grow.
+                </p>
+
+                <div className="flex flex-wrap gap-2.5 mb-8">
+                  {trustChips.map((chip) => {
+                    const Icon = chip.icon;
+                    return (
+                      <div
+                        key={chip.label}
+                        className="inline-flex items-center gap-2 rounded-full bg-black/30 backdrop-blur-md border border-white/20 px-3 py-1.5 text-xs sm:text-sm text-white font-medium shadow-md"
+                      >
+                        <Icon className="w-3.5 h-3.5 text-gold-400 shrink-0" aria-hidden />
+                        {chip.label}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-wrap gap-6 sm:gap-10 pt-5 border-t border-white/25">
+                  {highlightStats.map((stat) => (
+                    <div key={stat.label}>
+                      <p className="text-2xl sm:text-3xl font-bold text-gold-400 drop-shadow-md">
+                        {stat.value}
+                      </p>
+                      <p className="text-white/90 text-xs sm:text-sm mt-0.5 font-medium">
+                        {stat.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: floating form card */}
+              <div className="flex items-stretch lg:items-center order-1 lg:order-2">
+                <div className="w-full bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-white/60 p-5 sm:p-6 md:p-8 flex flex-col">
+                  <div className="flex items-start justify-between gap-3 mb-5 md:mb-6">
+                    <div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                        Host application
+                      </h3>
+                      <p className="text-gray-500 text-sm mt-1.5 leading-relaxed">
+                        Tell us about yourself and the course you&apos;d like to host.
+                      </p>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-2 rounded-xl bg-gold-50 border border-gold-100 px-3 py-2 shrink-0">
+                      <Clock className="w-4 h-4 text-gold-600" aria-hidden="true" />
+                      <div className="text-xs leading-tight">
+                        <p className="font-semibold text-gold-700">Fast review</p>
+                        <p className="text-gray-500">Within 48 hours</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-gray-400 mb-4 sm:hidden">
+                    Please fill in all required details.
+                  </p>
+
+                  <form
+                    onSubmit={handleSubmit}
+                    aria-label="Course host registration form"
+                    className="flex flex-col flex-1"
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label htmlFor="fullName" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Full Name *
+                        </Label>
+                        <Input
+                          id="fullName"
+                          value={formData.fullName}
+                          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                          placeholder="Enter your full name"
+                          required
+                          aria-required="true"
+                          className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="email" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Email *
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          placeholder="your@email.com"
+                          required
+                          aria-required="true"
+                          className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="phone" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Phone *
+                        </Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder="+1 (234) 567-890"
+                          required
+                          aria-required="true"
+                          className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="gender" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Gender *
+                        </Label>
+                        <Select
+                          value={formData.gender}
+                          onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                        >
+                          <SelectTrigger
+                            id="gender"
+                            className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus:ring-purple-500"
+                            aria-required="true"
+                          >
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {genderOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="profession" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Profession *
+                        </Label>
+                        <Input
+                          id="profession"
+                          value={formData.profession}
+                          onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                          placeholder="e.g., Marketing Manager"
+                          required
+                          aria-required="true"
+                          className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label htmlFor="interest" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Course topic *
+                        </Label>
+                        <Select
+                          value={formData.interest}
+                          onValueChange={(value) => setFormData({ ...formData, interest: value })}
+                          required
+                        >
+                          <SelectTrigger
+                            id="interest"
+                            className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus:ring-purple-500"
+                            aria-required="true"
+                          >
+                            <SelectValue placeholder="Select your course topic" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {interestOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label htmlFor="message" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Message <span className="normal-case tracking-normal font-normal text-gray-400">(optional)</span>
+                        </Label>
+                        <Textarea
+                          id="message"
+                          value={formData.message}
+                          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                          placeholder="Describe the course you want to host and your experience..."
+                          rows={3}
+                          className="bg-gray-50/80 border-gray-200 rounded-xl resize-none focus-visible:ring-purple-500"
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full mt-6 h-12 rounded-full bg-purple-deep hover:bg-purple-800 text-white font-semibold text-base shadow-lg shadow-purple-900/25 transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" aria-hidden="true" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Submit host request
+                          <ArrowRight
+                            className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
+                            aria-hidden="true"
+                          />
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
         </ScrollAnimate>
-
-        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto">
-          <ScrollAnimate animation="slide-left" className="lg:col-span-1">
-            <h3 className="heading-md text-gray-900 mb-6">Why teach here</h3>
-            <div className="space-y-5">
-              {trustPoints.map((point) => {
-                const Icon = point.icon;
-                return (
-                  <div key={point.name} className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-purple-deep to-purple-700 flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-5 h-5 text-white" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="text-gray-900 font-semibold">{point.name}</p>
-                      <p className="text-gray-500 text-sm mt-0.5 leading-relaxed">{point.description}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <div className="grid grid-cols-3 gap-4">
-                {highlightStats.map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <p className="text-xl font-bold text-purple-deep">{stat.value}</p>
-                    <p className="text-gray-500 text-xs mt-1">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </ScrollAnimate>
-
-          <ScrollAnimate animation="slide-right" className="lg:col-span-2">
-            <div className="bg-white rounded-2xl p-8 md:p-10 shadow-lg border border-gray-100">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-                <div>
-                  <h3 className="heading-md text-gray-900">Host application</h3>
-                  <p className="text-gray-500 mt-2">
-                    Tell us about yourself and the course you&apos;d like to host.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 rounded-lg bg-gold-50 px-4 py-2.5 shrink-0">
-                  <Clock className="w-4 h-4 text-gold-600" aria-hidden="true" />
-                  <div className="text-sm">
-                    <p className="font-semibold text-gold-700">Fast review</p>
-                    <p className="text-gray-500">Within 48 hours</p>
-                  </div>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmit} aria-label="Course host registration form">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name *</Label>
-                    <Input
-                      id="fullName"
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="Enter your full name"
-                      required
-                      aria-required="true"
-                      className="bg-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="your@email.com"
-                      required
-                      aria-required="true"
-                      className="bg-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number *</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+1 (234) 567-890"
-                      required
-                      aria-required="true"
-                      className="bg-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">Gender *</Label>
-                    <Select
-                      value={formData.gender}
-                      onValueChange={(value) => setFormData({ ...formData, gender: value })}
-                    >
-                      <SelectTrigger id="gender" className="bg-white" aria-required="true">
-                        <SelectValue placeholder="Select your gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {genderOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="profession">Profession *</Label>
-                    <Input
-                      id="profession"
-                      value={formData.profession}
-                      onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-                      placeholder="e.g., Marketing Manager"
-                      required
-                      aria-required="true"
-                      className="bg-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="interest">Course topic *</Label>
-                    <Select
-                      value={formData.interest}
-                      onValueChange={(value) => setFormData({ ...formData, interest: value })}
-                      required
-                    >
-                      <SelectTrigger id="interest" className="bg-white" aria-required="true">
-                        <SelectValue placeholder="Select your course topic" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {interestOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="message">
-                      Message <span className="text-gray-400 font-normal">(optional)</span>
-                    </Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Describe the course you want to host and your experience..."
-                      rows={4}
-                      className="bg-white resize-none"
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn-secondary w-full mt-8 py-3.5 text-base group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-600 focus-visible:ring-offset-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" aria-hidden="true" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      Submit host request
-                      <ArrowRight
-                        className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"
-                        aria-hidden="true"
-                      />
-                    </>
-                  )}
-                </Button>
-              </form>
-            </div>
-          </ScrollAnimate>
-        </div>
       </div>
     </section>
   );

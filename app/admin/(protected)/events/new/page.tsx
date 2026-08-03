@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { AdminDetailLayout } from '@/components/admin/AdminDetailLayout';
+import { EventFormSection } from '@/components/admin/EventFormCard';
 import { EventImageGalleryUpload } from '@/components/admin/EventImageGalleryUpload';
 import TimeRangePicker from '@/components/admin/TimeRangePicker';
 import { Button } from '@/components/ui/button';
@@ -243,245 +244,260 @@ export default function CreateEventPage() {
       title="Create Event"
     >
       <form id="event-create-form" onSubmit={handleSave}>
-        <div className="space-y-6">
-            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <h2 className="text-base font-semibold text-purple-deep">Core event info</h2>
-                <p className="text-xs font-medium uppercase tracking-[0.22em] text-purple-deep/40">
-                  Basics
+        <div className="space-y-8 md:space-y-10">
+          <EventFormSection
+            step={1}
+            title="Core event info"
+            description="Name your event and set the basics — type, date, and pricing."
+            badge="Basics"
+          >
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Leadership Summit 2026"
+                required
+              />
+            </div>
+            <div className="grid gap-5 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select
+                  value={form.type}
+                  onValueChange={(value) => handleTypeChange(value as 'Online' | 'Offline')}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Online">Online</SelectItem>
+                    <SelectItem value="Offline">Offline</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={form.dateStart}
+                  onChange={(e) => setForm({ ...form, dateStart: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Price (₹)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+                <p className="text-xs text-gray-500">
+                  Set to 0 for free enrollment — users can join without payment.
                 </p>
               </div>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Title</Label>
-                  <Input
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder="Leadership Summit 2026"
-                    required
-                  />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <Select value={form.type} onValueChange={(value) => handleTypeChange(value as 'Online' | 'Offline')}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Online">Online</SelectItem>
-                      <SelectItem value="Offline">Offline</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Date</Label>
-                  <Input
-                    type="date"
-                    value={form.dateStart}
-                    onChange={(e) => setForm({ ...form, dateStart: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Price (₹)</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  />
-                  <p className="text-xs text-gray-500">
-                    Set to 0 for free enrollment — users can join without payment.
-                  </p>
-                </div>
-                </div>
-              </div>
-            </section>
+            </div>
+          </EventFormSection>
 
-            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-purple-deep">Event images</h2>
-              <EventImageGalleryUpload
-                value={form.imageUrls}
-                onChange={(imageUrls) => setForm((prev) => ({ ...prev, imageUrls }))}
-              />
-            </section>
+          <EventFormSection
+            step={2}
+            title="Event images"
+            description="Upload a gallery for the event page. The first image becomes the cover."
+            badge="Media"
+          >
+            <EventImageGalleryUpload
+              value={form.imageUrls}
+              onChange={(imageUrls) => setForm((prev) => ({ ...prev, imageUrls }))}
+            />
+          </EventFormSection>
 
-            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-purple-deep">
-                Instructor, summary, and outline
-              </h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Instructor</Label>
-                  {canPickAnyHost ? (
-                    <>
-                      <Select
-                        value={form.hostId}
-                        onValueChange={(value) => {
-                          if (value === 'manual') {
-                            setForm((prev) => ({ ...prev, hostId: 'manual' }));
-                            return;
+          <EventFormSection
+            step={3}
+            title="Instructor, summary & outline"
+            description="Who teaches this, what learners get, and how the course is structured."
+            badge="Content"
+          >
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Instructor</Label>
+                {canPickAnyHost ? (
+                  <>
+                    <Select
+                      value={form.hostId}
+                      onValueChange={(value) => {
+                        if (value === 'manual') {
+                          setForm((prev) => ({ ...prev, hostId: 'manual' }));
+                          return;
+                        }
+                        handleHostChange(value);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            loadingHosts
+                              ? 'Loading instructors…'
+                              : hosts.length
+                                ? 'Select an instructor from users'
+                                : 'No instructor users found'
                           }
-                          handleHostChange(value);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              loadingHosts
-                                ? 'Loading instructors…'
-                                : hosts.length
-                                  ? 'Select an instructor from users'
-                                  : 'No instructor users found'
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="manual">Manual instructor</SelectItem>
-                          {hosts.map((host) => (
-                            <SelectItem key={host.id} value={host.id}>
-                              {hostOptionLabel(host)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {!loadingHosts && hosts.length === 0 ? (
-                        <p className="text-xs text-gray-500">
-                          Add users with the Instructor role in{' '}
-                          <Link
-                            href="/admin/users"
-                            className="font-medium text-purple-deep underline"
-                          >
-                            Users
-                          </Link>{' '}
-                          to populate this list.
-                        </p>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <Input
-                        value={form.speakerName || 'You'}
-                        readOnly
-                        className="bg-gray-50"
-                      />
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual instructor</SelectItem>
+                        {hosts.map((host) => (
+                          <SelectItem key={host.id} value={host.id}>
+                            {hostOptionLabel(host)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {!loadingHosts && hosts.length === 0 ? (
                       <p className="text-xs text-gray-500">
-                        You are set as the instructor for this event.
+                        Add users with the Instructor role in{' '}
+                        <Link
+                          href="/admin/users"
+                          className="font-medium text-purple-deep underline"
+                        >
+                          Users
+                        </Link>{' '}
+                        to populate this list.
                       </p>
-                    </>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label>Instructor name</Label>
-                  <Input
-                    value={form.speakerName}
-                    onChange={(e) => setForm({ ...form, speakerName: e.target.value })}
-                    placeholder="Dr. Angela Okonkwo"
-                    readOnly={form.hostId !== 'manual'}
-                    required
-                  />
-                </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      value={form.speakerName || 'You'}
+                      readOnly
+                      className="bg-gray-50"
+                    />
+                    <p className="text-xs text-gray-500">
+                      You are set as the instructor for this event.
+                    </p>
+                  </>
+                )}
               </div>
               <div className="space-y-2">
-                <Label>Instructor details</Label>
-                <Textarea
-                  value={form.speakerBio}
-                  onChange={(e) => setForm({ ...form, speakerBio: e.target.value })}
-                  placeholder="Short bio, expertise, teaching background, or speaking experience."
-                  rows={4}
+                <Label>Instructor name</Label>
+                <Input
+                  value={form.speakerName}
+                  onChange={(e) => setForm({ ...form, speakerName: e.target.value })}
+                  placeholder="Dr. Angela Okonkwo"
+                  readOnly={form.hostId !== 'manual'}
+                  required
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Course summary</Label>
-                <RichTextEditor
-                  value={form.description}
-                  onChange={(description) => setForm({ ...form, description })}
-                  placeholder="Describe the course, the promise for learners, and what they will take away."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Course outline</Label>
-                <Textarea
-                  value={form.courseOutline}
-                  onChange={(e) => setForm({ ...form, courseOutline: e.target.value })}
-                  placeholder={"Module 1 - ...\nModule 2 - ...\nModule 3 - ..."}
-                  rows={6}
-                />
-              </div>
-            </section>
+            </div>
+            <div className="space-y-2">
+              <Label>Instructor details</Label>
+              <Textarea
+                value={form.speakerBio}
+                onChange={(e) => setForm({ ...form, speakerBio: e.target.value })}
+                placeholder="Short bio, expertise, teaching background, or speaking experience."
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Course summary</Label>
+              <RichTextEditor
+                value={form.description}
+                onChange={(description) => setForm({ ...form, description })}
+                placeholder="Describe the course, the promise for learners, and what they will take away."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Course outline</Label>
+              <Textarea
+                value={form.courseOutline}
+                onChange={(e) => setForm({ ...form, courseOutline: e.target.value })}
+                placeholder={'Module 1 - ...\nModule 2 - ...\nModule 3 - ...'}
+                rows={6}
+              />
+            </div>
+          </EventFormSection>
 
-            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-purple-deep">
-                {form.type === 'Online' ? 'Online session details' : 'Offline venue details'}
-              </h2>
-              {form.type === 'Online' ? (
-                <div className="space-y-4 rounded-2xl border border-purple-100 bg-gradient-to-br from-white via-purple-50/40 to-gold-50/30 p-5">
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Online label</Label>
-                      <Input
-                        value={form.location}
-                        onChange={(e) => setForm({ ...form, location: e.target.value })}
-                        placeholder="Google Meet"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Google Meet link (optional fallback)</Label>
-                      <Input
-                        value={form.meetingLink}
-                        onChange={(e) => setForm({ ...form, meetingLink: e.target.value })}
-                        placeholder="https://meet.google.com/abc-defg-hij"
-                      />
-                    </div>
+          <EventFormSection
+            step={4}
+            title={
+              form.type === 'Online' ? 'Online session details' : 'Offline venue details'
+            }
+            description={
+              form.type === 'Online'
+                ? 'Meeting link, capacity, and session time for your virtual event.'
+                : 'Venue, map pin, capacity, and schedule for your in-person event.'
+            }
+            badge={form.type === 'Online' ? 'Online' : 'Offline'}
+          >
+            {form.type === 'Online' ? (
+              <div className="space-y-5 rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50/50 via-white to-gold-50/30 p-4 sm:p-5">
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Online label</Label>
+                    <Input
+                      value={form.location}
+                      onChange={(e) => setForm({ ...form, location: e.target.value })}
+                      placeholder="Google Meet"
+                      required
+                    />
                   </div>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Total seats</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={form.maxAttendees}
-                        onChange={(e) => setForm({ ...form, maxAttendees: e.target.value })}
-                        placeholder="e.g. 50"
-                        required
-                      />
-                    </div>
-                    <TimeRangePicker
-                      value={form.timeLabel}
-                      onChange={(timeLabel) => setForm({ ...form, timeLabel })}
-                      variant="bare"
+                  <div className="space-y-2">
+                    <Label>Google Meet link (optional fallback)</Label>
+                    <Input
+                      value={form.meetingLink}
+                      onChange={(e) => setForm({ ...form, meetingLink: e.target.value })}
+                      placeholder="https://meet.google.com/abc-defg-hij"
                     />
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-4 rounded-2xl border border-purple-100 bg-gradient-to-br from-white via-purple-50/30 to-gold-50/20 p-5">
-                  <LocationMapPicker
-                    visible
-                    location={form.location}
-                    venue={form.venue}
-                    latitude={form.latitude ? parseFloat(form.latitude) : null}
-                    longitude={form.longitude ? parseFloat(form.longitude) : null}
-                    onLocationChange={(value) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        location: value.location,
-                        venue: value.venue || prev.venue,
-                        latitude: String(value.latitude),
-                        longitude: String(value.longitude),
-                      }))
-                    }
-                    onLocationTextChange={(location) =>
-                      setForm((prev) => ({ ...prev, location }))
-                    }
-                    onVenueChange={(venue) => setForm((prev) => ({ ...prev, venue }))}
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Total seats</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={form.maxAttendees}
+                      onChange={(e) => setForm({ ...form, maxAttendees: e.target.value })}
+                      placeholder="e.g. 50"
+                      required
+                    />
+                  </div>
+                  <TimeRangePicker
+                    value={form.timeLabel}
+                    onChange={(timeLabel) => setForm({ ...form, timeLabel })}
+                    variant="bare"
                   />
-                  <p className="text-xs text-gray-500">
-                    Map pin is optional. You can edit the address and venue fields above.
-                  </p>
-                  <div className="space-y-2 lg:w-1/2 lg:pr-2">
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-5 rounded-xl border border-purple-100 bg-gradient-to-br from-purple-50/40 via-white to-gold-50/25 p-4 sm:p-5">
+                <LocationMapPicker
+                  visible
+                  location={form.location}
+                  venue={form.venue}
+                  latitude={form.latitude ? parseFloat(form.latitude) : null}
+                  longitude={form.longitude ? parseFloat(form.longitude) : null}
+                  onLocationChange={(value) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      location: value.location,
+                      venue: value.venue || prev.venue,
+                      latitude: String(value.latitude),
+                      longitude: String(value.longitude),
+                    }))
+                  }
+                  onLocationTextChange={(location) =>
+                    setForm((prev) => ({ ...prev, location }))
+                  }
+                  onVenueChange={(venue) => setForm((prev) => ({ ...prev, venue }))}
+                />
+                <p className="text-xs text-gray-500">
+                  Map pin is optional. You can edit the address and venue fields above.
+                </p>
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="space-y-2">
                     <Label>Max attendees</Label>
                     <Input
                       type="number"
@@ -497,41 +513,51 @@ export default function CreateEventPage() {
                     variant="bare"
                   />
                 </div>
-              )}
-            </section>
-
-            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-purple-deep">Visibility</h2>
-              <div className="space-y-2 sm:max-w-xs">
-                <Label>Status</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(value) =>
-                    setForm({ ...form, status: value as 'DRAFT' | 'PUBLISHED' })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="DRAFT">Draft</SelectItem>
-                    <SelectItem value="PUBLISHED">Published</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
-            </section>
+            )}
+          </EventFormSection>
 
-          <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-end">
-            <Button asChild variant="outline" className="border-gray-200">
-              <Link href="/admin/events">Cancel</Link>
-            </Button>
-            <Button type="submit" disabled={saving} className="btn-primary min-w-[140px]">
-              {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                'Create event'
-              )}
-            </Button>
+          <EventFormSection
+            step={5}
+            title="Visibility"
+            description="Choose whether this event is a draft or published for members."
+            badge="Publish"
+          >
+            <div className="space-y-2 sm:max-w-xs">
+              <Label>Status</Label>
+              <Select
+                value={form.status}
+                onValueChange={(value) =>
+                  setForm({ ...form, status: value as 'DRAFT' | 'PUBLISHED' })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="PUBLISHED">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </EventFormSection>
+
+          <div className="flex flex-col-reverse gap-3 rounded-2xl border border-purple-100 bg-white px-5 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <p className="text-sm text-gray-500">
+              Review each section above, then create the event.
+            </p>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button asChild variant="outline" className="border-gray-200">
+                <Link href="/admin/events">Cancel</Link>
+              </Button>
+              <Button type="submit" disabled={saving} className="btn-primary min-w-[140px]">
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Create event'
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </form>

@@ -25,6 +25,9 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
+  // Homepage hero is light; other public pages keep dark gradient heroes.
+  const lightSurface = pathname === '/' || scrolled;
+
   useEffect(() => {
     const syncHeaderWithScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -53,8 +56,8 @@ export default function Header() {
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        scrolled
-          ? 'bg-white/95 backdrop-blur-xl shadow-lg shadow-purple-900/5'
+        lightSurface
+          ? 'bg-white/90 backdrop-blur-xl shadow-sm shadow-purple-900/5'
           : 'bg-transparent'
       )}
     >
@@ -68,7 +71,7 @@ export default function Header() {
             <span
               className={cn(
                 'text-2xl font-bold font-display transition-colors',
-                scrolled ? 'text-purple-deep' : 'text-white'
+                lightSurface ? 'text-purple-deep' : 'text-white'
               )}
             >
               GZURA
@@ -83,7 +86,7 @@ export default function Header() {
                 href={item.href}
                 className={cn(
                   'text-sm font-medium transition-colors relative group',
-                  scrolled
+                  lightSurface
                     ? pathname === item.href
                       ? 'text-purple-deep'
                       : 'text-gray-700 hover:text-purple-deep'
@@ -96,7 +99,7 @@ export default function Header() {
                 <span
                   className={cn(
                     'absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full',
-                    scrolled ? 'bg-purple-deep' : 'bg-gold-400'
+                    lightSurface ? 'bg-purple-deep' : 'bg-gold-400'
                   )}
                 />
               </Link>
@@ -110,7 +113,9 @@ export default function Header() {
                 href={getDashboardPath(user.role)}
                 className={cn(
                   'text-sm font-medium transition-colors',
-                  scrolled ? 'text-purple-deep hover:text-gold-royal' : 'text-white/90 hover:text-gold-400'
+                  lightSurface
+                    ? 'text-purple-deep hover:text-gold-royal'
+                    : 'text-white/90 hover:text-gold-400'
                 )}
               >
                 Dashboard
@@ -120,11 +125,13 @@ export default function Header() {
                 href="/login"
                 className={cn(
                   'text-sm font-medium transition-colors',
-                  scrolled ? 'text-purple-deep hover:text-gold-royal' : 'text-white/90 hover:text-gold-400'
+                  lightSurface
+                    ? 'text-purple-deep hover:text-gold-royal'
+                    : 'text-white/90 hover:text-gold-400'
                 )}
-                >
-                  Login
-                </Link>
+              >
+                Login
+              </Link>
             )}
           </div>
 
@@ -133,7 +140,7 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className={cn(
               'lg:hidden p-2 rounded-lg transition-colors',
-              scrolled
+              lightSurface
                 ? 'text-purple-deep hover:bg-purple-100'
                 : 'text-white hover:bg-white/10'
             )}

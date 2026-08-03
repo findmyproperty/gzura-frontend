@@ -1,4 +1,5 @@
 import HeroSection from '@/components/sections/HeroSection';
+import LogoStrip from '@/components/sections/LogoStrip';
 import AboutSection from '@/components/sections/AboutSection';
 import ProgramsSection from '@/components/sections/ProgramsSection';
 import JoinSection from '@/components/sections/JoinSection';
@@ -7,11 +8,11 @@ import UpcomingEventsSection from '@/components/sections/UpcomingEventsSection';
 import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import CTASection from '@/components/sections/CTASection';
 
-
 export default function MarketingHome() {
   return (
     <>
       <HeroSection />
+      <LogoStrip />
       <AboutSection />
       <ProgramsSection />
       <JoinSection />
