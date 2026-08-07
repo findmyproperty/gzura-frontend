@@ -102,11 +102,13 @@ export interface PassValidationResult {
   status: 'enrolled' | 'checked_in' | 'invalid';
   message: string;
   attendee?: {
+    id?: string;
     fullName: string;
     email: string;
     eventTitle: string;
     venue: string;
     eventDate: string;
+    passUrl?: string;
   };
   checkedInAt?: string | null;
 }

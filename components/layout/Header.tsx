@@ -25,8 +25,15 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
-  // Homepage hero is light; other public pages keep dark gradient heroes.
-  const lightSurface = pathname === '/' || scrolled;
+  // Check if current route has a dark hero banner (like event details with gradient top)
+  const isDarkHeroPage =
+    (pathname.startsWith('/events/') && pathname.split('/').length === 3) ||
+    pathname === '/about' ||
+    pathname === '/programs' ||
+    pathname === '/success-stories' ||
+    pathname === '/contact';
+
+  const lightSurface = scrolled || !isDarkHeroPage || pathname === '/' || pathname.startsWith('/pass');
 
   useEffect(() => {
     const syncHeaderWithScroll = () => {
