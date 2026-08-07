@@ -320,17 +320,19 @@ export function StatusBadge({
   tone = 'success',
 }: {
   label: string;
-  tone?: 'success' | 'danger' | 'muted';
+  tone?: 'success' | 'danger' | 'warning' | 'muted';
 }) {
   const dotClass = {
     success: 'bg-emerald-500',
     danger: 'bg-red-500',
+    warning: 'bg-amber-500',
     muted: 'bg-gray-400',
   }[tone];
 
   const textClass = {
     success: 'text-emerald-600',
     danger: 'text-red-600',
+    warning: 'text-amber-600',
     muted: 'text-gray-500',
   }[tone];
 

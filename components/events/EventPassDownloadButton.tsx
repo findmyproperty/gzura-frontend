@@ -145,7 +145,27 @@ export default function EventPassDownloadButton({ event }: { event: Event }) {
     return () => window.cancelAnimationFrame(frame);
   }, [downloading, event, registration, user?.email]);
 
-  if (authLoading || !user || event.type !== 'Offline') return null;
+  const [userRegistration, setUserRegistration] = useState<EventRegistration | null>(null);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (!user || event.type !== 'Offline') {
+      setUserRegistration(null);
+      setChecking(false);
+      return;
+    }
+
+    api
+      .getMyRegistrations()
+      .then((list) => {
+        const match = list.find((item) => item.eventId === event.id);
+        setUserRegistration(match || null);
+      })
+      .catch(() => setUserRegistration(null))
+      .finally(() => setChecking(false));
+  }, [user, event.id, event.type]);
+
+  if (authLoading || checking || !user || !userRegistration || event.type !== 'Offline') return null;
 
   const downloadPass = async () => {
     setDownloading(true);

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell, ChevronDown, LogOut, Search, User } from 'lucide-react';
+import { Bell, ChevronDown, FileText, LogOut, Search, User, UserCheck } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -50,11 +50,33 @@ export default function MemberShell({
                   className={cn(
                     'hover:text-purple-deep transition-colors',
                     pathname.startsWith('/my-learnings')
-                      ? 'text-purple-deep'
+                      ? 'text-purple-deep font-semibold'
                       : 'text-gray-600',
                   )}
                 >
                   My Learnings
+                </Link>
+                <Link
+                  href="/invoices"
+                  className={cn(
+                    'hover:text-purple-deep transition-colors',
+                    pathname.startsWith('/invoices')
+                      ? 'text-purple-deep font-semibold'
+                      : 'text-gray-600',
+                  )}
+                >
+                  Invoices
+                </Link>
+                <Link
+                  href="/profile"
+                  className={cn(
+                    'hover:text-purple-deep transition-colors',
+                    pathname.startsWith('/profile')
+                      ? 'text-purple-deep font-semibold'
+                      : 'text-gray-600',
+                  )}
+                >
+                  Profile
                 </Link>
               </nav>
             </div>
@@ -114,6 +136,19 @@ export default function MemberShell({
                         My Learnings
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/invoices">
+                        <FileText className="w-4 h-4 mr-2" />
+                        My Invoices
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        Edit Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {
                         logout();

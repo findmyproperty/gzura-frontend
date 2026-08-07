@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
   Calendar,
+  CheckCircle2,
   ChevronDown,
   ClipboardList,
   ExternalLink,
@@ -42,6 +43,7 @@ import { cn } from '@/lib/utils';
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/events', label: 'Events', icon: Calendar },
+  { href: '/admin/event-approvals', label: 'Event Approvals', icon: CheckCircle2 },
   { href: '/admin/registrations', label: 'Host Requests', icon: ClipboardList },
   { href: '/admin/users', label: 'Users', icon: Users },
 ];

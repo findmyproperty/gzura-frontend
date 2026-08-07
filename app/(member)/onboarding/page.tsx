@@ -14,17 +14,21 @@ import {
   Search,
   Sparkles,
   Target,
+  UserCheck,
   Users2,
 } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   completeOnboarding,
   GZURA_PROGRAMS,
   isOnboardingComplete,
   MEMBER_GOALS,
 } from '@/lib/member-onboarding';
+import { api } from '@/lib/api';
+import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const GOAL_ICONS = {
@@ -55,7 +59,21 @@ const PROGRAM_ICON_BOX: Record<string, string> = {
 export default function OnboardingPage() {
   const router = useRouter();
   const { user, loading, refreshUser } = useAuth();
+
+  const isMobileUser =
+    user?.email?.endsWith('@gzura.mobile') ||
+    user?.firstName === 'Mobile' ||
+    user?.firstName === 'User';
+
   const [step, setStep] = useState(1);
+
+  // Profile form state for OTP / new users
+  const [profileForm, setProfileForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
+
   const [selectedGoal, setSelectedGoal] = useState('');
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
   const [programSearch, setProgramSearch] = useState('');
@@ -70,10 +88,23 @@ export default function OnboardingPage() {
       router.replace('/admin');
       return;
     }
-    if (!loading && user && isOnboardingComplete(user)) {
+    if (!loading && user && isOnboardingComplete(user) && !isMobileUser) {
       router.replace('/home');
+      return;
     }
-  }, [user, loading, router]);
+
+    if (user) {
+      setProfileForm({
+        firstName: user.firstName === 'Mobile' || user.firstName === 'User' ? '' : user.firstName || '',
+        lastName: user.lastName === 'User' || user.lastName === 'Member' ? '' : user.lastName || '',
+        email: user.email?.endsWith('@gzura.mobile') ? '' : user.email || '',
+      });
+
+      if (isMobileUser) {
+        setStep(0);
+      }
+    }
+  }, [user, loading, router, isMobileUser]);
 
   const filteredPrograms = useMemo(() => {
     const query = programSearch.trim().toLowerCase();
@@ -89,6 +120,41 @@ export default function OnboardingPage() {
     setSelectedPrograms((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+  };
+
+  const saveProfileStep = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!profileForm.firstName.trim() || !profileForm.email.trim()) {
+      toast({
+        title: 'Required fields missing',
+        description: 'Please provide your first name and email address.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await api.updateProfile({
+        firstName: profileForm.firstName.trim(),
+        lastName: profileForm.lastName.trim(),
+        email: profileForm.email.trim().toLowerCase(),
+      });
+      await refreshUser();
+      toast({
+        title: 'Profile Saved',
+        description: `Welcome to GZURA, ${profileForm.firstName}!`,
+      });
+      setStep(1);
+    } catch (err) {
+      toast({
+        title: 'Could not update profile',
+        description: err instanceof Error ? err.message : 'Please try again',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const finishOnboarding = async () => {
@@ -128,13 +194,87 @@ export default function OnboardingPage() {
       </header>
 
       <div className="flex-1 flex flex-col items-center px-4 py-10 sm:py-16">
-        {step === 1 ? (
+        {step === 0 ? (
+          /* Step 0: Profile Details Collection for OTP / New Users */
+          <div className="w-full max-w-md">
+            <div className="text-center mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-deep mx-auto flex items-center justify-center mb-3">
+                <UserCheck className="w-6 h-6" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
+              <p className="text-gray-600">
+                Please enter your details to personalize your account and receive course updates.
+              </p>
+            </div>
+
+            <form onSubmit={saveProfileStep} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={profileForm.firstName}
+                    onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                    placeholder="John"
+                    className="h-11"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={profileForm.lastName}
+                    onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                    placeholder="Doe"
+                    className="h-11"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={profileForm.email}
+                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                  placeholder="you@example.com"
+                  className="h-11"
+                  required
+                />
+                <p className="text-xs text-gray-500">
+                  Course passes, receipts, and event links will be sent to this email.
+                </p>
+              </div>
+
+              {user.phone && (
+                <div className="space-y-2">
+                  <Label>Mobile Number</Label>
+                  <Input value={user.phone} disabled className="h-11 bg-gray-50 text-gray-600" />
+                </div>
+              )}
+
+              <Button type="submit" disabled={saving} className="btn-primary w-full h-11 mt-4">
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    Continue to Onboarding
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </form>
+          </div>
+        ) : step === 1 ? (
+          /* Step 1: Learning Goals */
           <div className="w-full max-w-5xl text-center">
             <p className="text-sm font-semibold text-purple-deep mb-3">
               Welcome to GZURA
             </p>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-              Hello {user.firstName}!
+              Hello {user.firstName || 'Member'}!
             </h1>
             <p className="text-gray-600 max-w-2xl mx-auto mb-10 text-lg">
               We empower individuals through learning, leadership, and opportunities.
@@ -175,6 +315,7 @@ export default function OnboardingPage() {
             </div>
           </div>
         ) : (
+          /* Step 2: Program Interests */
           <div className="w-full max-w-4xl">
             <p className="text-center text-gray-600 font-medium mb-2">Step 2 of 2</p>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-3">
@@ -257,7 +398,7 @@ export default function OnboardingPage() {
             Next
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
-        ) : (
+        ) : step === 2 ? (
           <Button
             className="btn-primary min-w-[140px]"
             disabled={saving || selectedPrograms.length === 0}
@@ -266,7 +407,7 @@ export default function OnboardingPage() {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join the community'}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
-        )}
+        ) : null}
       </footer>
     </div>
   );

@@ -116,7 +116,13 @@ const emptyForm = {
   price: '0',
   maxAttendees: '',
   meetingLink: '',
-  status: 'DRAFT' as 'DRAFT' | 'PUBLISHED',
+  status: 'DRAFT' as
+    | 'DRAFT'
+    | 'PENDING_APPROVAL'
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'RESUBMITTED'
+    | 'PUBLISHED',
 };
 
 const PAGE_SIZE = 10;
@@ -461,10 +467,17 @@ export default function AdminEventsPage() {
                   <PillBadge>{event.type}</PillBadge>
                 </AdminTableCell>
                 <AdminTableCell>
-                  <StatusBadge
-                    label={event.status === 'PUBLISHED' ? 'Published' : 'Draft'}
-                    tone={event.status === 'PUBLISHED' ? 'success' : 'muted'}
-                  />
+                  {event.status === 'PUBLISHED' || event.status === 'APPROVED' ? (
+                    <StatusBadge label="Approved & Live" tone="success" />
+                  ) : event.status === 'PENDING_APPROVAL' ? (
+                    <StatusBadge label="Pending Approval" tone="warning" />
+                  ) : event.status === 'RESUBMITTED' ? (
+                    <StatusBadge label="Resubmitted" tone="warning" />
+                  ) : event.status === 'REJECTED' ? (
+                    <StatusBadge label="Rejected" tone="danger" />
+                  ) : (
+                    <StatusBadge label="Draft" tone="muted" />
+                  )}
                 </AdminTableCell>
                 <AdminTableCell className="text-gray-600">
                   {event._count?.registrations ?? 0}

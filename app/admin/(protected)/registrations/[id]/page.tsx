@@ -161,6 +161,14 @@ export default function AdminRegistrationViewPage() {
             value={formatInterestLabel(registration.interest)}
           />
           <DetailField
+            label="Preferred Date"
+            value={registration.preferredDate || '—'}
+          />
+          <DetailField
+            label="Preferred Time"
+            value={registration.preferredTime || '—'}
+          />
+          <DetailField
             label="Status"
             value={formatRegistrationStatusLabel(registration.status)}
           />

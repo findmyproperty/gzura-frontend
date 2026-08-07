@@ -52,7 +52,14 @@ export interface Event {
   memberPrice?: string | number | null;
   maxAttendees?: number | null;
   featured: boolean;
-  status: 'DRAFT' | 'PUBLISHED';
+  status:
+    | 'DRAFT'
+    | 'PENDING_APPROVAL'
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'RESUBMITTED'
+    | 'PUBLISHED';
+  rejectionReason?: string | null;
   _count?: { registrations: number };
 }
 
@@ -83,6 +90,8 @@ export interface EventRegistration {
   passUrl?: string;
   paymentStatus?: PaymentStatus;
   amountPaid?: number | null;
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
   checkedInAt?: string | null;
   createdAt: string;
   event?: Event;
@@ -136,6 +145,8 @@ export interface CommunityRegistration {
   gender?: string | null;
   profession?: string | null;
   interest?: string | null;
+  preferredDate?: string | null;
+  preferredTime?: string | null;
   message?: string | null;
   status: CommunityRegistrationStatus;
   createdAt: string;
@@ -283,6 +294,24 @@ export const api = {
       body: JSON.stringify({ credential }),
     }),
 
+  sendOtp: (phone: string) =>
+    fetchApi<{ message: string; phone: string; devOtp?: string }>(
+      '/auth/send-otp',
+      { method: 'POST', body: JSON.stringify({ phone }) },
+    ),
+
+  verifyOtp: (data: {
+    phone: string;
+    otp: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  }) =>
+    fetchApi<AuthResponse>('/auth/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   adminLogin: (email: string, password: string) =>
     fetchApi<AuthResponse>('/auth/admin/login', {
       method: 'POST',
@@ -290,6 +319,13 @@ export const api = {
     }),
 
   me: () => fetchApi<User>('/auth/me', {}, true),
+
+  updateProfile: (data: Record<string, unknown>) =>
+    fetchApi<User>(
+      '/users/profile',
+      { method: 'PATCH', body: JSON.stringify(data) },
+      true,
+    ),
 
   completeOnboarding: (goal: string, interests: string[]) =>
     fetchApi<User>(
@@ -309,6 +345,23 @@ export const api = {
 
   updateEvent: (id: string, data: Record<string, unknown>) =>
     fetchApi<Event>(`/events/${id}`, { method: 'PATCH', body: JSON.stringify(data) }, true),
+
+  approveEvent: (id: string) =>
+    fetchApi<Event>(`/events/${id}/approve`, { method: 'PATCH' }, true),
+
+  rejectEvent: (id: string, reason: string) =>
+    fetchApi<Event>(
+      `/events/${id}/reject`,
+      { method: 'PATCH', body: JSON.stringify({ reason }) },
+      true,
+    ),
+
+  resubmitEvent: (id: string, data?: Record<string, unknown>) =>
+    fetchApi<Event>(
+      `/events/${id}/resubmit`,
+      { method: 'PATCH', body: JSON.stringify(data || {}) },
+      true,
+    ),
 
   deleteEvent: (id: string) =>
     fetchApi<Event>(`/events/${id}`, { method: 'DELETE' }, true),

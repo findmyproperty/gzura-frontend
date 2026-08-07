@@ -61,6 +61,8 @@ export default function JoinSection() {
     gender: '',
     profession: '',
     interest: '',
+    preferredDate: '',
+    preferredTime: '',
     message: '',
   });
 
@@ -85,6 +87,8 @@ export default function JoinSection() {
         gender: formData.gender,
         profession: formData.profession.trim(),
         interest: formData.interest,
+        preferredDate: formData.preferredDate,
+        preferredTime: formData.preferredTime.trim(),
         message: formData.message.trim(),
       });
 
@@ -98,6 +102,8 @@ export default function JoinSection() {
           gender: '',
           profession: '',
           interest: '',
+          preferredDate: '',
+          preferredTime: '',
           message: '',
         });
       }, 2000);
@@ -392,6 +398,33 @@ export default function JoinSection() {
                             ))}
                           </SelectContent>
                         </Select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="preferredDate" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Preferred Date <span className="normal-case tracking-normal font-normal text-gray-400">(optional)</span>
+                        </Label>
+                        <Input
+                          id="preferredDate"
+                          type="date"
+                          value={formData.preferredDate}
+                          onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+                          className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="preferredTime" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
+                          Preferred Time <span className="normal-case tracking-normal font-normal text-gray-400">(optional)</span>
+                        </Label>
+                        <Input
+                          id="preferredTime"
+                          type="text"
+                          value={formData.preferredTime}
+                          onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
+                          placeholder="e.g., 5:00 PM - 7:00 PM IST"
+                          className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"
+                        />
                       </div>
 
                       <div className="space-y-1.5 sm:col-span-2">

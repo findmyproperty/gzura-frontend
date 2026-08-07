@@ -96,11 +96,18 @@ export default function CreateEventPage() {
   useEffect(() => {
     api
       .getHostUsers()
-      .then((list) => {
-        setHosts(list);
-        // Instructors default to themselves as the event host
+      .then(async (list) => {
+        let fullList = list;
+        if (!fullList.length) {
+          try {
+            fullList = await api.getUsers();
+          } catch {
+            fullList = [];
+          }
+        }
+        setHosts(fullList);
         if (user?.role === 'HOST') {
-          const self = list.find((h) => h.id === user.id);
+          const self = fullList.find((h) => h.id === user.id);
           if (self) {
             setForm((prev) => ({
               ...prev,
