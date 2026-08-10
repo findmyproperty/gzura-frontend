@@ -5,23 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { isAdminAreaRole } from '@/lib/user-roles';
 
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+
 function AdminLoadingScreen() {
-  return (
-    <div
-      className="min-h-screen flex items-center justify-center gradient-bg"
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(to bottom right, #2D0A4E, #4c1d95, #1e0a3c)',
-      }}
-    >
-      <p className="text-white" style={{ color: '#fff' }}>
-        Loading...
-      </p>
-    </div>
-  );
+  return <LoadingSpinner light message="Loading Admin Workspace..." />;
 }
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
