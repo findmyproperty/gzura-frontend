@@ -33,6 +33,7 @@ import { isGoogleMeetLink } from '@/lib/meeting';
 import { formatEventPrice } from '@/lib/price';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { isFullAdmin } from '@/lib/user-roles';
 import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -115,7 +116,7 @@ export default function AdminEventViewPage() {
   const [updating, setUpdating] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const isAdmin = user ? isFullAdmin(user.role) : false;
 
   const handleApprove = async () => {
     if (!event) return;
