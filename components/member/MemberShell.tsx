@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell, ChevronDown, FileText, LogOut, Search, User, UserCheck } from 'lucide-react';
+import { Bell, ChevronDown, FileText, LogOut, Receipt, Search, User, UserCheck } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -131,8 +131,19 @@ export default function MemberShell({
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/my-learnings">
+                      <Link href="/profile">
                         <User className="w-4 h-4 mr-2" />
+                        Edit profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile#invoices">
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Invoices
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/my-learnings">
                         My Learnings
                       </Link>
                     </DropdownMenuItem>

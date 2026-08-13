@@ -21,6 +21,9 @@ function isAdminAreaRole(role?: string) {
 /** Instructors may only use event routes under /admin */
 function isInstructorAdminPath(pathname: string) {
   if (pathname === '/admin' || pathname === '/admin/') return true;
+  if (pathname === '/admin/profile' || pathname.startsWith('/admin/profile/')) {
+    return true;
+  }
   return (
     pathname === '/admin/events' ||
     pathname.startsWith('/admin/events/')
@@ -128,6 +131,8 @@ export const config = {
     '/home/:path*',
     '/my-learnings/:path*',
     '/dashboard/:path*',
+    '/profile',
+    '/profile/:path*',
     '/onboarding',
     '/events/:id',
     '/events/:id/meet',

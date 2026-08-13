@@ -74,7 +74,7 @@ export default function AdminRegistrationsPage() {
         title: status === 'approved' ? 'Request approved' : 'Request rejected',
         description:
           status === 'approved'
-            ? `${fullName} is now listed in Users as an instructor.`
+            ? `${fullName} is now listed in Users as a host.`
             : `${fullName}'s host request has been rejected.`,
       });
     } catch (err) {
@@ -114,7 +114,7 @@ export default function AdminRegistrationsPage() {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col">
       <AdminPageHeader
         breadcrumb="Admin / Host Requests"
         title="Host Registration Requests"

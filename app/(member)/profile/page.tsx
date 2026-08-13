@@ -7,19 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { MobileNumberLink } from '@/components/auth/MobileNumberLink';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 export default function MemberProfilePage() {
   const router = useRouter();
-  const { user, loading: authLoading, refreshUser } = useAuth();
+  const { user, loading: authLoading, login, refreshUser } = useAuth();
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
-    phone: user?.phone || '',
     city: user?.city || '',
     profession: user?.profession || '',
   });
@@ -41,7 +41,6 @@ export default function MemberProfilePage() {
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim().toLowerCase(),
-        phone: form.phone.trim() || null,
         city: form.city.trim() || null,
         profession: form.profession.trim() || null,
       });
@@ -76,7 +75,7 @@ export default function MemberProfilePage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -115,18 +114,6 @@ export default function MemberProfilePage() {
               <p className="text-xs text-gray-500">
                 Changing your email address will update your sign-in email.
               </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="+91"
-                className="h-11"
-              />
             </div>
           </div>
 
@@ -174,6 +161,13 @@ export default function MemberProfilePage() {
             </Button>
           </div>
         </form>
+
+        <div className="border-t border-gray-100 pt-6">
+          <MobileNumberLink
+            linkedPhone={user.phone}
+            onAuthUpdate={(result) => login(result.accessToken, result.user)}
+          />
+        </div>
       </div>
     </div>
   );

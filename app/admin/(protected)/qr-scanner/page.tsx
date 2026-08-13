@@ -10,6 +10,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AdminPageHeader } from '@/components/admin/admin-chrome';
 import { api, PassValidationResult } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
@@ -134,12 +135,11 @@ export default function AdminQrScannerPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-purple-deep">QR Scanner</h1>
-        <p className="text-gray-600 mt-1">
-          Scan offline event passes to verify enrollment and check in attendees.
-        </p>
-      </div>
+      <AdminPageHeader
+        breadcrumb="Admin"
+        title="QR Scanner"
+        subtitle="Scan offline event passes to verify enrollment and check in attendees."
+      />
 
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
         <div className="relative overflow-hidden rounded-xl bg-gray-50 min-h-[280px]">

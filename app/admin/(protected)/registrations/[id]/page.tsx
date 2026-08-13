@@ -55,7 +55,7 @@ export default function AdminRegistrationViewPage() {
         title: status === 'approved' ? 'Request approved' : 'Request rejected',
         description:
           status === 'approved'
-            ? `${registration.fullName} is now listed in Users as an instructor.`
+            ? `${registration.fullName} is now listed in Users as a host.`
             : `${registration.fullName}'s host request has been rejected.`,
       });
     } catch (err) {

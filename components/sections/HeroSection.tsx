@@ -44,15 +44,15 @@ export default function HeroSection() {
     >
       {/* Soft purple abstract shapes (Fundpro style) */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute -right-16 top-24 h-[28rem] w-[28rem] rounded-[3rem] bg-purple-100/80 blur-0 rotate-6" />
-        <div className="absolute right-8 top-40 h-[22rem] w-[22rem] rounded-[2.5rem] bg-purple-200/50 -rotate-3" />
-        <div className="absolute bottom-0 left-1/3 h-48 w-48 rounded-full bg-gold-100/40 blur-2xl" />
+        <div className="absolute -right-16 top-24 h-[28rem] w-[28rem] 2xl:h-[36rem] 2xl:w-[36rem] rounded-[3rem] bg-purple-100/80 blur-0 rotate-6" />
+        <div className="absolute right-8 top-40 h-[22rem] w-[22rem] 2xl:h-[28rem] 2xl:w-[28rem] rounded-[2.5rem] bg-purple-200/50 -rotate-3" />
+        <div className="absolute bottom-0 left-1/3 h-48 w-48 2xl:h-64 2xl:w-64 rounded-full bg-gold-100/40 blur-2xl" />
       </div>
 
       <div className="container-custom relative z-10 flex h-full flex-col justify-center pt-20 pb-3 sm:pb-4">
-        <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-6 xl:gap-10">
+        <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-6 xl:gap-10 2xl:gap-20">
           {/* ── LEFT: copy + video ── */}
-          <div className="lg:col-span-5 xl:col-span-4">
+          <div className="lg:col-span-5 xl:col-span-4 2xl:col-span-4">
             <p
               className={cn(show, 'mb-4 text-sm text-neutral-500')}
               style={d(0)}
@@ -68,7 +68,7 @@ export default function HeroSection() {
               id="hero-heading"
               className={cn(
                 show,
-                'text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-[2.65rem] xl:text-5xl leading-[1.12]'
+                'text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-[2.65rem] xl:text-5xl 2xl:text-[5.5rem] leading-[1.12]'
               )}
               style={d(60)}
             >
@@ -85,7 +85,7 @@ export default function HeroSection() {
             <p
               className={cn(
                 show,
-                'mt-4 max-w-md text-sm leading-relaxed text-neutral-500 sm:text-base'
+                'mt-4 max-w-md 2xl:max-w-xl text-sm leading-relaxed text-neutral-500 sm:text-base 2xl:text-xl'
               )}
               style={d(120)}
             >
@@ -95,7 +95,7 @@ export default function HeroSection() {
 
             {/* Video card */}
             <div
-              className={cn(show, 'mt-6 sm:mt-8 max-w-sm')}
+              className={cn(show, 'mt-6 sm:mt-8 max-w-sm 2xl:max-w-xl')}
               style={d(180)}
             >
               <Link
@@ -123,10 +123,10 @@ export default function HeroSection() {
 
           {/* ── CENTER: men & women pose ── */}
           <div
-            className={cn(show, 'relative lg:col-span-4 xl:col-span-5')}
+            className={cn(show, 'relative lg:col-span-4 xl:col-span-5 2xl:col-span-5')}
             style={d(140)}
           >
-            <div className="relative mx-auto aspect-[3/4] max-h-[min(58svh,520px)] w-full max-w-md overflow-hidden rounded-[1.75rem] bg-purple-100 shadow-2xl shadow-purple-900/15 ring-1 ring-purple-100/80 sm:max-h-[min(62svh,560px)] lg:max-w-none">
+            <div className="relative mx-auto aspect-[3/4] max-h-[min(58svh,520px)] w-full max-w-md overflow-hidden rounded-[1.75rem] bg-purple-100 shadow-2xl shadow-purple-900/15 ring-1 ring-purple-100/80 sm:max-h-[min(62svh,560px)] lg:max-w-none 2xl:max-h-[1100px] 2xl:aspect-[4/5] 2xl:rounded-[3rem]">
               <Image
                 src={HERO_POSE}
                 alt="Men and women leaders standing together with confidence"
@@ -147,13 +147,13 @@ export default function HeroSection() {
           <div
             className={cn(
               show,
-              'flex flex-col gap-4 sm:gap-5 lg:col-span-3 lg:pl-1'
+              'flex flex-col gap-4 sm:gap-5 lg:col-span-3 lg:pl-1 2xl:col-span-3 2xl:gap-8'
             )}
             style={d(200)}
           >
             {/* Rating card */}
-            <div className="rounded-2xl bg-white p-5 shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6">
-              <p className="text-3xl font-bold tracking-tight text-purple-deep sm:text-4xl">
+            <div className="rounded-2xl bg-white p-5 shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6 2xl:p-8">
+              <p className="text-3xl font-bold tracking-tight text-purple-deep sm:text-4xl 2xl:text-5xl">
                 4.9
                 <span className="text-2xl text-neutral-400">/5</span>
               </p>
@@ -200,8 +200,8 @@ export default function HeroSection() {
             </div>
 
             {/* CTA card */}
-            <div className="rounded-2xl bg-white p-5 shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6">
-              <h2 className="text-lg font-bold leading-snug text-neutral-900 sm:text-xl">
+            <div className="rounded-2xl bg-white p-5 shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6 2xl:p-8">
+              <h2 className="text-lg font-bold leading-snug text-neutral-900 sm:text-xl 2xl:text-2xl">
                 Get To Know
                 <span className="block">Our Community</span>
               </h2>

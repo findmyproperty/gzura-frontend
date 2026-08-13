@@ -67,7 +67,7 @@ export default function ProgramsSection() {
       <div className="container-custom relative z-10">
         {/* Header */}
         <ScrollAnimate animation="fade-up">
-          <header className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+          <header className="text-center max-w-3xl mx-auto mb-8 md:mb-10">
             <div className="inline-flex items-center gap-2 bg-purple-100 rounded-full px-4 py-2 mb-6">
               <span className="text-purple-700 text-sm font-semibold">
                 Programs & Services
@@ -118,7 +118,7 @@ export default function ProgramsSection() {
 
         {/* CTA */}
         <ScrollAnimate animation="fade-up" delay={600}>
-          <div className="text-center mt-12 md:mt-16">
+          <div className="text-center mt-8 md:mt-10">
             <Link href="/programs">
               <button className="btn-primary group focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2">
                 Learn More

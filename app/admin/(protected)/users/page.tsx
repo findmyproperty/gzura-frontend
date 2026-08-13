@@ -227,7 +227,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col">
       <AdminPageHeader breadcrumb="Admin / User Management" title="User Management" />
 
       <AdminDataTable
@@ -263,7 +263,7 @@ export default function AdminUsersPage() {
           </>
         }
         actions={
-          <Button className="btn-primary" onClick={openCreate}>
+          <Button className="btn-admin" onClick={openCreate}>
             <Plus className="w-4 h-4 mr-2" />
             Add user
           </Button>

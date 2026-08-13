@@ -105,28 +105,32 @@
     @apply bg-gradient-to-r from-purple-deep to-purple-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 hover:from-purple-800 hover:to-purple-900 hover:shadow-lg hover:shadow-purple-500/25;
   }
 
+  .btn-admin {
+    @apply inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 h-10 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 disabled:pointer-events-none disabled:opacity-50;
+  }
+
   .btn-secondary {
     @apply bg-gradient-to-r from-gold-royal to-gold-400 text-purple-950 font-semibold px-8 py-3 rounded-lg transition-all duration-300 hover:from-gold-400 hover:to-gold-300 hover:shadow-lg hover:shadow-gold-500/25;
   }
 
   .section-padding {
-    @apply py-20 md:py-28 lg:py-32;
+    @apply py-12 md:py-16 lg:py-20 2xl:py-24;
   }
 
   .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-7xl 2xl:max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-20;
   }
 
   .heading-xl {
-    @apply text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight;
+    @apply text-4xl sm:text-5xl lg:text-6xl 2xl:text-7xl font-bold tracking-tight;
   }
 
   .heading-lg {
-    @apply text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight;
+    @apply text-3xl sm:text-4xl lg:text-5xl 2xl:text-6xl font-bold tracking-tight;
   }
 
   .heading-md {
-    @apply text-2xl sm:text-3xl font-bold tracking-tight;
+    @apply text-2xl sm:text-3xl 2xl:text-4xl font-bold tracking-tight;
   }
 }
 

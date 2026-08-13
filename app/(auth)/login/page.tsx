@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowRight, Eye, EyeOff, Loader2, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,20 +19,29 @@ import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 
+function AuthDivider() {
+  return (
+    <div className="relative py-1">
+      <div className="absolute inset-0 flex items-center">
+        <span className="w-full border-t border-gray-200" />
+      </div>
+      <div className="relative flex justify-center text-sm">
+        <span className="bg-white px-3 text-gray-500">or</span>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading: authLoading, login } = useAuth();
 
-  const [loginMethod, setLoginMethod] = useState<'email' | 'otp'>('email');
+  const [method, setMethod] = useState<'email' | 'phone'>('email');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  // Email login state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // Mobile OTP state
   const [phone, setPhone] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
@@ -116,6 +125,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await api.sendOtp(phone.trim());
+      setPhone(res.phone);
       setOtpSent(true);
       toast({
         title: 'OTP Sent!',
@@ -183,193 +193,194 @@ export default function LoginPage() {
       </header>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-            <p className="text-gray-600">
-              Sign in to continue your learning journey with GZURA
-            </p>
-          </div>
+        <div className="w-full max-w-[380px]">
+          <h1 className="text-3xl font-bold text-zinc-900 mb-8">
+            {method === 'phone' ? 'Sign in with phone number' : 'Welcome back'}
+          </h1>
 
-          {/* Auth Method Switcher Tabs */}
-          <div className="grid grid-cols-2 p-1 bg-gray-100 rounded-xl mb-6 text-sm font-medium">
-            <button
-              type="button"
-              onClick={() => setLoginMethod('email')}
-              className={`py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${loginMethod === 'email'
-                  ? 'bg-white text-purple-deep shadow-sm font-semibold'
-                  : 'text-gray-600 hover:text-gray-900'
-                }`}
-            >
-              <Mail className="w-4 h-4" />
-              Email Password
-            </button>
-            <button
-              type="button"
-              onClick={() => setLoginMethod('otp')}
-              className={`py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${loginMethod === 'otp'
-                  ? 'bg-white text-purple-deep shadow-sm font-semibold'
-                  : 'text-gray-600 hover:text-gray-900'
-                }`}
-            >
-              <Phone className="w-4 h-4" />
-              Mobile OTP
-            </button>
-          </div>
-
-          {loginMethod === 'email' ? (
-            <>
-              <div className="space-y-5">
-                <GoogleSignInButton
-                  onSuccess={handleGoogleSuccess}
-                  onError={() =>
-                    toast({
-                      title: 'Google sign-in unavailable',
-                      description: 'Could not load Google sign-in. Please try again.',
-                      variant: 'destructive',
-                    })
-                  }
+          {method === 'email' ? (
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@domain.com"
+                  className="h-12 rounded-md"
+                  required
                 />
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-200" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-3 text-gray-500">or continue with email</span>
-                  </div>
-                </div>
               </div>
-
-              <form onSubmit={handleEmailSubmit} className="space-y-4 mt-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
                   <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="h-11"
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="h-12 rounded-md pr-10"
                     required
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      className="h-11 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <Button type="submit" disabled={loading} className="btn-primary w-full h-11">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign in'}
-                </Button>
-              </form>
-            </>
-          ) : (
-            /* Mobile OTP Login Flow */
-            <div className="space-y-4">
-              {!otpSent ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Mobile Number</Label>
-                    <div className="relative">
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+91"
-                        className="h-11"
-                        required
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      We will send a 6-digit verification code to this phone number.
-                    </p>
-                  </div>
-                  <Button type="submit" disabled={loading} className="btn-primary w-full h-11">
-                    {loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        Send Verification Code
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div className="rounded-lg bg-purple-50 p-3 text-sm text-purple-900 flex justify-between items-center">
-                    <span>Code sent to <strong>{phone}</strong></span>
-                    <button
-                      type="button"
-                      onClick={() => setOtpSent(false)}
-                      className="text-xs font-semibold underline text-purple-700 hover:text-purple-900"
-                    >
-                      Change
-                    </button>
-                  </div>
-
-                  <div className="space-y-3 flex flex-col items-center">
-                    <Label htmlFor="otp" className="text-center w-full text-sm font-medium">
-                      Enter 6-Digit Verification Code
-                    </Label>
-                    <InputOTP
-                      maxLength={6}
-                      value={otpCode}
-                      onChange={(val) => setOtpCode(val)}
-                    >
-                      <InputOTPGroup className="gap-2">
-                        <InputOTPSlot index={0} className="w-11 h-12 text-center text-lg font-mono font-bold rounded-lg border-2 border-purple-200" />
-                        <InputOTPSlot index={1} className="w-11 h-12 text-center text-lg font-mono font-bold rounded-lg border-2 border-purple-200" />
-                        <InputOTPSlot index={2} className="w-11 h-12 text-center text-lg font-mono font-bold rounded-lg border-2 border-purple-200" />
-                        <InputOTPSlot index={3} className="w-11 h-12 text-center text-lg font-mono font-bold rounded-lg border-2 border-purple-200" />
-                        <InputOTPSlot index={4} className="w-11 h-12 text-lg font-mono font-bold rounded-lg border-2 border-purple-200" />
-                        <InputOTPSlot index={5} className="w-11 h-12 text-lg font-mono font-bold rounded-lg border-2 border-purple-200" />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                  <Button type="submit" disabled={loading || otpCode.length < 6} className="btn-primary w-full h-11 mt-2">
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify Code & Sign In'}
-                  </Button>
-
                   <button
                     type="button"
-                    onClick={handleSendOtp}
-                    disabled={loading}
-                    className="w-full text-center text-xs text-purple-700 hover:underline font-medium pt-2"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    Didn&apos;t receive code? Resend OTP
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
-                </form>
-              )}
+                </div>
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="btn-primary h-12 w-full rounded-full text-base"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign in'}
+              </Button>
+            </form>
+          ) : !otpSent ? (
+            <form onSubmit={handleSendOtp} className="space-y-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setMethod('email');
+                  setOtpSent(false);
+                  setOtpCode('');
+                }}
+                className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-purple-deep"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </button>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 98765 43210"
+                  className="h-12 rounded-md"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="btn-primary h-12 w-full rounded-full text-base"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Next'}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <button
+                type="button"
+                onClick={() => setOtpSent(false)}
+                className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-purple-deep"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </button>
+              <div className="rounded-lg bg-purple-50 p-3 text-sm text-purple-900 flex justify-between items-center">
+                <span>
+                  Code sent to <strong>{phone}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOtpSent(false)}
+                  className="text-xs font-semibold underline text-purple-700 hover:text-purple-900"
+                >
+                  Change
+                </button>
+              </div>
+              <div className="flex flex-col items-center space-y-3">
+                <Label className="w-full text-center text-sm font-medium">
+                  Enter 6-digit code
+                </Label>
+                <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
+                  <InputOTPGroup className="gap-2">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <InputOTPSlot
+                        key={index}
+                        index={index}
+                        className="h-12 w-11 rounded-lg border-2 border-purple-200 text-center text-lg font-mono font-bold"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <Button
+                type="submit"
+                disabled={loading || otpCode.length < 6}
+                className="btn-primary h-12 w-full rounded-full text-base"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign in'}
+              </Button>
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={loading}
+                className="w-full text-center text-xs font-medium text-purple-700 hover:underline"
+              >
+                Didn&apos;t receive code? Resend
+              </button>
+            </form>
+          )}
+
+          {method === 'email' ? (
+            <div className="mt-8 space-y-3">
+              <AuthDivider />
+              <GoogleSignInButton
+                onSuccess={handleGoogleSuccess}
+                onError={() =>
+                  toast({
+                    title: 'Google sign-in unavailable',
+                    description: 'Could not load Google sign-in. Please try again.',
+                    variant: 'destructive',
+                  })
+                }
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setMethod('phone');
+                  setOtpSent(false);
+                  setOtpCode('');
+                }}
+                className="flex h-12 w-full items-center justify-center gap-3 rounded-full border border-zinc-300 bg-white text-sm font-bold text-zinc-900 transition-colors hover:bg-zinc-50"
+              >
+                <Smartphone className="h-5 w-5" />
+                Sign in with phone number
+              </button>
+            </div>
+          ) : (
+            <div className="mt-8 space-y-3">
+              <AuthDivider />
+              <GoogleSignInButton
+                onSuccess={handleGoogleSuccess}
+                onError={() =>
+                  toast({
+                    title: 'Google sign-in unavailable',
+                    description: 'Could not load Google sign-in. Please try again.',
+                    variant: 'destructive',
+                  })
+                }
+              />
             </div>
           )}
 
-          <p className="text-center text-sm text-gray-600 mt-6">
+          <p className="mt-8 text-center text-sm text-gray-600">
             New to GZURA?{' '}
-            <Link href="/signup" className="text-purple-deep font-semibold hover:underline">
+            <Link href="/signup" className="font-semibold text-purple-deep underline underline-offset-2">
               Join for free
             </Link>
           </p>

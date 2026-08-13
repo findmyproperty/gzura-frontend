@@ -59,7 +59,7 @@ export default function EventRegisterPage() {
       setSuccess(true);
       toast({
         title: 'Course joined!',
-        description: `${event?.title} has been added to your learnings.`,
+        description: `${event?.title} has been added to your learnings. Check your email for confirmation details.`,
       });
     } catch (err) {
       toast({
@@ -88,7 +88,11 @@ export default function EventRegisterPage() {
         <div className="bg-white rounded-2xl p-12 text-center max-w-md shadow-2xl">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-purple-deep mb-2">You&apos;re enrolled!</h1>
-          <p className="text-gray-600 mb-6">{event?.title} is now in your courses.</p>
+          <p className="text-gray-600 mb-6">
+            {event?.title} is now in your courses. A confirmation email with
+            the event schedule, {event?.type === 'Online' ? 'meeting link' : 'venue'},
+            and ticket details is on its way to {form.email}.
+          </p>
           <div className="flex flex-col gap-3">
             <Link href="/my-learnings">
               <Button className="btn-primary w-full">View My Learnings</Button>

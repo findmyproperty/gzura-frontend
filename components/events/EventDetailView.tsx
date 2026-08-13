@@ -128,7 +128,7 @@ export default function EventDetailView({
               <div className="rounded-2xl border border-purple-100 bg-purple-50 p-6">
                 <div className="mb-3 flex items-center gap-3">
                   <User className="h-5 w-5 text-gold-royal" />
-                  <h3 className="font-semibold text-purple-deep">Instructor Details</h3>
+                  <h3 className="font-semibold text-purple-deep">Host Details</h3>
                 </div>
                 <p className="font-medium text-gray-900">{event.speakerName}</p>
                 {event.speakerBio ? (

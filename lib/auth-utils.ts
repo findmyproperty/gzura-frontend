@@ -22,6 +22,9 @@ export function getDashboardPath(role: UserRole): string {
 /** Paths instructors (HOST) may use inside /admin */
 export function isInstructorAdminPath(pathname: string): boolean {
   if (pathname === '/admin' || pathname === '/admin/') return true;
+  if (pathname === '/admin/profile' || pathname.startsWith('/admin/profile/')) {
+    return true;
+  }
   return (
     pathname === '/admin/events' ||
     pathname.startsWith('/admin/events/')

@@ -7,22 +7,19 @@ import {
   Bell,
   Calendar,
   CheckCircle2,
-  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight,
   ClipboardList,
   ExternalLink,
   LayoutDashboard,
   LogOut,
   Menu,
-  PanelLeftClose,
-  Plus,
-  ScanLine,
-  Settings,
-  User,
+  Pencil,
   Users,
   X,
 } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +33,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { api, CommunityRegistration } from '@/lib/api';
+import { AdminChromeProvider, useAdminChrome } from '@/components/admin/admin-chrome';
 import { formatUserRole, isFullAdmin } from '@/lib/user-roles';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +55,6 @@ const adminNavItems = [
 const instructorNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/events', label: 'Events', icon: Calendar },
-  { href: '/admin/events/new', label: 'Create Event', icon: Plus, exact: true },
 ];
 
 const SIDEBAR_KEY = 'gzura_admin_sidebar_open';
@@ -61,17 +64,39 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  return (
+    <AdminChromeProvider>
+      <AdminLayoutShell>{children}</AdminLayoutShell>
+    </AdminChromeProvider>
+  );
+}
+
+function AdminLayoutShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { pageHeader } = useAdminChrome();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [notifications, setNotifications] = useState<CommunityRegistration[]>([]);
 
+  type NotificationItem = {
+    id: string;
+    type: 'HOST_REQUEST' | 'EVENT_APPROVAL';
+    title: string;
+    subtitle: string;
+    createdAt: string;
+    href: string;
+  };
+
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const isAdmin = user ? isFullAdmin(user.role) : false;
   const navItems = isAdmin ? adminNavItems : instructorNavItems;
-  const panelLabel = isAdmin ? 'Admin Panel' : 'Instructor Panel';
+  const panelLabel = isAdmin ? 'Admin Panel' : 'Host Panel';
 
   useEffect(() => {
     const stored = localStorage.getItem(SIDEBAR_KEY);
@@ -83,19 +108,59 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!isAdmin) {
-      setNotifications([]);
+      api.getEvents(true)
+        .then((events) => {
+          const rejectedEvents: NotificationItem[] = events
+            .filter(e => e.status === 'REJECTED')
+            .map(e => ({
+              id: e.id,
+              type: 'EVENT_APPROVAL',
+              title: 'Event rejected',
+              subtitle: `${e.title} needs revision`,
+              createdAt: e.createdAt,
+              href: `/admin/events/${e.id}`,
+            }));
+            
+          const recent = rejectedEvents
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 5);
+            
+          setNotifications(recent);
+        })
+        .catch(() => setNotifications([]));
       return;
     }
-    api
-      .getCommunityRegistrations()
-      .then((regs) => {
-        const recent = [...regs]
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          )
+    
+    Promise.all([
+      api.getCommunityRegistrations(),
+      api.getEvents(true),
+    ])
+      .then(([regs, events]) => {
+        const hostRequests: NotificationItem[] = regs.map(reg => ({
+          id: reg.id,
+          type: 'HOST_REQUEST',
+          title: 'New host request',
+          subtitle: `${reg.fullName} wants to host on GZURA`,
+          createdAt: reg.createdAt,
+          href: '/admin/registrations',
+        }));
+
+        const pendingEvents: NotificationItem[] = events
+          .filter(e => e.status === 'PENDING')
+          .map(e => ({
+            id: e.id,
+            type: 'EVENT_APPROVAL',
+            title: 'Event approval request',
+            subtitle: `${e.title}`,
+            createdAt: e.createdAt,
+            href: `/admin/events?status=PENDING`,
+          }));
+
+        const all = [...hostRequests, ...pendingEvents]
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 5);
-        setNotifications(recent);
+          
+        setNotifications(all);
       })
       .catch(() => setNotifications([]));
   }, [isAdmin]);
@@ -150,11 +215,13 @@ export default function AdminLayout({
         onClick={onNavigate}
         title={collapsed ? item.label : undefined}
         className={cn(
-          'flex items-center rounded-lg text-sm font-medium transition-colors',
-          collapsed ? 'justify-center px-3 py-3' : 'gap-3 px-4 py-3',
+          'flex items-center text-sm font-medium transition-colors',
+          collapsed
+            ? 'justify-center mx-auto h-11 w-11 rounded-2xl'
+            : 'gap-3 px-3 py-2.5 rounded-2xl',
           active
             ? 'bg-white/15 text-gold-400'
-            : 'text-white/80 hover:bg-white/10 hover:text-white',
+            : 'text-white/75 hover:bg-white/10 hover:text-white',
         )}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -173,62 +240,31 @@ export default function AdminLayout({
     <>
       <div
         className={cn(
-          'border-b border-white/10 flex items-center shrink-0',
-          collapsed ? 'p-3 justify-center' : 'p-4 gap-2',
+          'flex items-center shrink-0',
+          collapsed ? 'px-3 pt-5 pb-3 justify-center' : 'px-4 pt-5 pb-3',
         )}
       >
-        {collapsed ? (
-          <>
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              title="Expand sidebar"
-              aria-label="Expand sidebar"
-              className="hidden lg:flex rounded-lg hover:ring-2 hover:ring-white/20 transition-shadow"
-            >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gold-royal to-gold-400 flex items-center justify-center flex-shrink-0">
-                <span className="text-purple-deep font-bold text-xl font-display">G</span>
-              </div>
-            </button>
-            <Link
-              href="/admin"
-              onClick={onNavigate}
-              className="lg:hidden flex justify-center"
-            >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gold-royal to-gold-400 flex items-center justify-center flex-shrink-0">
-                <span className="text-purple-deep font-bold text-xl font-display">G</span>
-              </div>
-            </Link>
-          </>
-        ) : (
-          <div className="flex items-center justify-between gap-2 min-w-0 w-full">
-            <Link
-              href="/admin"
-              onClick={onNavigate}
-              className="flex items-center gap-2 min-w-0"
-            >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gold-royal to-gold-400 flex items-center justify-center flex-shrink-0">
-                <span className="text-purple-deep font-bold text-xl font-display">G</span>
-              </div>
-              <div className="min-w-0">
-                <p className="font-display font-bold text-lg leading-tight truncate">GZURA</p>
-                <p className="text-gold-400 text-xs font-medium">{panelLabel}</p>
-              </div>
-            </Link>
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              title="Collapse sidebar"
-              aria-label="Collapse sidebar"
-              className="hidden lg:flex p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors shrink-0"
-            >
-              <PanelLeftClose className="w-4 h-4" />
-            </button>
+        <Link
+          href="/admin"
+          onClick={onNavigate}
+          className={cn(
+            'flex items-center min-w-0',
+            collapsed ? 'justify-center' : 'gap-2.5',
+          )}
+        >
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gold-royal to-gold-400 flex items-center justify-center flex-shrink-0">
+            <span className="text-purple-deep font-bold text-xl font-display">G</span>
           </div>
-        )}
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="font-display font-bold text-lg leading-tight truncate">GZURA</p>
+              <p className="text-gold-400 text-xs font-medium">{panelLabel}</p>
+            </div>
+          )}
+        </Link>
       </div>
 
-      <nav className={cn('flex-1 space-y-1', collapsed ? 'p-2' : 'p-4')}>
+      <nav className={cn('flex-1 space-y-1 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}>
         {navItems.map((item) => (
           <NavLink
             key={item.href}
@@ -239,240 +275,111 @@ export default function AdminLayout({
         ))}
       </nav>
 
-      <div className={cn('border-t border-white/10 space-y-1', collapsed ? 'p-2' : 'p-4')}>
-        <Link
-          href="/"
-          onClick={onNavigate}
-          title={collapsed ? 'View Website' : undefined}
-          className={cn(
-            'flex items-center text-sm text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/10',
-            collapsed ? 'justify-center p-3' : 'gap-2 px-4 py-2',
-          )}
-        >
-          <ExternalLink className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span>View Website</span>}
-        </Link>
-        <button
-          onClick={() => {
-            onNavigate?.();
-            handleLogout();
-          }}
-          title={collapsed ? 'Sign Out' : undefined}
-          className={cn(
-            'flex items-center w-full text-sm text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/10',
-            collapsed ? 'justify-center p-3' : 'gap-2 px-4 py-2',
-          )}
-        >
-          <LogOut className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span>Sign Out</span>}
-        </button>
-      </div>
-    </>
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
-      {/* Desktop sidebar */}
-      <aside
-        className={cn(
-          'hidden lg:flex flex-col bg-purple-deep text-white fixed inset-y-0 left-0 z-40 overflow-hidden transition-[width] duration-300 ease-in-out',
-          sidebarOpen ? 'w-64' : 'w-[72px]',
-          !mounted && 'transition-none',
+      <div className={cn('mt-auto shrink-0', collapsed ? 'p-2' : 'px-2 pb-3 pt-1')}>
+        {collapsed && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label="Expand sidebar"
+                className="hidden lg:flex w-full items-center justify-center rounded-md p-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors mb-1"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="text-xs">
+              Expand
+            </TooltipContent>
+          </Tooltip>
         )}
-      >
-        <SidebarContent collapsed={!sidebarOpen} />
-      </aside>
-
-      {/* Mobile overlay sidebar */}
-      {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-50 bg-black/50"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-      <aside
-        className={cn(
-          'lg:hidden fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-purple-deep text-white transition-transform duration-300 ease-in-out',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full',
-        )}
-      >
-        <div className="absolute top-4 right-4">
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10"
-            aria-label="Close sidebar"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <SidebarContent onNavigate={() => setMobileOpen(false)} />
-      </aside>
-
-      {/* Main content */}
-      <div
-        className={cn(
-          'flex-1 flex flex-col min-h-screen min-w-0 w-full transition-[margin] duration-300 ease-in-out',
-          sidebarOpen ? 'lg:ml-64' : 'lg:ml-[72px]',
-          !mounted && 'transition-none',
-        )}
-      >
-        <header className="sticky top-0 z-30 bg-purple-deep text-white px-4 py-3 flex items-center justify-between shadow-lg lg:shadow-none lg:bg-gradient-to-r lg:from-purple-deep lg:to-purple-900 shrink-0">
-          <div className="flex items-center gap-3 min-w-0 lg:flex-1">
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors lg:hidden"
-              aria-label="Toggle sidebar"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            {isAdmin && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    className="relative p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-                    aria-label="Notifications"
-                  >
-                    <Bell className="w-5 h-5" />
-                    {newNotificationCount > 0 && (
-                      <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-royal px-1 text-[10px] font-bold text-purple-deep">
-                        {newNotificationCount > 9 ? '9+' : newNotificationCount}
-                      </span>
-                    )}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-80 p-0">
-                  <div className="border-b px-4 py-3">
-                    <p className="font-semibold text-purple-deep">Notifications</p>
-                    <p className="text-xs text-gray-500">Recent host registration requests</p>
-                  </div>
-                  <div className="max-h-72 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="px-4 py-8 text-center text-sm text-gray-500">
-                        No notifications yet
-                      </p>
-                    ) : (
-                      notifications.map((reg) => (
-                        <Link
-                          key={reg.id}
-                          href="/admin/registrations"
-                          className="flex flex-col gap-0.5 border-b border-gray-100 px-4 py-3 last:border-0 hover:bg-gray-50 transition-colors"
-                        >
-                          <p className="text-sm font-medium text-purple-deep">
-                            New host request
-                          </p>
-                          <p className="text-xs text-gray-600 truncate">
-                            {reg.fullName} wants to host on GZURA
-                          </p>
-                          <p className="text-[11px] text-gray-400">
-                            {new Date(reg.createdAt).toLocaleDateString('en-IN', {
-                              day: 'numeric',
-                              month: 'short',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </p>
-                        </Link>
-                      ))
-                    )}
-                  </div>
-                  {notifications.length > 0 && (
-                    <div className="border-t p-2">
-                      <Link
-                        href="/admin/registrations"
-                        className="block rounded-md px-3 py-2 text-center text-xs font-medium text-purple-deep hover:bg-purple-50 transition-colors"
-                      >
-                        View all host requests
-                      </Link>
-                    </div>
-                  )}
-                </PopoverContent>
-              </Popover>
-            )}
-
+          className={cn(
+            'flex items-center',
+            collapsed ? 'justify-center' : 'gap-1',
+          )}
+        >
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="flex items-center gap-2 rounded-lg p-1.5 text-white hover:bg-white/10 transition-colors"
-                  aria-label="Profile menu"
+                  type="button"
+                  title="Profile menu"
+                  aria-label="Open profile menu"
+                  className={cn(
+                    'flex items-center rounded-lg hover:bg-white/10 transition-colors min-w-0',
+                    collapsed ? 'justify-center p-1.5' : 'flex-1 gap-2.5 px-2 py-2',
+                  )}
                 >
-                  <Avatar className="h-9 w-9 border-2 border-gold-royal/40">
-                    <AvatarFallback className="bg-gradient-to-br from-gold-royal to-gold-400 text-purple-deep text-sm font-bold">
+                  <Avatar className="h-9 w-9 border-2 border-gold-royal/50 shrink-0">
+                    {user.avatarUrl ? (
+                      <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
+                    ) : null}
+                    <AvatarFallback className="bg-gradient-to-br from-gold-royal to-gold-400 text-purple-deep text-xs font-bold">
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden md:block text-left min-w-0">
-                    <p className="text-sm font-medium leading-tight truncate max-w-[140px]">
-                      {user?.firstName} {user?.lastName}
-                    </p>
-                    <p className="text-[11px] text-white/60 truncate max-w-[140px]">
-                      {user?.email}
-                    </p>
-                  </div>
-                  <ChevronDown className="hidden md:block w-4 h-4 text-white/60 shrink-0" />
+                  {!collapsed && (
+                    <div className="min-w-0 flex-1 text-left">
+                      <p className="text-sm font-medium text-white truncate leading-tight">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-[11px] text-white/60 truncate">
+                        {formatUserRole(user.role)}
+                      </p>
+                    </div>
+                  )}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col gap-1">
-                    <p className="font-semibold text-purple-deep">
-                      {user?.firstName} {user?.lastName}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                    <p className="text-[11px] text-gold-royal font-medium uppercase tracking-wide">
-                      {user ? formatUserRole(user.role) : ''}
-                    </p>
+              <DropdownMenuContent
+                side="right"
+                align="end"
+                sideOffset={10}
+                className="w-64 p-1.5"
+              >
+                <DropdownMenuLabel className="font-normal p-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 border border-gold-royal/40 shrink-0">
+                      {user.avatarUrl ? (
+                        <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
+                      ) : null}
+                      <AvatarFallback className="bg-gradient-to-br from-gold-royal to-gold-400 text-purple-deep text-sm font-bold">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-purple-deep truncate">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {formatUserRole(user.role)}
+                      </p>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/admin" className="cursor-pointer">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
+                  <Link
+                    href="/admin/profile"
+                    onClick={onNavigate}
+                    className="cursor-pointer"
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit profile
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/events" className="cursor-pointer">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Events
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/events/new" className="cursor-pointer">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Event
-                  </Link>
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/registrations" className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" />
-                        Host Requests
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/qr-scanner" className="cursor-pointer">
-                        <ScanLine className="mr-2 h-4 w-4" />
-                        QR Scanner
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuItem disabled>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/" className="cursor-pointer">
+                  <Link href="/" onClick={onNavigate} className="cursor-pointer">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     View Website
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={handleLogout}
+                  onClick={() => {
+                    onNavigate?.();
+                    handleLogout();
+                  }}
                   className="text-red-600 focus:text-red-600 cursor-pointer"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
@@ -480,13 +387,172 @@ export default function AdminLayout({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        </header>
-
-        <main className="flex-1 min-w-0 w-full max-w-full p-4 md:p-6 lg:p-8 overflow-x-auto">
-          {children}
-        </main>
+          )}
+          {!collapsed && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  aria-label="Collapse sidebar"
+                  className="hidden lg:flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Collapse
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <div className="min-h-screen bg-[#F6F4F1] p-2 sm:p-3 lg:p-4">
+        <div className="flex gap-3 lg:gap-4 h-[calc(100dvh-1rem)] sm:h-[calc(100dvh-1.5rem)] lg:h-[calc(100dvh-2rem)]">
+          {/* Desktop sidebar */}
+          <aside
+            className={cn(
+              'hidden lg:flex flex-col bg-purple-deep text-white rounded-[28px] shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out',
+              sidebarOpen ? 'w-[260px]' : 'w-[76px]',
+              !mounted && 'transition-none',
+            )}
+          >
+            <SidebarContent collapsed={!sidebarOpen} />
+          </aside>
+
+          {/* Mobile overlay sidebar */}
+          {mobileOpen && (
+            <div
+              className="lg:hidden fixed inset-0 z-50 bg-black/40"
+              onClick={() => setMobileOpen(false)}
+            />
+          )}
+          <aside
+            className={cn(
+              'lg:hidden fixed inset-y-3 left-3 z-50 w-64 flex flex-col bg-purple-deep text-white rounded-[28px] transition-transform duration-300 ease-in-out',
+              mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+1.5rem)]',
+            )}
+          >
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10"
+                aria-label="Close sidebar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <SidebarContent onNavigate={() => setMobileOpen(false)} />
+          </aside>
+
+          {/* Main panel */}
+          <div className="flex-1 min-w-0 flex flex-col rounded-[28px] bg-[#F5F0FA] border border-purple-200/50 overflow-hidden">
+            <header className="flex items-center justify-between gap-4 px-4 sm:px-6 pt-4 pb-3 shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  onClick={() => setMobileOpen(true)}
+                  className="p-2 rounded-xl text-gray-500 hover:text-purple-deep hover:bg-white/70 transition-colors lg:hidden shrink-0"
+                  aria-label="Toggle sidebar"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                {pageHeader && (
+                  <div className="flex items-center gap-3 min-w-0">
+                    {pageHeader.breadcrumb ? (
+                      <>
+                        <p className="hidden sm:block text-sm text-gray-400 shrink-0">
+                          {pageHeader.breadcrumb}
+                        </p>
+                        <span className="hidden sm:block h-4 w-px bg-purple-200/80 shrink-0" />
+                      </>
+                    ) : null}
+                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 truncate">
+                      {pageHeader.title}
+                    </h1>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="relative p-2 rounded-full text-gray-500 hover:text-purple-deep hover:bg-gray-50 transition-colors"
+                      aria-label="Notifications"
+                    >
+                      <Bell className="w-5 h-5" />
+                      {newNotificationCount > 0 && (
+                        <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-royal px-1 text-[10px] font-bold text-purple-deep">
+                          {newNotificationCount > 9 ? '9+' : newNotificationCount}
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80 p-0 rounded-2xl">
+                    <div className="border-b px-4 py-3">
+                      <p className="font-semibold text-purple-deep">Notifications</p>
+                      <p className="text-xs text-gray-500">
+                        {isAdmin ? 'Recent host and event requests' : 'Important updates about your events'}
+                      </p>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="px-4 py-8 text-center text-sm text-gray-500">
+                          No notifications yet
+                        </p>
+                      ) : (
+                        notifications.map((notif) => (
+                          <Link
+                            key={`${notif.type}-${notif.id}`}
+                            href={notif.href}
+                            className="flex flex-col gap-0.5 border-b border-gray-100 px-4 py-3 last:border-0 hover:bg-gray-50 transition-colors"
+                          >
+                            <p className="text-sm font-medium text-purple-deep">
+                              {notif.title}
+                            </p>
+                            <p className="text-xs text-gray-600 truncate">
+                              {notif.subtitle}
+                            </p>
+                            <p className="text-[11px] text-gray-400">
+                              {new Date(notif.createdAt).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </p>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                    {notifications.length > 0 && isAdmin && (
+                      <div className="border-t p-2">
+                        <Link
+                          href="/admin/registrations"
+                          className="block rounded-xl px-3 py-2 text-center text-xs font-medium text-purple-deep hover:bg-purple-50 transition-colors"
+                        >
+                          View all host requests
+                        </Link>
+                      </div>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </header>
+
+            <main className="flex-1 min-w-0 min-h-0 overflow-auto px-4 sm:px-6 lg:px-8 pb-6 lg:pb-8 flex flex-col">
+              {pageHeader?.subtitle ? (
+                <p className="text-sm text-gray-500 -mt-1 mb-4">{pageHeader.subtitle}</p>
+              ) : null}
+              {children}
+            </main>
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
   );
 }

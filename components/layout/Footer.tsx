@@ -7,7 +7,6 @@ import {
   Youtube,
   Mail,
   Phone,
-  MapPin,
 } from 'lucide-react';
 
 const footerLinks = {
@@ -156,7 +155,7 @@ export default function Footer() {
 
         {/* Contact Info */}
         <div className="mt-16 pt-8 border-t border-purple-800/50">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-purple-800/50 flex items-center justify-center">
                 <Mail className="w-5 h-5 text-gold-400" />
@@ -164,10 +163,10 @@ export default function Footer() {
               <div>
                 <p className="text-white/50 text-sm">Email Us</p>
                 <a
-                  href="mailto:hello@gzura.com"
+                  href="mailto:teamgzura@gmail.com"
                   className="text-white hover:text-gold-400 transition-colors"
                 >
-                  hello@gzura.com
+                  teamgzura@gmail.com
                 </a>
               </div>
             </div>
@@ -178,20 +177,11 @@ export default function Footer() {
               <div>
                 <p className="text-white/50 text-sm">Call Us</p>
                 <a
-                  href="tel:+1234567890"
+                  href="tel:6360685656"
                   className="text-white hover:text-gold-400 transition-colors"
                 >
-                  +1 (234) 567-890
+                  6360685656
                 </a>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-purple-800/50 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-gold-400" />
-              </div>
-              <div>
-                <p className="text-white/50 text-sm">Visit Us</p>
-                <p className="text-white">123 Innovation Drive, Suite 100</p>
               </div>
             </div>
           </div>

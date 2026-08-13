@@ -13,20 +13,36 @@ import {
   User,
   Users,
   Video,
+  AlertCircle,
+  Check,
+  History,
+  X,
 } from 'lucide-react';
 import { AdminDetailLayout } from '@/components/admin/AdminDetailLayout';
 import { formatAdminDate, PillBadge, StatusBadge } from '@/components/admin/AdminDataTable';
+import { EventActivityLogDialog } from '@/components/admin/EventActivityLogDialog';
 import { GoogleMeetFields } from '@/components/admin/GoogleMeetFields';
 import EventContentManager from '@/components/admin/EventContentManager';
 import EventEnrolledUsers from '@/components/admin/EventEnrolledUsers';
 import RichTextContent from '@/components/ui/rich-text-content';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { api, Event } from '@/lib/api';
+import { api, Event, getEventRejectionReason, hasPendingEdits } from '@/lib/api';
 import { getEventCoverImage } from '@/lib/event-images';
 import { isGoogleMeetLink } from '@/lib/meeting';
 import { formatEventPrice } from '@/lib/price';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { toast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 function resolveMeetLink(event: Event) {
   if (isGoogleMeetLink(event.meetingUrl)) return event.meetingUrl!;
@@ -93,6 +109,59 @@ export default function AdminEventViewPage() {
   const id = params.id as string;
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+
+  const handleApprove = async () => {
+    if (!event) return;
+    try {
+      setUpdating(true);
+      const updated = hasPendingEdits(event)
+        ? await api.updateEvent(event.id, { approvePendingChanges: true })
+        : await api.updateEvent(event.id, { status: 'PUBLISHED', rejectionReason: '' });
+      setEvent(updated);
+      toast({
+        title: hasPendingEdits(event)
+          ? 'Edits approved and published'
+          : 'Event approved and published',
+      });
+    } catch (err) {
+      toast({ title: 'Error approving event', variant: 'destructive' });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!event || !rejectReason.trim()) return;
+    try {
+      setUpdating(true);
+      const updated = hasPendingEdits(event)
+        ? await api.updateEvent(event.id, {
+            rejectPendingChanges: true,
+            rejectionReason: rejectReason,
+          })
+        : await api.updateEvent(event.id, {
+            status: 'REJECTED',
+            rejectionReason: rejectReason,
+          });
+      setEvent(updated);
+      setRejectModalOpen(false);
+      setRejectReason('');
+      toast({
+        title: hasPendingEdits(event) ? 'Edits rejected' : 'Event rejected',
+      });
+    } catch (err) {
+      toast({ title: 'Error rejecting event', variant: 'destructive' });
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   useEffect(() => {
     api
@@ -136,6 +205,22 @@ export default function AdminEventViewPage() {
       subtitle={event.location}
       actions={
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setLogOpen(true)}>
+            <History className="w-4 h-4 mr-2" />
+            Show log
+          </Button>
+          {isAdmin && (event.status === 'PENDING' || hasPendingEdits(event)) ? (
+            <>
+              <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => setRejectModalOpen(true)} disabled={updating}>
+                <X className="w-4 h-4 mr-2" />
+                {hasPendingEdits(event) ? 'Reject edits' : 'Reject'}
+              </Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleApprove} disabled={updating}>
+                {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                {hasPendingEdits(event) ? 'Approve edits' : 'Approve'}
+              </Button>
+            </>
+          ) : null}
           {isOnline && meetLink ? (
             <Button asChild variant="outline">
               <a href={meetLink} target="_blank" rel="noreferrer">
@@ -153,6 +238,43 @@ export default function AdminEventViewPage() {
         </div>
       }
     >
+      {hasPendingEdits(event) && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <h3 className="font-semibold text-amber-900">Host edits awaiting approval</h3>
+          <p className="mt-1 text-sm text-amber-800">
+            The live event is unchanged. Approve to apply these updates, or reject them with a reason.
+          </p>
+          {event.pendingChanges?.comment ? (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-amber-900">
+              <span className="font-medium">Host comments: </span>
+              {event.pendingChanges.comment}
+            </p>
+          ) : null}
+          {event.pendingChanges?.payload?.title ? (
+            <p className="mt-2 text-sm text-amber-900">
+              Proposed title: {String(event.pendingChanges.payload.title)}
+            </p>
+          ) : null}
+        </div>
+      )}
+
+      {event.status === 'REJECTED' && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
+          <div className="flex gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-red-900">Event Rejected</h3>
+              <p className="mt-1 text-sm text-red-700 whitespace-pre-wrap">
+                {getEventRejectionReason(event) ||
+                  'This event was rejected. Please review the activity log and resubmit.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
         <div className="grid lg:grid-cols-[280px_minmax(0,1fr)]">
           {coverImage ? (
@@ -176,8 +298,24 @@ export default function AdminEventViewPage() {
                 {event.type}
               </PillBadge>
               <StatusBadge
-                label={event.status === 'PUBLISHED' ? 'Published' : 'Draft'}
-                tone={event.status === 'PUBLISHED' ? 'success' : 'muted'}
+                label={
+                  event.status === 'PUBLISHED'
+                    ? 'Published'
+                    : event.status === 'PENDING'
+                      ? 'Pending'
+                      : event.status === 'REJECTED'
+                        ? 'Rejected'
+                        : 'Draft'
+                }
+                tone={
+                  event.status === 'PUBLISHED'
+                    ? 'success'
+                    : event.status === 'PENDING'
+                      ? 'warning'
+                      : event.status === 'REJECTED'
+                        ? 'danger'
+                        : 'muted'
+                }
               />
             </div>
 
@@ -347,6 +485,42 @@ export default function AdminEventViewPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <EventActivityLogDialog
+        event={event}
+        open={logOpen}
+        onOpenChange={setLogOpen}
+      />
+
+      <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">
+              {hasPendingEdits(event) ? 'Reject edits' : 'Reject Event'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Reason for rejection</Label>
+              <Textarea
+                placeholder="Explain what needs to be fixed..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleReject} disabled={updating || !rejectReason.trim()}>
+              {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Confirm Rejection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminDetailLayout>
   );
 }

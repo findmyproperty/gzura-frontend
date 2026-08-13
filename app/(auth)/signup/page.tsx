@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -8,8 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { isOnboardingComplete } from '@/lib/member-onboarding';
+import { resolvePostLoginRedirect } from '@/lib/auth-utils';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -26,11 +29,27 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
     phone: '',
-    city: '',
-    profession: '',
   });
 
   const [passwordError, setPasswordError] = useState('');
+
+  const completeSignup = useCallback(
+    (res: Awaited<ReturnType<typeof api.register>>) => {
+      login(res.accessToken, res.user);
+
+      const destination =
+        res.user.role === 'MEMBER' && !isOnboardingComplete(res.user)
+          ? '/onboarding'
+          : resolvePostLoginRedirect(res.user.role, searchParams.get('redirect'));
+
+      toast({
+        title: 'Welcome to GZURA!',
+        description: "Let's personalize your experience.",
+      });
+      router.push(destination);
+    },
+    [login, router, searchParams],
+  );
 
   const handlePasswordChange = (value: string) => {
     setForm((prev) => {
@@ -56,8 +75,33 @@ export default function SignupPage() {
     });
   };
 
+  const handleGoogleSuccess = async (credential: string) => {
+    setLoading(true);
+    try {
+      const res = await api.loginWithGoogle(credential);
+      completeSignup(res);
+    } catch (err) {
+      toast({
+        title: 'Google sign-up failed',
+        description: err instanceof Error ? err.message : 'Please try again',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!form.phone.trim()) {
+      toast({
+        title: 'Mobile number required',
+        description: 'Please enter your mobile number.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setPasswordError('Passwords do not match');
@@ -72,10 +116,11 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const { confirmPassword: _, ...registerPayload } = form;
-      const res = await api.register(registerPayload);
-      login(res.accessToken, res.user);
-      toast({ title: 'Welcome to GZURA!', description: 'Let\'s personalize your experience.' });
-      router.push('/onboarding');
+      const res = await api.register({
+        ...registerPayload,
+        phone: form.phone.trim(),
+      });
+      completeSignup(res);
     } catch (err) {
       toast({
         title: 'Registration failed',
@@ -135,11 +180,23 @@ export default function SignupPage() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="name@domain.com"
                 className="h-11"
                 required
               />
             </div>
-            
+            <div className="space-y-2">
+              <Label>Mobile number *</Label>
+              <Input
+                type="tel"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="+91 98765 43210"
+                className="h-11"
+                required
+              />
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Password *</Label>
@@ -190,29 +247,32 @@ export default function SignupPage() {
               <p className="text-xs text-red-600 font-medium">{passwordError}</p>
             ) : null}
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>City</Label>
-                <Input
-                  value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  className="h-11"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Profession</Label>
-                <Input
-                  value={form.profession}
-                  onChange={(e) => setForm({ ...form, profession: e.target.value })}
-                  className="h-11"
-                />
-              </div>
-            </div>
-
-            <Button type="submit" disabled={loading || !!passwordError} className="btn-primary w-full h-11 mt-2">
+            <Button type="submit" disabled={loading || !!passwordError} className="btn-primary w-full h-12 rounded-full mt-2">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create account'}
             </Button>
           </form>
+
+          <div className="mt-8 space-y-3">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-3 text-gray-500">or</span>
+              </div>
+            </div>
+            <GoogleSignInButton
+              label="Sign up with Google"
+              onSuccess={handleGoogleSuccess}
+              onError={() =>
+                toast({
+                  title: 'Google sign-up unavailable',
+                  description: 'Could not load Google sign-up. Please try again.',
+                  variant: 'destructive',
+                })
+              }
+            />
+          </div>
 
           <p className="text-center text-sm text-gray-600 mt-6">
             Already a member?{' '}

@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { AdminPageHeader } from '@/components/admin/admin-chrome';
 import { cn } from '@/lib/utils';
+
+function breadcrumbFromHref(href: string) {
+  if (href.startsWith('/admin/events')) return 'Admin / Events';
+  if (href.startsWith('/admin/users')) return 'Admin / Users';
+  if (href.startsWith('/admin/registrations')) return 'Admin / Host Requests';
+  return 'Admin';
+}
 
 export function AdminDetailLayout({
   backHref,
@@ -21,19 +29,20 @@ export function AdminDetailLayout({
 }) {
   return (
     <div className="space-y-6">
-      <Link
-        href={backHref}
-        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-deep transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        {backLabel}
-      </Link>
+      <AdminPageHeader
+        breadcrumb={breadcrumbFromHref(backHref)}
+        title={title}
+        subtitle={subtitle}
+      />
 
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-purple-deep">{title}</h1>
-          {subtitle && <p className="text-gray-600 text-sm mt-1">{subtitle}</p>}
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <Link
+          href={backHref}
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-zinc-900 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {backLabel}
+        </Link>
         {actions}
       </div>
 
@@ -54,7 +63,7 @@ export function DetailCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl border border-gray-100 shadow-sm p-6',
+        'bg-white rounded-2xl border border-gray-200/80 p-6',
         className,
       )}
     >

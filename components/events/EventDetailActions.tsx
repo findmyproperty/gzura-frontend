@@ -60,7 +60,7 @@ export default function EventDetailActions({ event }: { event: Event }) {
     setSuccessOpen(true);
     toast({
       title: 'Course joined!',
-      description: `${event.title} has been added to your learnings.`,
+      description: `${event.title} has been added to your learnings. Check your email for confirmation details.`,
     });
   };
 

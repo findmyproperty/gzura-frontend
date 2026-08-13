@@ -11,6 +11,8 @@ export interface User {
   phone?: string | null;
   city?: string | null;
   profession?: string | null;
+  avatarUrl?: string | null;
+  hasPassword?: boolean;
   onboardingGoal?: string | null;
   onboardingInterests?: string[] | null;
   onboardingCompletedAt?: string | null;
@@ -58,9 +60,72 @@ export interface Event {
     | 'APPROVED'
     | 'REJECTED'
     | 'RESUBMITTED'
-    | 'PUBLISHED';
+    | 'PUBLISHED'
+    | 'PENDING';
   rejectionReason?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  activityLogs?: EventActivityLog[];
+  pendingChanges?: EventPendingChanges | null;
   _count?: { registrations: number };
+}
+
+export type EventPendingChanges = {
+  payload: Record<string, unknown>;
+  status: 'PENDING' | 'REJECTED';
+  rejectionReason?: string | null;
+  submittedAt?: string;
+  comment?: string | null;
+};
+
+export type EventActivityAction =
+  | 'CREATED'
+  | 'SUBMITTED'
+  | 'REJECTED'
+  | 'APPROVED'
+  | 'RESUBMITTED'
+  | 'CHANGES_SUBMITTED'
+  | 'CHANGES_APPROVED'
+  | 'CHANGES_REJECTED';
+
+export interface EventActivityLog {
+  id: string;
+  action: EventActivityAction;
+  message?: string | null;
+  actorId?: string | null;
+  actorName?: string | null;
+  actorRole?: string | null;
+  createdAt: string;
+}
+
+export function getEventRejectionReason(
+  event?: Pick<Event, 'rejectionReason' | 'activityLogs'> | null,
+) {
+  if (!event) return '';
+  const fromLogs = [...(event.activityLogs ?? [])]
+    .filter((log) => log.action === 'REJECTED')
+    .map((log) => log.message?.trim())
+    .filter(Boolean)
+    .at(-1);
+  return fromLogs || event.rejectionReason?.trim() || '';
+}
+
+export function hasPendingEdits(event?: Pick<Event, 'pendingChanges'> | null) {
+  return event?.pendingChanges?.status === 'PENDING';
+}
+
+export function eventForEditor(event: Event): Event {
+  const payload = event.pendingChanges?.payload;
+  if (!payload) return event;
+  return {
+    ...event,
+    ...payload,
+    dateStart: String(payload.dateStart || event.dateStart),
+    galleryImages:
+      (payload.galleryImages as string[] | undefined) ?? event.galleryImages,
+    imageUrl: (payload.imageUrl as string | undefined) ?? event.imageUrl,
+    status: event.status,
+  };
 }
 
 export interface DashboardStats {
@@ -96,6 +161,38 @@ export interface EventRegistration {
   createdAt: string;
   event?: Event;
 }
+
+export interface EventInvoice {
+  id: string;
+  invoiceNumber: string;
+  ticketId: string;
+  issuedAt: string;
+  attendeeName: string;
+  attendeeEmail: string;
+  attendeePhone?: string | null;
+  eventId: string;
+  eventTitle: string;
+  eventType?: string | null;
+  eventDate?: string | null;
+  eventTime?: string | null;
+  venue?: string | null;
+  amount: number;
+  currency: string;
+  paymentStatus: PaymentStatus;
+  paymentRef?: string | null;
+  orderId?: string | null;
+  passUrl?: string | null;
+}
+
+export type UpdateProfileInput = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  profession?: string;
+  avatarUrl?: string;
+};
 
 export interface PassValidationResult {
   valid: boolean;
@@ -314,6 +411,23 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  sendLinkPhoneOtp: (phone: string) =>
+    fetchApi<{ message: string; phone: string; devOtp?: string }>(
+      '/auth/me/phone/send-otp',
+      { method: 'POST', body: JSON.stringify({ phone }) },
+      true,
+    ),
+
+  verifyLinkPhone: (phone: string, otp: string) =>
+    fetchApi<AuthResponse>(
+      '/auth/me/phone/verify',
+      { method: 'POST', body: JSON.stringify({ phone, otp }) },
+      true,
+    ),
+
+  unlinkPhone: () =>
+    fetchApi<AuthResponse>('/auth/me/phone', { method: 'DELETE' }, true),
+
   adminLogin: (email: string, password: string) =>
     fetchApi<AuthResponse>('/auth/admin/login', {
       method: 'POST',
@@ -322,10 +436,27 @@ export const api = {
 
   me: () => fetchApi<User>('/auth/me', {}, true),
 
-  updateProfile: (data: Record<string, unknown>) =>
+  updateProfile: (data: Record<string, unknown> | UpdateProfileInput) =>
     fetchApi<User>(
       '/users/profile',
       { method: 'PATCH', body: JSON.stringify(data) },
+      true,
+    ),
+
+  updateAuthProfile: (data: UpdateProfileInput) =>
+    fetchApi<AuthResponse>(
+      '/auth/me',
+      { method: 'PATCH', body: JSON.stringify(data) },
+      true,
+    ),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    fetchApi<{ success: boolean }>(
+      '/auth/me/password',
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      },
       true,
     ),
 
@@ -337,10 +468,10 @@ export const api = {
     ),
 
   getEvents: (all = false) =>
-    fetchApi<Event[]>(`/events${all ? '?all=true' : ''}`),
+    fetchApi<Event[]>(`/events${all ? '?all=true' : ''}`, {}, all),
 
   getEvent: (id: string, all = false) =>
-    fetchApi<Event>(`/events/${id}${all ? '?all=true' : ''}`),
+    fetchApi<Event>(`/events/${id}${all ? '?all=true' : ''}`, {}, all),
 
   createEvent: (data: Record<string, unknown>) =>
     fetchApi<Event>('/events', { method: 'POST', body: JSON.stringify(data) }, true),
@@ -367,6 +498,12 @@ export const api = {
 
   deleteEvent: (id: string) =>
     fetchApi<Event>(`/events/${id}`, { method: 'DELETE' }, true),
+
+  uploadProfileAvatar: (file: File) =>
+    uploadFileApi<{ url: string; filename: string }>(
+      '/uploads/profile-avatar',
+      file,
+    ),
 
   uploadEventThumbnail: (file: File) =>
     uploadFileApi<{ url: string; filename: string }>(
@@ -457,6 +594,12 @@ export const api = {
 
   getMyRegistrations: () =>
     fetchApi<EventRegistration[]>('/registrations/my', {}, true),
+
+  getMyInvoices: () =>
+    fetchApi<EventInvoice[]>('/registrations/my/invoices', {}, true),
+
+  getMyInvoice: (id: string) =>
+    fetchApi<EventInvoice>(`/registrations/my/invoices/${id}`, {}, true),
 
   getRegistrations: (eventId?: string) =>
     fetchApi<EventRegistration[]>(

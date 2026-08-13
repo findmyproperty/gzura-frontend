@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { AdminDetailLayout } from '@/components/admin/AdminDetailLayout';
+import { getAvatarColor, getInitialsFromFullName } from '@/components/admin/AdminDataTable';
 import { EventFormSection } from '@/components/admin/EventFormCard';
 import { EventImageGalleryUpload } from '@/components/admin/EventImageGalleryUpload';
 import TimeRangePicker from '@/components/admin/TimeRangePicker';
@@ -22,6 +23,7 @@ import { isFullAdmin } from '@/lib/user-roles';
 import { normalizeRichText } from '@/lib/rich-text';
 import { parseEventPrice } from '@/lib/price';
 import { slugify } from '@/lib/slug';
+import { cn } from '@/lib/utils';
 
 const LocationMapPicker = dynamic(
   () => import('@/components/admin/LocationMapPicker'),
@@ -60,7 +62,7 @@ type EventFormState = {
   price: string;
   maxAttendees: string;
   meetingLink: string;
-  status: 'DRAFT' | 'PUBLISHED';
+  status: 'DRAFT' | 'PUBLISHED' | 'PENDING';
 };
 
 const emptyForm: EventFormState = {
@@ -76,7 +78,7 @@ const emptyForm: EventFormState = {
   longitude: '',
   speakerName: '',
   speakerBio: '',
-  hostId: 'manual',
+  hostId: '',
   imageUrls: [],
   price: '0',
   maxAttendees: '',
@@ -180,6 +182,15 @@ export default function CreateEventPage() {
       return;
     }
 
+    if (!form.hostId) {
+      toast({
+        title: 'Host required',
+        description: 'Please select a host for this event.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const offlineLocation =
@@ -222,7 +233,7 @@ export default function CreateEventPage() {
       const savePayload = {
         ...rest,
         slug: slugify(form.title),
-        hostId: hostId !== 'manual' ? hostId : undefined,
+        hostId: hostId,
       };
       const saved: Event = await api.createEvent(savePayload);
       toast({ title: 'Event created' });
@@ -322,106 +333,140 @@ export default function CreateEventPage() {
 
           <EventFormSection
             step={3}
-            title="Instructor, summary & outline"
-            description="Who teaches this, what learners get, and how the course is structured."
+            title="Course details"
+            description="Instructor profile, what learners get, and how the course is structured."
             badge="Content"
           >
-            <div className="grid gap-5 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Instructor</Label>
-                {canPickAnyHost ? (
-                  <>
-                    <Select
-                      value={form.hostId}
-                      onValueChange={(value) => {
-                        if (value === 'manual') {
-                          setForm((prev) => ({ ...prev, hostId: 'manual' }));
-                          return;
-                        }
-                        handleHostChange(value);
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            loadingHosts
-                              ? 'Loading instructors…'
-                              : hosts.length
-                                ? 'Select an instructor from users'
-                                : 'No instructor users found'
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="manual">Manual instructor</SelectItem>
-                        {hosts.map((host) => (
-                          <SelectItem key={host.id} value={host.id}>
-                            {hostOptionLabel(host)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {!loadingHosts && hosts.length === 0 ? (
-                      <p className="text-xs text-gray-500">
-                        Add users with the Instructor role in{' '}
-                        <Link
-                          href="/admin/users"
-                          className="font-medium text-purple-deep underline"
-                        >
-                          Users
-                        </Link>{' '}
-                        to populate this list.
-                      </p>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    <Input
-                      value={form.speakerName || 'You'}
-                      readOnly
-                      className="bg-gray-50"
-                    />
-                    <p className="text-xs text-gray-500">
-                      You are set as the instructor for this event.
+            <div className="space-y-4">
+              <div className="rounded-xl border border-purple-100 bg-gradient-to-br from-white to-purple-50/40 p-4 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      'flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm',
+                      getAvatarColor(form.hostId || form.speakerName || 'host'),
+                    )}
+                  >
+                    {getInitialsFromFullName(form.speakerName)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-purple-deep/50">
+                      Instructor
                     </p>
-                  </>
-                )}
+                    <p className="truncate text-sm font-semibold text-purple-deep">
+                      {form.speakerName || 'Select a host'}
+                    </p>
+                    {form.speakerBio ? (
+                      <p className="truncate text-xs text-gray-500">{form.speakerBio}</p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-medium text-gray-500">Host</Label>
+                    {canPickAnyHost ? (
+                      <>
+                        <Select
+                          value={form.hostId}
+                          onValueChange={(value) => {
+                            handleHostChange(value);
+                          }}
+                        >
+                          <SelectTrigger className="h-11 border-purple-100 bg-white">
+                            <SelectValue
+                              placeholder={
+                                loadingHosts
+                                  ? 'Loading hosts…'
+                                  : hosts.length
+                                    ? 'Select a host'
+                                    : 'No host users found'
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {hosts.map((host) => (
+                              <SelectItem key={host.id} value={host.id}>
+                                {hostOptionLabel(host)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {!loadingHosts && hosts.length === 0 ? (
+                          <p className="text-xs text-gray-500">
+                            Add users with the Host role in{' '}
+                            <Link
+                              href="/admin/users"
+                              className="font-medium text-purple-deep underline"
+                            >
+                              Users
+                            </Link>
+                            .
+                          </p>
+                        ) : null}
+                      </>
+                    ) : (
+                      <>
+                        <Input
+                          value={form.speakerName || 'You'}
+                          readOnly
+                          className="h-11 bg-purple-50/50 border-purple-100"
+                        />
+                        <p className="text-xs text-gray-500">
+                          You are set as the host for this event.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-medium text-gray-500">Display name</Label>
+                    <Input
+                      value={form.speakerName}
+                      onChange={(e) => setForm({ ...form, speakerName: e.target.value })}
+                      placeholder="Name shown on the course"
+                      readOnly={true}
+                      required
+                      className="h-11 border-purple-100 bg-purple-50/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-[11px] font-medium text-gray-500">Host details</Label>
+                  <Textarea
+                    value={form.speakerBio}
+                    onChange={(e) => setForm({ ...form, speakerBio: e.target.value })}
+                    placeholder="Short bio, expertise, or teaching background."
+                    rows={4}
+                    className="min-h-[96px] resize-none border-purple-100 bg-white"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Instructor name</Label>
-                <Input
-                  value={form.speakerName}
-                  onChange={(e) => setForm({ ...form, speakerName: e.target.value })}
-                  placeholder="Dr. Angela Okonkwo"
-                  readOnly={form.hostId !== 'manual'}
-                  required
+
+              <div className="rounded-xl border border-purple-100 bg-gradient-to-br from-white to-purple-50/40 p-4 space-y-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-purple-deep/50">
+                    Course outline
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-500">
+                    List modules one per line. Learners see this on the event page.
+                  </p>
+                </div>
+                <Textarea
+                  value={form.courseOutline}
+                  onChange={(e) => setForm({ ...form, courseOutline: e.target.value })}
+                  placeholder={'Module 1 — Foundations\nModule 2 — Practice\nModule 3 — Wrap-up'}
+                  rows={8}
+                  className="min-h-[180px] resize-none border-purple-100 bg-white font-mono text-[13px] leading-relaxed"
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Instructor details</Label>
-              <Textarea
-                value={form.speakerBio}
-                onChange={(e) => setForm({ ...form, speakerBio: e.target.value })}
-                placeholder="Short bio, expertise, teaching background, or speaking experience."
-                rows={4}
-              />
-            </div>
+
             <div className="space-y-2">
               <Label>Course summary</Label>
               <RichTextEditor
                 value={form.description}
                 onChange={(description) => setForm({ ...form, description })}
                 placeholder="Describe the course, the promise for learners, and what they will take away."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Course outline</Label>
-              <Textarea
-                value={form.courseOutline}
-                onChange={(e) => setForm({ ...form, courseOutline: e.target.value })}
-                placeholder={'Module 1 - ...\nModule 2 - ...\nModule 3 - ...'}
-                rows={6}
               />
             </div>
           </EventFormSection>
@@ -527,15 +572,19 @@ export default function CreateEventPage() {
           <EventFormSection
             step={5}
             title="Visibility"
-            description="Choose whether this event is a draft or published for members."
-            badge="Publish"
+            description={
+              canPickAnyHost
+                ? 'Choose whether this event is a draft or published for members.'
+                : 'Choose whether this event is a draft or submit it for admin approval.'
+            }
+            badge={canPickAnyHost ? 'Publish' : 'Approval'}
           >
             <div className="space-y-2 sm:max-w-xs">
               <Label>Status</Label>
               <Select
                 value={form.status}
                 onValueChange={(value) =>
-                  setForm({ ...form, status: value as 'DRAFT' | 'PUBLISHED' })
+                  setForm({ ...form, status: value as 'DRAFT' | 'PUBLISHED' | 'PENDING' })
                 }
               >
                 <SelectTrigger>
@@ -543,7 +592,14 @@ export default function CreateEventPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DRAFT">Draft</SelectItem>
-                  <SelectItem value="PUBLISHED">Published</SelectItem>
+                  {canPickAnyHost ? (
+                    <>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="PUBLISHED">Published</SelectItem>
+                    </>
+                  ) : (
+                    <SelectItem value="PENDING">Submit for review</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>

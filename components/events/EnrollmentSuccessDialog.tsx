@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { CheckCircle2, ExternalLink, MapPin, Video } from 'lucide-react';
+import { CheckCircle2, ExternalLink, MapPin, Receipt, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -36,7 +36,12 @@ export default function EnrollmentSuccessDialog({
           </div>
           <DialogTitle className="text-center text-xl">You&apos;re enrolled!</DialogTitle>
           <DialogDescription className="text-center">
-            {event.title} has been added to your courses.
+            {event.title} has been added to your courses. A confirmation email
+            with the schedule, {event.type === 'Online' ? 'meeting link' : 'venue'},
+            and ticket details is on its way to {registration.email}
+            {registration.paymentStatus === 'PAID'
+              ? ', along with your invoice.'
+              : '.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -80,6 +85,15 @@ export default function EnrollmentSuccessDialog({
                 <EventPassQr passUrl={registration.passUrl} />
               ) : null}
             </div>
+          ) : null}
+
+          {registration.paymentStatus === 'PAID' ? (
+            <Link href="/profile#invoices">
+              <Button variant="outline" className="w-full">
+                <Receipt className="mr-2 h-4 w-4" />
+                View invoice
+              </Button>
+            </Link>
           ) : null}
 
           <Link href="/my-learnings">

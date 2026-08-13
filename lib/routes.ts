@@ -17,6 +17,7 @@ export const MEMBER_PATH_PREFIXES = [
   '/my-learnings',
   '/dashboard',
   '/onboarding',
+  '/profile',
 ] as const;
 
 export const ADMIN_PATH_PREFIX = '/admin';

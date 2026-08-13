@@ -5,7 +5,6 @@ import { Metadata } from 'next';
 import {
   Mail,
   Phone,
-  MapPin,
   Clock,
   Send,
   MessageSquare,
@@ -61,10 +60,10 @@ export default function ContactPage() {
                   <div>
                     <p className="text-gray-500 text-sm mb-1">Email Us</p>
                     <a
-                      href="mailto:hello@gzura.com"
+                      href="mailto:teamgzura@gmail.com"
                       className="text-gray-900 font-medium hover:text-purple-700 transition-colors"
                     >
-                      hello@gzura.com
+                      teamgzura@gmail.com
                     </a>
                     <p className="text-gray-500 text-sm mt-1">
                       support@gzura.com
@@ -79,28 +78,14 @@ export default function ContactPage() {
                   <div>
                     <p className="text-gray-500 text-sm mb-1">Call Us</p>
                     <a
-                      href="tel:+1234567890"
+                      href="tel:6360685656"
                       className="text-gray-900 font-medium hover:text-purple-700 transition-colors"
                     >
-                      +1 (234) 567-890
+                      6360685656
                     </a>
                     <p className="text-gray-500 text-sm mt-1">
                       Mon-Fri, 9am-6pm EST
                     </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-deep to-purple-700 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Visit Us</p>
-                    <p className="text-gray-900 font-medium">
-                      123 Innovation Drive
-                    </p>
-                    <p className="text-gray-500">Suite 100</p>
-                    <p className="text-gray-500">New York, NY 10001</p>
                   </div>
                 </div>
 
@@ -152,16 +137,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Map Section */}
-      <section className="h-96 bg-gray-200 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-deep/90 to-purple-900/90 flex items-center justify-center">
-          <div className="text-center text-white">
-            <MapPin className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg opacity-75">Map integration coming soon</p>
-            <p className="text-white/60">123 Innovation Drive, Suite 100, New York, NY</p>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

@@ -33,30 +33,28 @@ export function getInitialsFromFullName(fullName?: string) {
 
 export function formatAdminDate(date?: string | null) {
   if (!date) return '—';
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'long',
+  return new Date(date).toLocaleDateString('en-IN', {
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'Asia/Kolkata',
   });
 }
 
-export function AdminPageHeader({
-  breadcrumb,
-  title,
-  subtitle,
-}: {
-  breadcrumb: string;
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div>
-      <p className="text-sm text-gray-500">{breadcrumb}</p>
-      <h1 className="text-2xl font-bold text-purple-deep mt-1">{title}</h1>
-      {subtitle ? <p className="text-sm text-gray-600 mt-2 max-w-3xl">{subtitle}</p> : null}
-    </div>
-  );
+export function formatAdminDateTime(date?: string | null) {
+  if (!date) return '—';
+  return new Date(date).toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'Asia/Kolkata',
+  });
 }
+
+export { AdminPageHeader } from '@/components/admin/admin-chrome';
 
 export function AdminDataTable({
   search,
@@ -80,22 +78,22 @@ export function AdminDataTable({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       {(onSearchChange || filters || actions) && (
-        <div className="p-4 md:p-5 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="shrink-0 flex flex-col sm:flex-row sm:items-center gap-3">
           {onSearchChange && (
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div className="relative flex h-10 w-full max-w-sm items-center">
+              <Search className="pointer-events-none absolute left-3.5 h-4 w-4 text-gray-400" />
               <Input
                 value={search ?? ''}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="pl-9 bg-gray-50 border-gray-200"
+                className="h-10 w-full rounded-full border-gray-200 bg-white py-0 pl-10 shadow-none focus-visible:ring-1 focus-visible:ring-purple-200 focus-visible:ring-offset-0"
               />
             </div>
           )}
           {(filters || actions) && (
-            <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
+            <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
               {filters}
               {actions}
             </div>
@@ -103,17 +101,21 @@ export function AdminDataTable({
         </div>
       )}
 
-      {loading ? (
-        <div className="p-12 text-center text-gray-500">Loading...</div>
-      ) : emptyMessage ? (
-        <div className="p-12 text-center text-gray-500">{emptyMessage}</div>
-      ) : (
-        <div className="overflow-x-auto">{children}</div>
-      )}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-purple-100/70 bg-white">
+        <div className="min-h-0 flex-1 overflow-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {loading ? (
+            <div className="p-12 text-center text-gray-500">Loading...</div>
+          ) : emptyMessage ? (
+            <div className="p-12 text-center text-gray-500">{emptyMessage}</div>
+          ) : (
+            children
+          )}
+        </div>
 
-      {!loading && !emptyMessage && footer ? (
-        <div className="border-t border-gray-100 px-4 py-3 md:px-5">{footer}</div>
-      ) : null}
+        {!loading && !emptyMessage && footer ? (
+          <div className="shrink-0 border-t border-gray-100 px-5 py-3">{footer}</div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -156,7 +158,7 @@ export function AdminTablePagination({
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+          className="inline-flex h-9 items-center gap-1 rounded-full px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-40"
         >
           Previous
         </button>
@@ -179,8 +181,8 @@ export function AdminTablePagination({
                 className={cn(
                   'inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors',
                   p === page
-                    ? 'bg-purple-deep text-white shadow-sm'
-                    : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                    ? 'bg-zinc-900 text-white rounded-full'
+                    : 'text-gray-600 hover:bg-gray-100 rounded-full'
                 )}
               >
                 {p}
@@ -197,7 +199,7 @@ export function AdminTablePagination({
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-40"
+          className="inline-flex h-9 items-center gap-1 rounded-full px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-40"
         >
           Next
         </button>
@@ -230,7 +232,7 @@ export function AdminTable({
   minWidth?: string;
 }) {
   return (
-    <table className="w-full text-sm" style={{ minWidth }}>
+    <table className="w-full table-fixed text-sm" style={{ minWidth }}>
       {children}
     </table>
   );
@@ -238,8 +240,10 @@ export function AdminTable({
 
 export function AdminTableHead({ children }: { children: React.ReactNode }) {
   return (
-    <thead>
-      <tr className="border-b border-gray-100 text-gray-500">{children}</tr>
+    <thead className="sticky top-0 z-10">
+      <tr className="border-b border-gray-100 bg-[#F8F6FB] text-[11px] uppercase tracking-wider text-gray-400">
+        {children}
+      </tr>
     </thead>
   );
 }
@@ -252,7 +256,7 @@ export function AdminTableHeaderCell({
   className?: string;
 }) {
   return (
-    <th className={cn('text-left font-medium px-5 py-4', className)}>{children}</th>
+    <th className={cn('text-left font-medium px-4 py-3.5 first:pl-5 last:pr-5', className)}>{children}</th>
   );
 }
 
@@ -273,7 +277,7 @@ export function AdminTableRow({
     <tr
       onClick={onClick}
       className={cn(
-        'border-b border-gray-50 hover:bg-gray-50/80 transition-colors',
+        'border-b border-gray-100 last:border-0 hover:bg-[#F8F6FB] transition-colors',
         onClick && 'cursor-pointer',
         className,
       )}
@@ -293,7 +297,7 @@ export function AdminTableCell({
   onClick?: React.MouseEventHandler<HTMLTableCellElement>;
 }) {
   return (
-    <td className={cn('px-5 py-4', className)} onClick={onClick}>
+    <td className={cn('px-4 py-5 align-middle first:pl-5 last:pr-5', className)} onClick={onClick}>
       {children}
     </td>
   );
@@ -320,27 +324,24 @@ export function StatusBadge({
   tone = 'success',
 }: {
   label: string;
-  tone?: 'success' | 'danger' | 'warning' | 'muted';
+  tone?: 'success' | 'danger' | 'muted' | 'warning';
 }) {
-  const dotClass = {
-    success: 'bg-emerald-500',
-    danger: 'bg-red-500',
-    warning: 'bg-amber-500',
-    muted: 'bg-gray-400',
-  }[tone];
-
-  const textClass = {
-    success: 'text-emerald-600',
-    danger: 'text-red-600',
-    warning: 'text-amber-600',
-    muted: 'text-gray-500',
+  const wrapClass = {
+    success: 'bg-emerald-50 text-emerald-700',
+    danger: 'bg-red-50 text-red-700',
+    muted: 'bg-gray-100 text-gray-600',
+    warning: 'bg-amber-50 text-amber-700',
   }[tone];
 
   return (
-    <div className="flex items-center gap-2">
-      <span className={cn('h-2 w-2 rounded-full', dotClass)} />
-      <span className={cn('text-sm font-medium', textClass)}>{label}</span>
-    </div>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
+        wrapClass,
+      )}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -354,7 +355,7 @@ export function PillBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700',
+        'inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600',
         className,
       )}
     >
