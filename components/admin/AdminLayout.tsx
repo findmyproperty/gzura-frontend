@@ -117,7 +117,7 @@ function AdminLayoutShell({
               type: 'EVENT_APPROVAL',
               title: 'Event rejected',
               subtitle: `${e.title} needs revision`,
-              createdAt: e.createdAt,
+              createdAt: e.createdAt ?? e.updatedAt ?? e.dateStart,
               href: `/admin/events/${e.id}`,
             }));
             
@@ -152,7 +152,7 @@ function AdminLayoutShell({
             type: 'EVENT_APPROVAL',
             title: 'Event approval request',
             subtitle: `${e.title}`,
-            createdAt: e.createdAt,
+            createdAt: e.createdAt ?? e.updatedAt ?? e.dateStart,
             href: `/admin/events?status=PENDING`,
           }));
 
