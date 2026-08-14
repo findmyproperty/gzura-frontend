@@ -6,8 +6,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
   Calendar,
-  ChevronsLeft,
-  ChevronsRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   ExternalLink,
   LayoutDashboard,
@@ -94,7 +95,6 @@ function AdminLayoutShell({
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const isAdmin = user ? isFullAdmin(user.role) : false;
   const navItems = isAdmin ? adminNavItems : instructorNavItems;
-  const panelLabel = isAdmin ? 'Admin Panel' : 'Host Panel';
 
   useEffect(() => {
     const stored = localStorage.getItem(SIDEBAR_KEY);
@@ -207,62 +207,102 @@ function AdminLayoutShell({
     onNavigate?: () => void;
   }) => {
     const active = isActive(item.href, item.exact);
-    return (
+    const link = (
       <Link
         href={item.href}
         onClick={onNavigate}
-        title={collapsed ? item.label : undefined}
+        aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex items-center text-sm font-medium transition-colors',
+          'group flex items-center text-[13.5px] font-medium transition-colors',
           collapsed
-            ? 'justify-center mx-auto h-11 w-11 rounded-2xl'
-            : 'gap-3 px-3 py-2.5 rounded-2xl',
+            ? 'mx-auto h-10 w-10 justify-center rounded-xl'
+            : 'gap-3 rounded-2xl px-3 py-[9px]',
           active
-            ? 'bg-white/10 text-gold-400'
-            : 'text-white/70 hover:bg-purple-deep/50 hover:text-white',
+            ? 'bg-purple-50 text-purple-deep'
+            : 'text-[#8A8A8A] hover:bg-purple-50 hover:text-purple-deep',
         )}
       >
-        <item.icon className="w-4 h-4 flex-shrink-0" />
-        {!collapsed && <span>{item.label}</span>}
+        <item.icon
+          className={cn(
+            'h-5 w-5 shrink-0',
+            active ? 'text-purple-deep' : 'text-[#B0B0B0] group-hover:text-purple-deep',
+          )}
+        />
+        {!collapsed && <span className="truncate">{item.label}</span>}
       </Link>
+    );
+
+    if (!collapsed) return link;
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right" className="text-xs">
+          {item.label}
+        </TooltipContent>
+      </Tooltip>
     );
   };
 
   const SidebarContent = ({
     collapsed = false,
     onNavigate,
+    showCollapse = false,
   }: {
     collapsed?: boolean;
     onNavigate?: () => void;
+    showCollapse?: boolean;
   }) => (
-    <>
+    <div className="flex h-full min-h-0 flex-col">
       <div
         className={cn(
-          'flex items-center shrink-0',
-          collapsed ? 'px-3 pt-5 pb-3 justify-center' : 'px-4 pt-5 pb-3',
+          'flex shrink-0 items-center',
+          collapsed ? 'justify-center px-0 pb-5 pt-5' : 'justify-between gap-2 px-4 pb-4 pt-5',
         )}
       >
         <Link
           href="/admin"
           onClick={onNavigate}
           className={cn(
-            'flex items-center min-w-0',
+            'flex min-w-0 items-center',
             collapsed ? 'justify-center' : 'gap-2.5',
           )}
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gold-royal to-gold-400 flex items-center justify-center flex-shrink-0">
-            <span className="text-purple-deep font-bold text-xl font-display">G</span>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-purple-deep">
+            <span className="font-display text-[15px] font-bold leading-none text-white">G</span>
           </div>
           {!collapsed && (
-            <div className="min-w-0">
-              <p className="font-display font-bold text-lg leading-tight truncate">GZURA</p>
-              <p className="text-gold-400 text-xs font-medium">{panelLabel}</p>
-            </div>
+            <p className="truncate text-[15px] font-semibold tracking-tight text-zinc-900">
+              GZURA
+            </p>
           )}
         </Link>
+        {showCollapse && !collapsed ? (
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            aria-label="Collapse sidebar"
+            className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#EBEBEB] bg-white text-zinc-400 transition-colors hover:bg-[#F5F5F5] hover:text-zinc-900 lg:flex"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
       </div>
 
-      <nav className={cn('flex-1 space-y-1 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}>
+      <nav
+        className={cn(
+          'scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto',
+          collapsed ? 'items-center gap-4 px-0' : 'gap-1 px-3',
+        )}
+      >
+        <p
+          className={cn(
+            'font-medium uppercase tracking-[0.16em] text-[#C4C4C4]',
+            collapsed ? 'pb-0.5 text-[8px]' : 'px-3 pb-2 pt-1 text-[10px]',
+          )}
+        >
+          Main
+        </p>
         {navItems.map((item) => (
           <NavLink
             key={item.href}
@@ -273,62 +313,49 @@ function AdminLayoutShell({
         ))}
       </nav>
 
-      <div className={cn('mt-auto shrink-0', collapsed ? 'p-2' : 'px-2 pb-3 pt-1')}>
-        {collapsed && (
-          <Tooltip>
-            <TooltipTrigger asChild>
+      <div
+        className={cn(
+          'mt-auto shrink-0',
+          collapsed ? 'flex flex-col items-center px-0 pb-4 pt-3' : 'px-3 pb-3 pt-2',
+        )}
+      >
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                onClick={toggleSidebar}
-                aria-label="Expand sidebar"
-                className="hidden lg:flex w-full items-center justify-center rounded-md p-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors mb-1"
+                title="Profile menu"
+                aria-label="Open profile menu"
+                className={cn(
+                  'flex min-w-0 items-center transition-colors',
+                  collapsed
+                    ? 'justify-center rounded-2xl p-0.5 hover:bg-[#F5F5F5]'
+                    : 'w-full gap-2.5 rounded-2xl border border-[#EBEBEB] bg-white px-2.5 py-2 hover:bg-[#FAFAFA]',
+                )}
               >
-                <ChevronsRight className="w-4 h-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="text-xs">
-              Expand
-            </TooltipContent>
-          </Tooltip>
-        )}
-        <div
-          className={cn(
-            'flex items-center',
-            collapsed ? 'justify-center' : 'gap-1',
-          )}
-        >
-          {user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  title="Profile menu"
-                  aria-label="Open profile menu"
-                  className={cn(
-                    'flex items-center rounded-lg hover:bg-white/10 transition-colors min-w-0',
-                    collapsed ? 'justify-center p-1.5' : 'flex-1 gap-2.5 px-2 py-2',
-                  )}
-                >
-                  <Avatar className="h-9 w-9 border-2 border-gold-royal/50 shrink-0">
-                    {user.avatarUrl ? (
-                      <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
-                    ) : null}
-                    <AvatarFallback className="bg-gradient-to-br from-gold-royal to-gold-400 text-purple-deep text-xs font-bold">
-                      {userInitials}
-                    </AvatarFallback>
-                  </Avatar>
-                  {!collapsed && (
+                <Avatar className="h-9 w-9 shrink-0">
+                  {user.avatarUrl ? (
+                    <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
+                  ) : null}
+                  <AvatarFallback className="bg-purple-deep text-[11px] font-semibold text-white">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                {!collapsed && (
+                  <>
                     <div className="min-w-0 flex-1 text-left">
-                      <p className="text-sm font-medium text-white truncate leading-tight">
+                      <p className="truncate text-[13px] font-medium leading-tight text-zinc-900">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-[11px] text-white/60 truncate">
+                      <p className="truncate text-[11px] text-[#A1A1A1]">
                         {formatUserRole(user.role)}
                       </p>
                     </div>
-                  )}
-                </button>
-              </DropdownMenuTrigger>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-zinc-300" />
+                  </>
+                )}
+              </button>
+            </DropdownMenuTrigger>
               <DropdownMenuContent
                 side="right"
                 align="end"
@@ -337,11 +364,11 @@ function AdminLayoutShell({
               >
                 <DropdownMenuLabel className="font-normal p-2">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border border-gold-royal/40 shrink-0">
+                    <Avatar className="h-10 w-10 shrink-0 ring-1 ring-zinc-200">
                       {user.avatarUrl ? (
                         <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
                       ) : null}
-                      <AvatarFallback className="bg-gradient-to-br from-gold-royal to-gold-400 text-purple-deep text-sm font-bold">
+                      <AvatarFallback className="bg-purple-deep text-sm font-semibold text-white">
                         {userInitials}
                       </AvatarFallback>
                     </Avatar>
@@ -385,76 +412,72 @@ function AdminLayoutShell({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
-          {!collapsed && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={toggleSidebar}
-                  aria-label="Collapse sidebar"
-                  className="hidden lg:flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  <ChevronsLeft className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
-                Collapse
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="min-h-screen bg-[#F4F4F5] p-2 sm:p-3 lg:p-4">
-        <div className="flex gap-3 lg:gap-4 h-[calc(100dvh-1rem)] sm:h-[calc(100dvh-1.5rem)] lg:h-[calc(100dvh-2rem)]">
+      <div className="flex h-screen overflow-hidden bg-[#F4F4F5]">
           {/* Desktop sidebar */}
           <aside
             className={cn(
-              'hidden lg:flex flex-col bg-zinc-950 text-white rounded-[28px] shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out',
-              sidebarOpen ? 'w-[260px]' : 'w-[76px]',
+              'relative my-3 ml-3 hidden shrink-0 flex-col rounded-[22px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[width] duration-300 ease-in-out lg:flex',
+              sidebarOpen ? 'w-[252px]' : 'w-[76px]',
               !mounted && 'transition-none',
             )}
           >
-            <SidebarContent collapsed={!sidebarOpen} />
+            <SidebarContent collapsed={!sidebarOpen} showCollapse />
+            {!sidebarOpen ? (
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label="Expand sidebar"
+                className="absolute -right-3 top-6 z-10 hidden h-6 w-6 items-center justify-center rounded-full border border-[#EBEBEB] bg-white text-zinc-400 shadow-sm transition-colors hover:bg-[#F5F5F5] hover:text-zinc-900 lg:flex"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
           </aside>
 
           {/* Mobile overlay sidebar */}
           {mobileOpen && (
             <div
-              className="lg:hidden fixed inset-0 z-50 bg-black/40"
+              className="fixed inset-0 z-50 bg-zinc-900/30 lg:hidden"
               onClick={() => setMobileOpen(false)}
             />
           )}
           <aside
             className={cn(
-              'lg:hidden fixed inset-y-3 left-3 z-50 w-64 flex flex-col bg-zinc-950 text-white rounded-[28px] transition-transform duration-300 ease-in-out',
+              'fixed inset-y-3 left-3 z-50 flex w-64 flex-col rounded-[22px] border border-[#EFEFEF] bg-white shadow-xl transition-transform duration-300 ease-in-out lg:hidden',
               mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+1.5rem)]',
             )}
           >
-            <div className="absolute top-4 right-4">
+            <div className="absolute right-3 top-3">
               <button
                 onClick={() => setMobileOpen(false)}
-                className="p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10"
+                className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-[#F5F5F5] hover:text-zinc-900"
                 aria-label="Close sidebar"
               >
-                <X className="w-5 h-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
             <SidebarContent onNavigate={() => setMobileOpen(false)} />
           </aside>
 
           {/* Main panel */}
-          <div className="flex-1 min-w-0 flex flex-col rounded-[28px] bg-[#F7F7F8] border border-black/[0.06] overflow-hidden">
+          <div
+            className={cn(
+              'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+              'my-3 ml-3 mr-3 rounded-[22px]',
+            )}
+          >
             <header className="flex items-center justify-between gap-4 px-4 sm:px-6 pt-4 pb-3 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={() => setMobileOpen(true)}
-                  className="p-2 rounded-xl text-gray-500 hover:text-purple-deep hover:bg-white transition-colors lg:hidden shrink-0"
+                  className="p-2 rounded-xl text-gray-500 hover:text-zinc-900 hover:bg-[#F5F5F5] transition-colors lg:hidden shrink-0"
                   aria-label="Toggle sidebar"
                 >
                   <Menu className="w-5 h-5" />
@@ -497,7 +520,7 @@ function AdminLayoutShell({
                         {isAdmin ? 'Recent host and event requests' : 'Important updates about your events'}
                       </p>
                     </div>
-                    <div className="max-h-72 overflow-y-auto">
+                    <div className="scrollbar-none max-h-72 overflow-y-auto">
                       {notifications.length === 0 ? (
                         <p className="px-4 py-8 text-center text-sm text-gray-500">
                           No notifications yet
@@ -542,14 +565,15 @@ function AdminLayoutShell({
               </div>
             </header>
 
-            <main className="flex-1 min-w-0 min-h-0 overflow-auto px-4 sm:px-6 lg:px-8 pb-6 lg:pb-8 flex flex-col">
+            <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-4 pb-0 sm:px-6 lg:px-8">
               {pageHeader?.subtitle ? (
-                <p className="text-sm text-gray-500 -mt-1 mb-4">{pageHeader.subtitle}</p>
+                <p className="shrink-0 text-sm text-gray-500 -mt-1 mb-4">{pageHeader.subtitle}</p>
               ) : null}
-              {children}
+              <div className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-auto">
+                {children}
+              </div>
             </main>
           </div>
-        </div>
       </div>
     </TooltipProvider>
   );

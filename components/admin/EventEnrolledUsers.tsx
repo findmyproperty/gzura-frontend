@@ -83,6 +83,7 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
 
   return (
     <AdminDataTable
+      fill={false}
       search={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search enrolled users."
@@ -120,11 +121,11 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
             }}
             ariaLabel="Select all enrolled users on this page"
           />
-          <AdminTableHeaderCell className={adminCol.primary} sortable>Attendee</AdminTableHeaderCell>
-          <AdminTableHeaderCell className={adminCol.person}>Contact</AdminTableHeaderCell>
-          <AdminTableHeaderCell className={adminCol.date}>Location</AdminTableHeaderCell>
-          <AdminTableHeaderCell className={adminCol.date}>Enrolled</AdminTableHeaderCell>
-          <AdminTableHeaderCell className={adminCol.type}>Payment</AdminTableHeaderCell>
+          <AdminTableHeaderCell className="w-[32%]" sortable>Attendee</AdminTableHeaderCell>
+          <AdminTableHeaderCell className="w-[26%]">Contact</AdminTableHeaderCell>
+          <AdminTableHeaderCell className="w-[12%]">Location</AdminTableHeaderCell>
+          <AdminTableHeaderCell className="w-[16%]">Enrolled</AdminTableHeaderCell>
+          <AdminTableHeaderCell className="w-[12%]">Payment</AdminTableHeaderCell>
           {isOffline ? <AdminTableHeaderCell className={adminCol.status}>Check-in</AdminTableHeaderCell> : null}
           {isOffline ? <AdminTableHeaderCell className={adminCol.actions}>Pass</AdminTableHeaderCell> : null}
         </AdminTableHead>

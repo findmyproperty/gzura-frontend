@@ -213,7 +213,7 @@ export default function AdminRegistrationsPage() {
   }));
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex h-full min-h-0 flex-1 flex-col">
       <AdminPageHeader
         breadcrumb="Admin / Host Requests"
         title="Host Registration Requests"

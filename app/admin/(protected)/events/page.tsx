@@ -497,7 +497,7 @@ export default function AdminEventsPage() {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex h-full min-h-0 flex-1 flex-col">
       <AdminPageHeader breadcrumb="Admin / Events" title="Event Management" />
 
       <AdminDataTable
@@ -550,7 +550,7 @@ export default function AdminEventsPage() {
                     'ml-2 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold',
                     approvalRequests.length > 0
                       ? 'bg-gold-royal text-zinc-900'
-                      : 'bg-zinc-900 text-white',
+                      : 'bg-purple-deep text-white',
                   )}
                 >
                   {approvalRequests.length}
@@ -564,7 +564,7 @@ export default function AdminEventsPage() {
                 onClick={() => setRejectedListOpen(true)}
               >
                 Rejected list
-                <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1 text-[10px] font-bold text-white">
+                <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-purple-deep px-1 text-[10px] font-bold text-white">
                   {rejectedEvents.length}
                 </span>
               </Button>

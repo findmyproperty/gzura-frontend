@@ -258,7 +258,7 @@ function HostDashboard() {
               Nothing needs your attention right now.
             </div>
           ) : (
-            <div className="min-h-0 flex-1 space-y-2 overflow-auto">
+            <div className="scrollbar-none min-h-0 flex-1 space-y-2 overflow-auto">
               {attention.map((event) => (
                 <Link
                   key={event.id}
@@ -297,7 +297,7 @@ function HostDashboard() {
               You have not created any courses yet.
             </div>
           ) : (
-            <div className="min-h-0 flex-1 space-y-2 overflow-auto">
+            <div className="scrollbar-none min-h-0 flex-1 space-y-2 overflow-auto">
               {recent.map((event) => (
                 <Link
                   key={event.id}

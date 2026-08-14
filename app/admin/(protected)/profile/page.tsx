@@ -229,7 +229,7 @@ export default function AdminProfilePage() {
                 disabled={savingPhoto}
                 onClick={() => fileInputRef.current?.click()}
                 aria-label="Change profile photo"
-                className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900 text-white shadow-md ring-2 ring-white transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-purple-deep text-white shadow-md ring-2 ring-white transition-colors hover:bg-purple-700 disabled:opacity-60"
               >
                 {savingPhoto ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

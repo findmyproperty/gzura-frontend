@@ -106,7 +106,7 @@
   }
 
   .btn-admin {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg !bg-zinc-900 px-4 h-9 text-[13px] font-semibold !text-white transition-colors hover:!bg-purple-deep hover:!text-white active:!bg-gold-royal active:!text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-royal/70 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg !bg-purple-deep px-4 h-9 text-[13px] font-semibold !text-white transition-colors hover:!bg-purple-700 hover:!text-white active:!bg-gold-royal active:!text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-royal/70 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-secondary {
@@ -135,6 +135,14 @@
 }
 
 @layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .animate-delay-100 {
     animation-delay: 100ms;
   }

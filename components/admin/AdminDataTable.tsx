@@ -23,14 +23,14 @@ import {
 import { cn } from '@/lib/utils';
 
 export const AVATAR_COLORS = [
-  'bg-zinc-900',
-  'bg-zinc-800',
-  'bg-neutral-800',
-  'bg-stone-800',
-  'bg-zinc-700',
-  'bg-neutral-700',
-  'bg-stone-700',
-  'bg-neutral-900',
+  'bg-purple-deep',
+  'bg-purple-800',
+  'bg-purple-700',
+  'bg-purple-900',
+  'bg-purple-600',
+  'bg-purple-800',
+  'bg-purple-700',
+  'bg-purple-950',
 ];
 
 export const ADMIN_TABLE_MIN_WIDTH = '960px';
@@ -185,6 +185,7 @@ export function AdminDataTable({
   loading,
   emptyMessage,
   footer,
+  fill = true,
   children,
 }: {
   search?: string;
@@ -196,6 +197,7 @@ export function AdminDataTable({
   loading?: boolean;
   emptyMessage?: string;
   footer?: React.ReactNode;
+  fill?: boolean;
   children: React.ReactNode;
 }) {
   const searchField = onSearchChange ? (
@@ -215,9 +217,14 @@ export function AdminDataTable({
   ) : null;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] bg-white font-sans shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div
+      className={cn(
+        'flex flex-col overflow-hidden rounded-[24px] bg-white font-sans shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+        fill ? 'min-h-0 flex-1' : 'h-auto',
+      )}
+    >
       {(onSearchChange || filters || actions || bulkBar) && (
-        <div className="shrink-0 space-y-3 px-5 pt-5">
+        <div className="shrink-0 space-y-3 px-5 pb-4 pt-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             {filters ? (
               <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -240,7 +247,12 @@ export function AdminDataTable({
         </div>
       )}
 
-      <div className="min-h-0 flex-1 overflow-auto px-4 pt-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        className={cn(
+          'scrollbar-none isolate overflow-auto px-4 pb-2',
+          fill ? 'min-h-0 flex-1' : 'h-auto',
+        )}
+      >
         {loading ? (
           <div className="p-16 text-center text-[14px] text-gray-500">Loading...</div>
         ) : emptyMessage ? (
@@ -251,7 +263,9 @@ export function AdminDataTable({
       </div>
 
       {!loading && !emptyMessage && footer ? (
-        <div className="shrink-0 px-5 py-3.5">{footer}</div>
+        <div className={cn('shrink-0 px-5 pb-3 pt-3', fill && 'mt-auto')}>
+          {footer}
+        </div>
       ) : null}
     </div>
   );
@@ -428,21 +442,24 @@ export function AdminTable({
 }) {
   return (
     <table
-      className="w-full table-fixed border-separate border-spacing-0 text-[14px] leading-5 font-sans"
+      className="h-auto w-full table-fixed border-collapse text-[14px] leading-5 font-sans"
       style={{ minWidth }}
     >
+      <colgroup>
+        <col style={{ width: 48 }} />
+      </colgroup>
       {children}
     </table>
   );
 }
 
 const headerCellClass =
-  'bg-[#F4F5F7] text-left text-[12px] font-medium text-gray-400 px-4 py-3 first:pl-4 last:pr-4 first:rounded-l-xl last:rounded-r-xl';
+  'bg-[#F4F5F7] text-left text-[12px] font-medium text-gray-400 px-4 py-3 first:pl-4 last:pr-4 first:rounded-tl-xl last:rounded-tr-xl';
 
 export function AdminTableHead({ children }: { children: React.ReactNode }) {
   return (
-    <thead className="sticky top-0 z-10 bg-white">
-      <tr>{children}</tr>
+    <thead className="sticky top-0 z-20">
+      <tr className="bg-[#F4F5F7]">{children}</tr>
     </thead>
   );
 }
@@ -471,7 +488,7 @@ export function AdminTableHeaderCell({
 }
 
 export function AdminTableBody({ children }: { children: React.ReactNode }) {
-  return <tbody>{children}</tbody>;
+  return <tbody className="relative z-0">{children}</tbody>;
 }
 
 export function AdminTableRow({
@@ -487,7 +504,7 @@ export function AdminTableRow({
     <tr
       onClick={onClick}
       className={cn(
-        'hover:bg-[#F7F7F8] transition-colors',
+        'hover:bg-[#FAFAFA]',
         onClick && 'cursor-pointer',
         className,
       )}
@@ -542,7 +559,7 @@ export function AdminTableCheckboxCell({
   if (header) {
     return (
       <th
-        className={cn(headerCellClass, 'w-11 px-4 py-3 align-middle')}
+        className={cn(headerCellClass, 'w-12 p-0 text-center align-middle')}
         onClick={(e) => e.stopPropagation()}
       >
         {checkbox}
@@ -552,7 +569,7 @@ export function AdminTableCheckboxCell({
 
   return (
     <td
-      className="w-11 border-b border-[#F3F4F6] px-4 py-[14px] align-middle first:pl-4"
+      className="w-12 border-b border-[#F3F4F6] p-0 text-center align-middle"
       onClick={(e) => e.stopPropagation()}
     >
       {checkbox}
@@ -639,28 +656,28 @@ export function StatusBadge({
   label: string;
   tone?: 'success' | 'danger' | 'muted' | 'warning';
 }) {
-  const wrapClass = {
-    success: 'bg-gold-50 text-gold-800',
-    danger: 'bg-zinc-100 text-zinc-900',
-    muted: 'bg-gray-100 text-gray-500',
-    warning: 'bg-purple-50 text-purple-deep',
+  const textClass = {
+    success: 'text-zinc-800',
+    danger: 'text-zinc-900',
+    muted: 'text-gray-400',
+    warning: 'text-purple-deep',
   }[tone];
 
   const dotClass = {
-    success: 'bg-gold-royal',
-    danger: 'bg-zinc-900',
-    muted: 'bg-gray-400',
+    success: 'bg-emerald-500',
+    danger: 'bg-purple-deep',
+    muted: 'bg-gray-300',
     warning: 'bg-purple-deep',
   }[tone];
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-medium',
-        wrapClass,
+        'inline-flex items-center gap-2 whitespace-nowrap text-[13px] font-medium',
+        textClass,
       )}
     >
-      <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', dotClass)} />
+      <span className={cn('h-2 w-2 shrink-0 rounded-full', dotClass)} />
       {label}
     </span>
   );
