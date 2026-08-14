@@ -13,10 +13,8 @@ import {
   BookOpen,
   Calendar,
   CheckCircle2,
-  ClipboardList,
   Clock,
   IndianRupee,
-  Plus,
   TrendingUp,
   Users,
   XCircle,
@@ -595,35 +593,6 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-
-      <div className="grid md:grid-cols-3 gap-6">
-        <Link
-          href="/admin/events"
-          className="bg-white rounded-2xl p-8 border border-gray-200/80 card-hover group"
-        >
-          <Calendar className="w-8 h-8 text-zinc-900 mb-4 group-hover:text-gold-royal transition-colors" />
-          <h2 className="text-xl font-semibold text-zinc-900 mb-2">Manage Events</h2>
-          <p className="text-gray-600 text-sm">Create, edit, and publish events</p>
-        </Link>
-
-        <Link
-          href="/admin/registrations"
-          className="bg-white rounded-2xl p-8 border border-gray-200/80 card-hover group"
-        >
-          <ClipboardList className="w-8 h-8 text-zinc-900 mb-4 group-hover:text-gold-royal transition-colors" />
-          <h2 className="text-xl font-semibold text-zinc-900 mb-2">Registrations</h2>
-          <p className="text-gray-600 text-sm">View all event registrations</p>
-        </Link>
-
-        <Link
-          href="/admin/events/new"
-          className="bg-white rounded-2xl p-8 border border-gray-200/80 card-hover group"
-        >
-          <Plus className="w-8 h-8 text-zinc-900 mb-4 group-hover:text-gold-royal transition-colors" />
-          <h2 className="text-xl font-semibold text-zinc-900 mb-2">New Event</h2>
-          <p className="text-gray-500 text-sm">Quickly create a new event</p>
-        </Link>
-      </div>
     </div>
   );
 }

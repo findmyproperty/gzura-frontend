@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
   Calendar,
-  CheckCircle2,
   ChevronsLeft,
   ChevronsRight,
   ClipboardList,
@@ -47,7 +46,6 @@ import { cn } from '@/lib/utils';
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/events', label: 'Events', icon: Calendar },
-  { href: '/admin/event-approvals', label: 'Event Approvals', icon: CheckCircle2 },
   { href: '/admin/registrations', label: 'Host Requests', icon: ClipboardList },
   { href: '/admin/users', label: 'Users', icon: Users },
 ];
@@ -220,8 +218,8 @@ function AdminLayoutShell({
             ? 'justify-center mx-auto h-11 w-11 rounded-2xl'
             : 'gap-3 px-3 py-2.5 rounded-2xl',
           active
-            ? 'bg-white/15 text-gold-400'
-            : 'text-white/75 hover:bg-white/10 hover:text-white',
+            ? 'bg-white/10 text-gold-400'
+            : 'text-white/70 hover:bg-purple-deep/50 hover:text-white',
         )}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -348,7 +346,7 @@ function AdminLayoutShell({
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="font-semibold text-purple-deep truncate">
+                      <p className="font-semibold text-zinc-900 truncate">
                         {user.firstName} {user.lastName}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
@@ -412,12 +410,12 @@ function AdminLayoutShell({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="min-h-screen bg-[#F6F4F1] p-2 sm:p-3 lg:p-4">
+      <div className="min-h-screen bg-[#F4F4F5] p-2 sm:p-3 lg:p-4">
         <div className="flex gap-3 lg:gap-4 h-[calc(100dvh-1rem)] sm:h-[calc(100dvh-1.5rem)] lg:h-[calc(100dvh-2rem)]">
           {/* Desktop sidebar */}
           <aside
             className={cn(
-              'hidden lg:flex flex-col bg-purple-deep text-white rounded-[28px] shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out',
+              'hidden lg:flex flex-col bg-zinc-950 text-white rounded-[28px] shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out',
               sidebarOpen ? 'w-[260px]' : 'w-[76px]',
               !mounted && 'transition-none',
             )}
@@ -434,7 +432,7 @@ function AdminLayoutShell({
           )}
           <aside
             className={cn(
-              'lg:hidden fixed inset-y-3 left-3 z-50 w-64 flex flex-col bg-purple-deep text-white rounded-[28px] transition-transform duration-300 ease-in-out',
+              'lg:hidden fixed inset-y-3 left-3 z-50 w-64 flex flex-col bg-zinc-950 text-white rounded-[28px] transition-transform duration-300 ease-in-out',
               mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+1.5rem)]',
             )}
           >
@@ -451,12 +449,12 @@ function AdminLayoutShell({
           </aside>
 
           {/* Main panel */}
-          <div className="flex-1 min-w-0 flex flex-col rounded-[28px] bg-[#F5F0FA] border border-purple-200/50 overflow-hidden">
+          <div className="flex-1 min-w-0 flex flex-col rounded-[28px] bg-[#F7F7F8] border border-black/[0.06] overflow-hidden">
             <header className="flex items-center justify-between gap-4 px-4 sm:px-6 pt-4 pb-3 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={() => setMobileOpen(true)}
-                  className="p-2 rounded-xl text-gray-500 hover:text-purple-deep hover:bg-white/70 transition-colors lg:hidden shrink-0"
+                  className="p-2 rounded-xl text-gray-500 hover:text-purple-deep hover:bg-white transition-colors lg:hidden shrink-0"
                   aria-label="Toggle sidebar"
                 >
                   <Menu className="w-5 h-5" />
@@ -465,13 +463,13 @@ function AdminLayoutShell({
                   <div className="flex items-center gap-3 min-w-0">
                     {pageHeader.breadcrumb ? (
                       <>
-                        <p className="hidden sm:block text-sm text-gray-400 shrink-0">
+                        <p className="hidden sm:block text-[14px] text-gray-400 shrink-0 font-sans">
                           {pageHeader.breadcrumb}
                         </p>
-                        <span className="hidden sm:block h-4 w-px bg-purple-200/80 shrink-0" />
+                        <span className="hidden sm:block h-4 w-px bg-zinc-200 shrink-0" />
                       </>
                     ) : null}
-                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 truncate">
+                    <h1 className="text-[22px] sm:text-[24px] font-bold leading-tight tracking-tight text-zinc-900 truncate font-sans">
                       {pageHeader.title}
                     </h1>
                   </div>
@@ -481,7 +479,7 @@ function AdminLayoutShell({
                 <Popover>
                   <PopoverTrigger asChild>
                     <button
-                      className="relative p-2 rounded-full text-gray-500 hover:text-purple-deep hover:bg-gray-50 transition-colors"
+                      className="relative p-2 rounded-full text-gray-500 hover:text-purple-deep hover:bg-purple-50 transition-colors"
                       aria-label="Notifications"
                     >
                       <Bell className="w-5 h-5" />
@@ -494,7 +492,7 @@ function AdminLayoutShell({
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-80 p-0 rounded-2xl">
                     <div className="border-b px-4 py-3">
-                      <p className="font-semibold text-purple-deep">Notifications</p>
+                      <p className="font-semibold text-zinc-900">Notifications</p>
                       <p className="text-xs text-gray-500">
                         {isAdmin ? 'Recent host and event requests' : 'Important updates about your events'}
                       </p>
@@ -511,7 +509,7 @@ function AdminLayoutShell({
                             href={notif.href}
                             className="flex flex-col gap-0.5 border-b border-gray-100 px-4 py-3 last:border-0 hover:bg-gray-50 transition-colors"
                           >
-                            <p className="text-sm font-medium text-purple-deep">
+                            <p className="text-sm font-medium text-zinc-900">
                               {notif.title}
                             </p>
                             <p className="text-xs text-gray-600 truncate">
@@ -533,7 +531,7 @@ function AdminLayoutShell({
                       <div className="border-t p-2">
                         <Link
                           href="/admin/registrations"
-                          className="block rounded-xl px-3 py-2 text-center text-xs font-medium text-purple-deep hover:bg-purple-50 transition-colors"
+                          className="block rounded-xl px-3 py-2 text-center text-xs font-medium text-zinc-900 hover:bg-gold-50 hover:text-gold-800 transition-colors"
                         >
                           View all host requests
                         </Link>

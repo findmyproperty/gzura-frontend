@@ -10,7 +10,6 @@ import {
   History,
   Loader2,
   MapPin,
-  MoreHorizontal,
   Pencil,
   Plus,
   Trash2,
@@ -21,21 +20,33 @@ import {
 import { api, Event, User, eventForEditor, getEventRejectionReason, hasPendingEdits } from '@/lib/api';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import {
+  AdminBulkBar,
   AdminDataTable,
   AdminEmptyRow,
+  AdminEntityCell,
+  AdminFilterChip,
+  AdminMoreButton,
   AdminPageHeader,
+  AdminRowActions,
   AdminTable,
   AdminTableBody,
   AdminTableCell,
+  AdminTableCheckboxCell,
   AdminTableHead,
   AdminTableHeaderCell,
   AdminTablePagination,
   AdminTableRow,
+  ADMIN_TABLE_MIN_WIDTH,
+  adminActionOutlineClass,
+  adminCol,
+  adminFilterTriggerClass,
   formatAdminDate,
   getAvatarColor,
   getInitialsFromFullName,
   PillBadge,
   StatusBadge,
+  runAdminBulk,
+  useAdminTablePaging,
 } from '@/components/admin/AdminDataTable';
 import {
   AlertDialog,
@@ -58,7 +69,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
@@ -78,7 +88,7 @@ import { EventFormCard } from '@/components/admin/EventFormCard';
 import { EventActivityLogDialog } from '@/components/admin/EventActivityLogDialog';
 import { EventImageGalleryUpload } from '@/components/admin/EventImageGalleryUpload';
 import { GoogleMeetFields } from '@/components/admin/GoogleMeetFields';
-import { getEventImages } from '@/lib/event-images';
+import { getEventCoverImage, getEventImages } from '@/lib/event-images';
 import { cn } from '@/lib/utils';
 import TimeRangePicker from '@/components/admin/TimeRangePicker';
 import { useAuth } from '@/components/providers/AuthProvider';
@@ -103,6 +113,15 @@ const RichTextEditor = dynamic(() => import('@/components/ui/rich-text-editor'),
     <div className="min-h-[200px] animate-pulse rounded-md border border-input bg-muted/30" />
   ),
 });
+
+function isPendingReview(event: Event) {
+  return (
+    event.status === 'PENDING' ||
+    event.status === 'PENDING_APPROVAL' ||
+    event.status === 'RESUBMITTED' ||
+    hasPendingEdits(event)
+  );
+}
 
 const emptyForm = {
   title: '',
@@ -134,8 +153,6 @@ const emptyForm = {
   resubmissionComment: '',
 };
 
-const PAGE_SIZE = 10;
-
 export default function AdminEventsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -152,17 +169,15 @@ export default function AdminEventsPage() {
   const [loadingHosts, setLoadingHosts] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [meetingMeta, setMeetingMeta] = useState<{
     meetLink?: string | null;
     totalSeats?: number | null;
     seatsRemaining?: number | null;
   }>({});
-  const [eventToDelete, setEventToDelete] = useState<{
-    id: string;
-    title: string;
-  } | null>(null);
+  const [eventsToDelete, setEventsToDelete] = useState<Event[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [logEvent, setLogEvent] = useState<Event | null>(null);
   const [rejectedListOpen, setRejectedListOpen] = useState(false);
 
@@ -230,8 +245,7 @@ export default function AdminEventsPage() {
 
       const matchesStatus =
         statusFilter === 'all' ||
-        (statusFilter === 'APPROVAL' &&
-          (event.status === 'PENDING' || hasPendingEdits(event))) ||
+        (statusFilter === 'APPROVAL' && isPendingReview(event)) ||
         event.status === statusFilter;
 
       return matchesSearch && matchesStatus;
@@ -243,28 +257,17 @@ export default function AdminEventsPage() {
     [events],
   );
   const approvalRequests = useMemo(
-    () =>
-      events.filter(
-        (event) => event.status === 'PENDING' || hasPendingEdits(event),
-      ),
+    () => events.filter(isPendingReview),
     [events],
   );
 
-  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+  const { page, setPage, pageSize, setPageSize, totalPages, pagedItems: paginatedEvents } =
+    useAdminTablePaging(filteredEvents, `${search}|${statusFilter}`);
 
-  const paginatedEvents = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredEvents.slice(start, start + PAGE_SIZE);
-  }, [filteredEvents, page]);
-
-  // Reset to first page when filters change or current page is out of range
-  useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter]);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
+  const pageIds = paginatedEvents.map((event) => event.id);
+  const allPageSelected =
+    pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.includes(id));
 
   const openEdit = async (event: Event) => {
     const matchedHost =
@@ -451,13 +454,22 @@ export default function AdminEventsPage() {
   };
 
   const confirmDelete = async () => {
-    if (!eventToDelete) return;
+    if (eventsToDelete.length === 0) return;
 
     setDeleting(true);
     try {
-      await api.deleteEvent(eventToDelete.id);
-      toast({ title: 'Event deleted' });
-      setEventToDelete(null);
+      const ids = eventsToDelete.map((event) => event.id);
+      const { ok, failed } = await runAdminBulk(ids, (id) => api.deleteEvent(id));
+      toast({
+        title: failed
+          ? `Deleted ${ok}, ${failed} failed`
+          : ok === 1
+            ? 'Event deleted'
+            : `Deleted ${ok} events`,
+        variant: failed ? 'destructive' : 'default',
+      });
+      setEventsToDelete([]);
+      setSelectedIds((prev) => prev.filter((id) => !ids.includes(id)));
       loadEvents();
     } catch {
       toast({ title: 'Delete failed', variant: 'destructive' });
@@ -466,18 +478,21 @@ export default function AdminEventsPage() {
     }
   };
 
-  const togglePublish = async (event: Event) => {
-    const next = event.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
+  const handleBulkStatus = async (status: 'PUBLISHED' | 'DRAFT') => {
+    if (selectedIds.length === 0) return;
+    setBulkBusy(true);
     try {
-      await api.updateEvent(event.id, { status: next });
-      toast({ title: next === 'PUBLISHED' ? 'Event published' : 'Event moved to draft' });
-      loadEvents();
-    } catch (err) {
+      const { ok, failed } = await runAdminBulk(selectedIds, (id) =>
+        api.updateEvent(id, { status }),
+      );
       toast({
-        title: 'Update failed',
-        description: err instanceof Error ? err.message : 'Could not update status',
-        variant: 'destructive',
+        title: failed ? `Updated ${ok}, ${failed} failed` : `Updated ${ok} event${ok === 1 ? '' : 's'}`,
+        variant: failed ? 'destructive' : 'default',
       });
+      setSelectedIds([]);
+      loadEvents();
+    } finally {
+      setBulkBusy(false);
     }
   };
 
@@ -488,55 +503,111 @@ export default function AdminEventsPage() {
       <AdminDataTable
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search events"
+        searchPlaceholder="Search events."
         loading={loading}
         filters={
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-10 w-[150px] rounded-full border-gray-200 bg-white shadow-none focus:border-gray-200 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-1 focus-visible:ring-purple-200 focus-visible:ring-offset-0">
-              <SelectValue placeholder="All status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All status</SelectItem>
-              <SelectItem value="PUBLISHED">Published</SelectItem>
-              <SelectItem value="PENDING">Pending</SelectItem>
-              <SelectItem value="REJECTED">Rejected</SelectItem>
-              <SelectItem value="DRAFT">Draft</SelectItem>
-            </SelectContent>
-          </Select>
+          <>
+            {statusFilter !== 'all' && statusFilter !== 'APPROVAL' ? (
+              <AdminFilterChip
+                label={statusFilter.charAt(0) + statusFilter.slice(1).toLowerCase()}
+                onClear={() => setStatusFilter('all')}
+              />
+            ) : null}
+            <Select
+              value={statusFilter === 'APPROVAL' ? 'all' : statusFilter}
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className={adminFilterTriggerClass}>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Status</SelectItem>
+                <SelectItem value="PUBLISHED">Published</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="REJECTED">Rejected</SelectItem>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+              </SelectContent>
+            </Select>
+          </>
         }
         actions={
           <div className="flex items-center gap-2">
-            {isAdmin && approvalRequests.length > 0 && (
+            {isAdmin ? (
               <Button
                 variant="outline"
-                className="relative border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
-                onClick={() => setStatusFilter('APPROVAL')}
+                className={cn(
+                  adminActionOutlineClass,
+                  statusFilter === 'APPROVAL' &&
+                    'border-gold-royal bg-gold-50 text-zinc-900 hover:border-gold-royal hover:bg-gold-50 hover:text-zinc-900',
+                )}
+                onClick={() =>
+                  setStatusFilter((prev) => (prev === 'APPROVAL' ? 'all' : 'APPROVAL'))
+                }
               >
-                Approval Requests
-                <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white">
+                Pending for review
+                <span
+                  className={cn(
+                    'ml-2 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold',
+                    approvalRequests.length > 0
+                      ? 'bg-gold-royal text-zinc-900'
+                      : 'bg-zinc-900 text-white',
+                  )}
+                >
                   {approvalRequests.length}
                 </span>
               </Button>
-            )}
+            ) : null}
             {!isAdmin && rejectedEvents.length > 0 && (
               <Button
                 variant="outline"
-                className="relative border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
+                className={adminActionOutlineClass}
                 onClick={() => setRejectedListOpen(true)}
               >
                 Rejected list
-                <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1 text-[10px] font-bold text-white">
                   {rejectedEvents.length}
                 </span>
               </Button>
             )}
             <Button asChild className="btn-admin">
               <Link href="/admin/events/new">
-                <Plus className="w-4 h-4 mr-2" />
-                Add event
+                <Plus className="w-4 h-4" />
+                Add new event
               </Link>
             </Button>
           </div>
+        }
+        bulkBar={
+          <AdminBulkBar count={selectedIds.length} onClear={() => setSelectedIds([])}>
+            <Select
+              key={selectedIds.join(',')}
+              disabled={bulkBusy}
+              onValueChange={(value) => void handleBulkStatus(value as 'PUBLISHED' | 'DRAFT')}
+            >
+              <SelectTrigger className={adminFilterTriggerClass}>
+                <SelectValue placeholder="Update status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PUBLISHED">Set Published</SelectItem>
+                <SelectItem value="DRAFT">Set Draft</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              className={cn(
+                adminActionOutlineClass,
+                'text-red-600 hover:border-red-200 hover:bg-red-50 hover:text-red-700',
+              )}
+              disabled={bulkBusy || deleting}
+              onClick={() => {
+                const selected = events.filter((event) => selectedIds.includes(event.id));
+                if (selected.length) setEventsToDelete(selected);
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </AdminBulkBar>
         }
         footer={
           filteredEvents.length > 0 ? (
@@ -544,55 +615,83 @@ export default function AdminEventsPage() {
               page={page}
               totalPages={totalPages}
               totalItems={filteredEvents.length}
-              pageSize={PAGE_SIZE}
+              pageSize={pageSize}
               onPageChange={setPage}
+              onPageSizeChange={setPageSize}
               itemLabel="events"
             />
           ) : null
         }
       >
-        <AdminTable minWidth="860px">
+        <AdminTable minWidth={ADMIN_TABLE_MIN_WIDTH}>
           <AdminTableHead>
-            <AdminTableHeaderCell className={isAdmin ? 'w-[28%]' : 'w-[38%]'}>
+            <AdminTableCheckboxCell
+              header
+              checked={allPageSelected ? true : somePageSelected ? 'indeterminate' : false}
+              onCheckedChange={(checked) => {
+                setSelectedIds((prev) =>
+                  checked
+                    ? Array.from(new Set([...prev, ...pageIds]))
+                    : prev.filter((id) => !pageIds.includes(id)),
+                );
+              }}
+              ariaLabel="Select all events on this page"
+            />
+            <AdminTableHeaderCell className={isAdmin ? adminCol.primary : 'w-[32%]'} sortable>
               Event
             </AdminTableHeaderCell>
-            {isAdmin && <AdminTableHeaderCell className="w-[16%]">Host</AdminTableHeaderCell>}
-            <AdminTableHeaderCell className="w-[16%]">Date</AdminTableHeaderCell>
-            <AdminTableHeaderCell className="w-[12%]">Type</AdminTableHeaderCell>
-            <AdminTableHeaderCell className="w-[14%]">Status</AdminTableHeaderCell>
-            <AdminTableHeaderCell className="w-[12%]">Registrations</AdminTableHeaderCell>
-            <AdminTableHeaderCell className="w-14" />
+            {isAdmin && <AdminTableHeaderCell className={adminCol.person}>Host</AdminTableHeaderCell>}
+            <AdminTableHeaderCell className={adminCol.date}>Date</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.type}>Type</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.status}>Status</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.number}>Registrations</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.actions} />
           </AdminTableHead>
           <AdminTableBody>
-            {paginatedEvents.map((event) => (
+            {paginatedEvents.map((event) => {
+              const cover = getEventCoverImage(event);
+              return (
               <AdminTableRow
                 key={event.id}
                 onClick={() => router.push(`/admin/events/${event.id}`)}
               >
+                <AdminTableCheckboxCell
+                  checked={selectedIds.includes(event.id)}
+                  onCheckedChange={(checked) => {
+                    setSelectedIds((prev) =>
+                      checked ? [...prev, event.id] : prev.filter((id) => id !== event.id),
+                    );
+                  }}
+                  ariaLabel={`Select ${event.title}`}
+                />
                 <AdminTableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-[#F4F3F1] flex items-center justify-center shrink-0">
-                      <Calendar className="w-4 h-4 text-gray-500" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{event.title}</p>
-                      <p className="mt-1 text-gray-500 text-xs truncate">{event.location}</p>
-                    </div>
-                  </div>
+                  <AdminEntityCell
+                    media={
+                      cover ? (
+                        <img
+                          src={cover}
+                          alt=""
+                          className="h-9 w-9 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                        </div>
+                      )
+                    }
+                    title={event.title}
+                    subtitle={event.location}
+                  />
                 </AdminTableCell>
                 {isAdmin && (
                   <AdminTableCell>
                     {event.host ? (
-                      <div className="min-w-0 max-w-[150px] lg:max-w-[200px]">
-                        <p className="font-medium text-gray-900 truncate">
-                          {event.host.firstName} {event.host.lastName}
-                        </p>
-                        <p className="text-gray-500 text-xs truncate">
-                          {event.host.email}
-                        </p>
-                      </div>
+                      <AdminEntityCell
+                        title={`${event.host.firstName} ${event.host.lastName}`}
+                        subtitle={event.host.email}
+                      />
                     ) : (
-                      <span className="text-gray-400 text-sm">No host</span>
+                      <span className="text-sm text-gray-400">No host</span>
                     )}
                   </AdminTableCell>
                 )}
@@ -633,45 +732,36 @@ export default function AdminEventsPage() {
                   className="px-3"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="p-2 rounded-lg text-gray-400 hover:text-purple-deep hover:bg-gray-100 transition-colors"
-                        aria-label="Event actions"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-44">
-                      <DropdownMenuItem onClick={() => openEdit(event)}>
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Edit event
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setLogEvent(event)}>
-                        <History className="w-4 h-4 mr-2" />
-                        Show log
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => togglePublish(event)}>
-                        {event.status === 'PUBLISHED' ? 'Move to draft' : 'Publish event'}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600 focus:text-red-600"
-                        onClick={() =>
-                          setEventToDelete({ id: event.id, title: event.title })
-                        }
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete event
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <AdminRowActions
+                    menu={
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <AdminMoreButton />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem onClick={() => void openEdit(event)}>
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600 focus:text-red-600"
+                            onClick={() =>
+                              setEventsToDelete([event])
+                            }
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    }
+                  />
                 </AdminTableCell>
               </AdminTableRow>
-            ))}
+              );
+            })}
             {filteredEvents.length === 0 && (
-              <AdminEmptyRow colSpan={isAdmin ? 7 : 6} message="No events match your filters" />
+              <AdminEmptyRow colSpan={isAdmin ? 8 : 7} message="No events match your filters" />
             )}
           </AdminTableBody>
         </AdminTable>
@@ -1230,20 +1320,22 @@ export default function AdminEventsPage() {
       </Dialog>
 
       <AlertDialog
-        open={!!eventToDelete}
+        open={eventsToDelete.length > 0}
         onOpenChange={(open) => {
-          if (!open && !deleting) setEventToDelete(null);
+          if (!open && !deleting) setEventsToDelete([]);
         }}
       >
         <AlertDialogContent className="border-purple-100">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display text-purple-deep">
-              Delete event?
+              {eventsToDelete.length > 1 ? 'Delete events?' : 'Delete event?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete{' '}
               <span className="font-medium text-gray-900">
-                {eventToDelete?.title}
+                {eventsToDelete.length === 1
+                  ? eventsToDelete[0]?.title
+                  : `${eventsToDelete.length} events`}
               </span>
               . This action cannot be undone.
             </AlertDialogDescription>
@@ -1264,7 +1356,7 @@ export default function AdminEventsPage() {
                   Deleting…
                 </>
               ) : (
-                'Delete event'
+                eventsToDelete.length > 1 ? 'Delete events' : 'Delete event'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

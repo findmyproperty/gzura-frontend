@@ -216,7 +216,7 @@ export default function AdminEventViewPage() {
                 <X className="w-4 h-4 mr-2" />
                 {hasPendingEdits(event) ? 'Reject edits' : 'Reject'}
               </Button>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleApprove} disabled={updating}>
+              <Button className="btn-admin" onClick={handleApprove} disabled={updating}>
                 {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
                 {hasPendingEdits(event) ? 'Approve edits' : 'Approve'}
               </Button>
@@ -230,7 +230,7 @@ export default function AdminEventViewPage() {
               </a>
             </Button>
           ) : null}
-          <Button asChild className="btn-primary">
+          <Button asChild className="btn-admin">
             <Link href={`/admin/events?edit=${event.id}`}>
               <Pencil className="w-4 h-4 mr-2" />
               Edit event
@@ -295,7 +295,7 @@ export default function AdminEventViewPage() {
 
           <div className="p-5 sm:p-6 lg:p-7">
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              <PillBadge className="bg-purple-50 text-purple-deep">
+              <PillBadge>
                 {event.type}
               </PillBadge>
               <StatusBadge
@@ -398,7 +398,7 @@ export default function AdminEventViewPage() {
             className="rounded-lg px-4 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
             Enrolled
-            <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-deep">
+            <span className="ml-2 rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">
               {enrolledCount}
             </span>
           </TabsTrigger>

@@ -2,22 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import {
+  AdminAvatar,
   AdminDataTable,
   AdminEmptyRow,
+  AdminEntityCell,
   AdminTable,
   AdminTableBody,
   AdminTableCell,
+  AdminTableCheckboxCell,
   AdminTableHead,
   AdminTableHeaderCell,
+  AdminTablePagination,
   AdminTableRow,
-  getAvatarColor,
+  ADMIN_TABLE_MIN_WIDTH,
+  adminCol,
   getInitialsFromFullName,
   PillBadge,
   StatusBadge,
+  useAdminTablePaging,
 } from '@/components/admin/AdminDataTable';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { api, Event, EventRegistration } from '@/lib/api';
 
 function formatEnrolledAt(date: string) {
@@ -34,6 +39,7 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
   const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -64,36 +70,68 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
     });
   }, [registrations, search]);
 
+  const { page, setPage, pageSize, setPageSize, totalPages, pagedItems } =
+    useAdminTablePaging(filtered, search);
+
+  const pageIds = pagedItems.map((row) => row.id);
+  const allPageSelected =
+    pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.includes(id));
+
   const isOffline = event.type === 'Offline';
+  const colSpan = (isOffline ? 7 : 5) + 1;
 
   return (
     <AdminDataTable
       search={search}
       onSearchChange={setSearch}
-      searchPlaceholder="Search enrolled users..."
+      searchPlaceholder="Search enrolled users."
       loading={loading}
       emptyMessage={
         registrations.length === 0
           ? 'No one has enrolled in this event yet.'
           : undefined
       }
+      footer={
+        filtered.length > 0 ? (
+          <AdminTablePagination
+            page={page}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            itemLabel="enrolled"
+          />
+        ) : null
+      }
     >
-      <AdminTable minWidth="900px">
+      <AdminTable minWidth={ADMIN_TABLE_MIN_WIDTH}>
         <AdminTableHead>
-          <AdminTableHeaderCell>Attendee</AdminTableHeaderCell>
-          <AdminTableHeaderCell>Contact</AdminTableHeaderCell>
-          <AdminTableHeaderCell>Location</AdminTableHeaderCell>
-          <AdminTableHeaderCell>Enrolled</AdminTableHeaderCell>
-          <AdminTableHeaderCell>Payment</AdminTableHeaderCell>
-          {isOffline ? <AdminTableHeaderCell>Check-in</AdminTableHeaderCell> : null}
-          {isOffline ? <AdminTableHeaderCell>Pass</AdminTableHeaderCell> : null}
+          <AdminTableCheckboxCell
+            header
+            checked={allPageSelected ? true : somePageSelected ? 'indeterminate' : false}
+            onCheckedChange={(checked) => {
+              setSelectedIds((prev) =>
+                checked
+                  ? Array.from(new Set([...prev, ...pageIds]))
+                  : prev.filter((id) => !pageIds.includes(id)),
+              );
+            }}
+            ariaLabel="Select all enrolled users on this page"
+          />
+          <AdminTableHeaderCell className={adminCol.primary} sortable>Attendee</AdminTableHeaderCell>
+          <AdminTableHeaderCell className={adminCol.person}>Contact</AdminTableHeaderCell>
+          <AdminTableHeaderCell className={adminCol.date}>Location</AdminTableHeaderCell>
+          <AdminTableHeaderCell className={adminCol.date}>Enrolled</AdminTableHeaderCell>
+          <AdminTableHeaderCell className={adminCol.type}>Payment</AdminTableHeaderCell>
+          {isOffline ? <AdminTableHeaderCell className={adminCol.status}>Check-in</AdminTableHeaderCell> : null}
+          {isOffline ? <AdminTableHeaderCell className={adminCol.actions}>Pass</AdminTableHeaderCell> : null}
         </AdminTableHead>
         <AdminTableBody>
-          {loading ? (
-            <AdminEmptyRow colSpan={isOffline ? 7 : 5} message="Loading enrolled users..." />
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <AdminEmptyRow
-              colSpan={isOffline ? 7 : 5}
+              colSpan={colSpan}
               message={
                 registrations.length === 0
                   ? 'No enrolled users yet.'
@@ -101,24 +139,28 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
               }
             />
           ) : (
-            filtered.map((row) => (
+            pagedItems.map((row) => (
               <AdminTableRow key={row.id}>
+                <AdminTableCheckboxCell
+                  checked={selectedIds.includes(row.id)}
+                  onCheckedChange={(checked) => {
+                    setSelectedIds((prev) =>
+                      checked ? [...prev, row.id] : prev.filter((id) => id !== row.id),
+                    );
+                  }}
+                  ariaLabel={`Select ${row.fullName}`}
+                />
                 <AdminTableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback
-                        className={`${getAvatarColor(row.id)} text-white text-xs font-semibold`}
-                      >
-                        {getInitialsFromFullName(row.fullName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-gray-900">{row.fullName}</p>
-                      {row.profession ? (
-                        <p className="text-xs text-gray-500">{row.profession}</p>
-                      ) : null}
-                    </div>
-                  </div>
+                  <AdminEntityCell
+                    media={
+                      <AdminAvatar
+                        id={row.id}
+                        initials={getInitialsFromFullName(row.fullName)}
+                      />
+                    }
+                    title={row.fullName}
+                    subtitle={row.profession}
+                  />
                 </AdminTableCell>
                 <AdminTableCell>
                   <p className="text-gray-900">{row.email}</p>
@@ -130,7 +172,7 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
                 </AdminTableCell>
                 <AdminTableCell>
                   {row.paymentStatus === 'PAID' ? (
-                    <PillBadge className="bg-emerald-50 text-emerald-700">
+                    <PillBadge>
                       Paid{row.amountPaid ? ` · ₹${row.amountPaid}` : ''}
                     </PillBadge>
                   ) : (
@@ -153,7 +195,7 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
                         href={row.passUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-sm font-medium text-purple-deep hover:text-gold-royal"
+                        className="inline-flex items-center gap-1 text-sm font-medium text-zinc-900 hover:underline"
                       >
                         View pass
                         <ExternalLink className="h-3.5 w-3.5" />
@@ -168,15 +210,6 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
           )}
         </AdminTableBody>
       </AdminTable>
-
-      {!loading && registrations.length > 0 ? (
-        <div className="border-t border-gray-100 px-5 py-3 text-xs text-gray-500">
-          {filtered.length} of {registrations.length} enrolled
-          {event.maxAttendees
-            ? ` · ${event.maxAttendees - registrations.length} seats remaining`
-            : ''}
-        </div>
-      ) : null}
     </AdminDataTable>
   );
 }

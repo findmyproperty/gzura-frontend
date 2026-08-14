@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { adminActionOutlineClass } from '@/components/admin/AdminDataTable';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,13 +74,13 @@ export function AdminExportMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="bg-white border-gray-200 text-purple-deep hover:bg-purple-50"
+          className={adminActionOutlineClass}
           disabled={disabled || exporting !== null}
         >
           {exporting ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4" />
           )}
           Export
         </Button>

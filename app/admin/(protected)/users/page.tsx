@@ -2,25 +2,37 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { api, User } from '@/lib/api';
 import {
+  AdminAvatar,
+  AdminBulkBar,
   AdminDataTable,
   AdminEmptyRow,
+  AdminEntityCell,
+  AdminFilterChip,
+  AdminMoreButton,
   AdminPageHeader,
+  AdminRowActions,
   AdminTable,
   AdminTableBody,
   AdminTableCell,
+  AdminTableCheckboxCell,
   AdminTableHead,
   AdminTableHeaderCell,
+  AdminTablePagination,
   AdminTableRow,
+  ADMIN_TABLE_MIN_WIDTH,
+  adminActionOutlineClass,
+  adminCol,
+  adminFilterTriggerClass,
+  runAdminBulk,
   formatAdminDate,
-  getAvatarColor,
   getInitialsFromName,
   PillBadge,
   StatusBadge,
+  useAdminTablePaging,
 } from '@/components/admin/AdminDataTable';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -76,6 +88,8 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const loadUsers = () => {
     setLoading(true);
@@ -122,6 +136,14 @@ export default function AdminUsersPage() {
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [users, search, roleFilter, statusFilter]);
+
+  const { page, setPage, pageSize, setPageSize, totalPages, pagedItems } =
+    useAdminTablePaging(filteredUsers, `${search}|${roleFilter}|${statusFilter}`);
+
+  const pageIds = pagedItems.map((user) => user.id);
+  const allPageSelected =
+    pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.includes(id));
 
   const openCreate = () => {
     setEditingId(null);
@@ -226,6 +248,43 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleBulkStatus = async (status: 'ACTIVE' | 'BLOCKED') => {
+    if (selectedIds.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const { ok, failed } = await runAdminBulk(selectedIds, (id) =>
+        api.updateUser(id, { status }),
+      );
+      toast({
+        title: failed ? `Updated ${ok}, ${failed} failed` : `Updated ${ok} user${ok === 1 ? '' : 's'}`,
+        variant: failed ? 'destructive' : 'default',
+      });
+      setSelectedIds([]);
+      loadUsers();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Delete ${selectedIds.length} selected user${selectedIds.length === 1 ? '' : 's'}?`)) {
+      return;
+    }
+    setBulkBusy(true);
+    try {
+      const { ok, failed } = await runAdminBulk(selectedIds, (id) => api.deleteUser(id));
+      toast({
+        title: failed ? `Deleted ${ok}, ${failed} failed` : `Deleted ${ok} user${ok === 1 ? '' : 's'}`,
+        variant: failed ? 'destructive' : 'default',
+      });
+      setSelectedIds([]);
+      loadUsers();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <AdminPageHeader breadcrumb="Admin / User Management" title="User Management" />
@@ -233,16 +292,28 @@ export default function AdminUsersPage() {
       <AdminDataTable
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search users"
+        searchPlaceholder="Search users."
         loading={loading}
         filters={
           <>
+            {roleFilter !== 'all' ? (
+              <AdminFilterChip
+                label={formatUserRole(roleFilter as UserRole)}
+                onClear={() => setRoleFilter('all')}
+              />
+            ) : null}
+            {statusFilter !== 'all' ? (
+              <AdminFilterChip
+                label={statusFilter === 'ACTIVE' ? 'Active' : 'Blocked'}
+                onClear={() => setStatusFilter('all')}
+              />
+            ) : null}
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[140px] bg-gray-50 border-gray-200">
-                <SelectValue placeholder="All roles" />
+              <SelectTrigger className={adminFilterTriggerClass}>
+                <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All roles</SelectItem>
+                <SelectItem value="all">Role</SelectItem>
                 {USER_ROLE_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -251,11 +322,11 @@ export default function AdminUsersPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px] bg-gray-50 border-gray-200">
-                <SelectValue placeholder="All users" />
+              <SelectTrigger className={adminFilterTriggerClass}>
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All users</SelectItem>
+                <SelectItem value="all">Status</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="BLOCKED">Blocked</SelectItem>
               </SelectContent>
@@ -264,22 +335,73 @@ export default function AdminUsersPage() {
         }
         actions={
           <Button className="btn-admin" onClick={openCreate}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add user
+            <Plus className="w-4 h-4" />
+            Add new user
           </Button>
         }
+        bulkBar={
+          <AdminBulkBar count={selectedIds.length} onClear={() => setSelectedIds([])}>
+            <Select
+              key={selectedIds.join(',')}
+              disabled={bulkBusy}
+              onValueChange={(value) => void handleBulkStatus(value as 'ACTIVE' | 'BLOCKED')}
+            >
+              <SelectTrigger className={adminFilterTriggerClass}>
+                <SelectValue placeholder="Update status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">Set Active</SelectItem>
+                <SelectItem value="BLOCKED">Set Blocked</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              className={cn(adminActionOutlineClass, 'text-red-600 hover:border-red-200 hover:bg-red-50 hover:text-red-700')}
+              disabled={bulkBusy}
+              onClick={() => void handleBulkDelete()}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </AdminBulkBar>
+        }
+        footer={
+          filteredUsers.length > 0 ? (
+            <AdminTablePagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={filteredUsers.length}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              itemLabel="users"
+            />
+          ) : null
+        }
       >
-        <AdminTable minWidth="900px">
+        <AdminTable minWidth={ADMIN_TABLE_MIN_WIDTH}>
           <AdminTableHead>
-            <AdminTableHeaderCell>User</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Role</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Status</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Joined</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Last Sign In</AdminTableHeaderCell>
-            <AdminTableHeaderCell className="w-12" />
+            <AdminTableCheckboxCell
+              header
+              checked={allPageSelected ? true : somePageSelected ? 'indeterminate' : false}
+              onCheckedChange={(checked) => {
+                setSelectedIds((prev) =>
+                  checked
+                    ? Array.from(new Set([...prev, ...pageIds]))
+                    : prev.filter((id) => !pageIds.includes(id)),
+                );
+              }}
+              ariaLabel="Select all users on this page"
+            />
+            <AdminTableHeaderCell className="w-[28%]" sortable>User</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.type}>Role</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.status}>Status</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.date}>Joined</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.date}>Last Sign In</AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminCol.actions} />
           </AdminTableHead>
           <AdminTableBody>
-            {filteredUsers.map((user) => {
+            {pagedItems.map((user) => {
               const status = user.status ?? 'ACTIVE';
               const isActive = status === 'ACTIVE';
 
@@ -288,25 +410,26 @@ export default function AdminUsersPage() {
                   key={user.id}
                   onClick={() => router.push(`/admin/users/${user.id}`)}
                 >
+                  <AdminTableCheckboxCell
+                    checked={selectedIds.includes(user.id)}
+                    onCheckedChange={(checked) => {
+                      setSelectedIds((prev) =>
+                        checked ? [...prev, user.id] : prev.filter((id) => id !== user.id),
+                      );
+                    }}
+                    ariaLabel={`Select ${user.firstName} ${user.lastName}`}
+                  />
                   <AdminTableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback
-                          className={cn(
-                            getAvatarColor(user.id),
-                            'text-white text-sm font-semibold',
-                          )}
-                        >
-                          {getInitialsFromName(user.firstName, user.lastName)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 truncate">
-                          {user.firstName} {user.lastName}
-                        </p>
-                        <p className="text-gray-500 text-xs truncate">{user.email}</p>
-                      </div>
-                    </div>
+                    <AdminEntityCell
+                      media={
+                        <AdminAvatar
+                          id={user.id}
+                          initials={getInitialsFromName(user.firstName, user.lastName)}
+                        />
+                      }
+                      title={`${user.firstName} ${user.lastName}`}
+                      subtitle={user.email}
+                    />
                   </AdminTableCell>
                   <AdminTableCell>
                     <PillBadge>{formatUserRole(user.role)}</PillBadge>
@@ -327,42 +450,40 @@ export default function AdminUsersPage() {
                     className="px-3"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          className="p-2 rounded-lg text-gray-400 hover:text-purple-deep hover:bg-gray-100 transition-colors"
-                          aria-label="User actions"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem onClick={() => openEdit(user)}>
-                          <Pencil className="w-4 h-4 mr-2" />
-                          Edit user
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toggleStatus(user)}>
-                          {isActive ? 'Block user' : 'Activate user'}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600 focus:text-red-600"
-                          onClick={() =>
-                            handleDelete(user.id, `${user.firstName} ${user.lastName}`)
-                          }
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete user
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <AdminRowActions
+                      menu={
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <AdminMoreButton />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem onClick={() => openEdit(user)}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toggleStatus(user)}>
+                              {isActive ? 'Block user' : 'Activate user'}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600 focus:text-red-600"
+                              onClick={() =>
+                                handleDelete(user.id, `${user.firstName} ${user.lastName}`)
+                              }
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      }
+                    />
                   </AdminTableCell>
                 </AdminTableRow>
               );
             })}
             {filteredUsers.length === 0 && (
-              <AdminEmptyRow colSpan={6} message="No users match your filters" />
+              <AdminEmptyRow colSpan={7} message="No users match your filters" />
             )}
           </AdminTableBody>
         </AdminTable>
