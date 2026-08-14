@@ -492,7 +492,7 @@ export default function AdminEventsPage() {
         loading={loading}
         filters={
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-10 w-[150px] rounded-full bg-white border-gray-200">
+            <SelectTrigger className="h-10 w-[150px] rounded-full border-gray-200 bg-white shadow-none focus:border-gray-200 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-1 focus-visible:ring-purple-200 focus-visible:ring-offset-0">
               <SelectValue placeholder="All status" />
             </SelectTrigger>
             <SelectContent>

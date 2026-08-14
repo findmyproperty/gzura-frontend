@@ -127,6 +127,8 @@ export const config = {
     '/',
     '/login',
     '/signup',
+    '/forgot-password',
+    '/reset-password',
     '/home',
     '/home/:path*',
     '/my-learnings/:path*',

@@ -31,7 +31,13 @@ export default function Header() {
     pathname === '/about' ||
     pathname === '/programs' ||
     pathname === '/success-stories' ||
-    pathname === '/contact';
+    pathname === '/contact' ||
+    pathname === '/privacy' ||
+    pathname === '/terms' ||
+    pathname === '/cookies' ||
+    pathname === '/faq' ||
+    pathname === '/careers' ||
+    pathname === '/press';
 
   const lightSurface = scrolled || !isDarkHeroPage || pathname === '/' || pathname.startsWith('/pass');
 

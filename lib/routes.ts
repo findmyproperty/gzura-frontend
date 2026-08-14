@@ -8,9 +8,15 @@ export const PUBLIC_PATHS = [
   '/success-stories',
   '/join',
   '/register',
+  '/privacy',
+  '/terms',
+  '/cookies',
+  '/faq',
+  '/careers',
+  '/press',
 ] as const;
 
-export const AUTH_PATHS = ['/login', '/signup'] as const;
+export const AUTH_PATHS = ['/login', '/signup', '/forgot-password'] as const;
 
 export const MEMBER_PATH_PREFIXES = [
   '/home',

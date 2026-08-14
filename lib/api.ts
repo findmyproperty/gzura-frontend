@@ -450,15 +450,30 @@ export const api = {
       true,
     ),
 
-  changePassword: (currentPassword: string, newPassword: string) =>
+  changePassword: (currentPassword: string | undefined, newPassword: string) =>
     fetchApi<{ success: boolean }>(
       '/auth/me/password',
       {
         method: 'PATCH',
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({
+          ...(currentPassword ? { currentPassword } : {}),
+          newPassword,
+        }),
       },
       true,
     ),
+
+  forgotPassword: (identifier: string) =>
+    fetchApi<{ message: string; devResetUrl?: string }>(
+      '/auth/forgot-password',
+      { method: 'POST', body: JSON.stringify({ identifier }) },
+    ),
+
+  resetPassword: (token: string, newPassword: string) =>
+    fetchApi<{ success: boolean; message: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, newPassword }),
+    }),
 
   completeOnboarding: (goal: string, interests: string[]) =>
     fetchApi<User>(

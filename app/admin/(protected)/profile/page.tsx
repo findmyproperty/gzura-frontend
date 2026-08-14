@@ -46,7 +46,9 @@ export default function AdminProfilePage() {
   const initials = user
     ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
     : 'A';
-  const googleAccount = user?.hasPassword === false;
+  const isStaff = user?.role === 'HOST' || user?.role === 'ADMIN';
+  const googleAccount = user?.hasPassword === false && !isStaff;
+  const needsPasswordSetup = Boolean(isStaff && user?.hasPassword === false);
   const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Your profile';
 
   useEffect(() => {
@@ -169,14 +171,22 @@ export default function AdminProfilePage() {
 
     setSavingPassword(true);
     try {
-      await api.changePassword(currentPassword, newPassword);
+      await api.changePassword(
+        needsPasswordSetup ? undefined : currentPassword,
+        newPassword,
+      );
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      toast({ title: 'Password updated' });
+      await refreshUser();
+      toast({
+        title: needsPasswordSetup ? 'Password set' : 'Password updated',
+      });
     } catch (err) {
       toast({
-        title: 'Could not change password',
+        title: needsPasswordSetup
+          ? 'Could not set password'
+          : 'Could not change password',
         description: err instanceof Error ? err.message : 'Please try again',
         variant: 'destructive',
       });
@@ -349,21 +359,34 @@ export default function AdminProfilePage() {
               </div>
             ) : (
               <form onSubmit={handleChangePassword} className="flex flex-1 flex-col">
-                <div className="grid flex-1 content-start gap-4 sm:grid-cols-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="current-password" className="text-xs text-gray-500">
-                      Current password
-                    </Label>
-                    <Input
-                      id="current-password"
-                      type="password"
-                      autoComplete="current-password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      required
-                      className="h-11 rounded-xl bg-[#F8F6FB]"
-                    />
-                  </div>
+                {needsPasswordSetup ? (
+                  <p className="mb-4 text-sm text-gray-500">
+                    This account was created with Google. Set a password to also sign in with email.
+                  </p>
+                ) : null}
+                <div
+                  className={
+                    needsPasswordSetup
+                      ? 'grid flex-1 content-start gap-4 sm:grid-cols-2'
+                      : 'grid flex-1 content-start gap-4 sm:grid-cols-3'
+                  }
+                >
+                  {needsPasswordSetup ? null : (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="current-password" className="text-xs text-gray-500">
+                        Current password
+                      </Label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        className="h-11 rounded-xl bg-[#F8F6FB]"
+                      />
+                    </div>
+                  )}
                   <div className="space-y-1.5">
                     <Label htmlFor="new-password" className="text-xs text-gray-500">
                       New password
@@ -401,6 +424,8 @@ export default function AdminProfilePage() {
                   >
                     {savingPassword ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : needsPasswordSetup ? (
+                      'Set password'
                     ) : (
                       'Update password'
                     )}
