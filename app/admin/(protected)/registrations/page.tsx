@@ -224,6 +224,7 @@ export default function AdminRegistrationsPage() {
         onSearchChange={setSearch}
         searchPlaceholder="Search host requests."
         loading={loading}
+        filtersActive={statusFilter !== 'all'}
         filters={
           <>
             {statusFilter !== 'all' ? (
@@ -310,7 +311,9 @@ export default function AdminRegistrationsPage() {
             <AdminTableHeaderCell className={adminCol.person}>Profession</AdminTableHeaderCell>
             <AdminTableHeaderCell className={adminCol.status}>Status</AdminTableHeaderCell>
             <AdminTableHeaderCell className={adminCol.date}>Submitted</AdminTableHeaderCell>
-            <AdminTableHeaderCell className="w-[16%]">Actions</AdminTableHeaderCell>
+            <AdminTableHeaderCell className="w-[72px] text-right md:w-[200px]">
+              Actions
+            </AdminTableHeaderCell>
           </AdminTableHead>
           <AdminTableBody>
             {pagedItems.map((row) => (

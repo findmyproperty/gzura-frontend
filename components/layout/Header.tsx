@@ -3,8 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { getDashboardPath } from '@/lib/auth-utils';
 import { cn } from '@/lib/utils';
@@ -68,10 +77,8 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        lightSurface
-          ? 'bg-white/90 backdrop-blur-xl shadow-sm shadow-purple-900/5'
-          : 'bg-transparent'
+        'sticky top-0 z-50 w-full transition-all duration-300 bg-white/90',
+        lightSurface && 'shadow-sm shadow-purple-900/5'
       )}
     >
       <nav className="container-custom">
@@ -83,8 +90,8 @@ export default function Header() {
             </div>
             <span
               className={cn(
-                'text-2xl font-bold font-display transition-colors',
-                lightSurface ? 'text-purple-deep' : 'text-white'
+                'md:text-2xl text-xl font-bold font-display transition-colors',
+                 'text-purple-deep' 
               )}
             >
               GZURA
@@ -99,20 +106,16 @@ export default function Header() {
                 href={item.href}
                 className={cn(
                   'text-sm font-medium transition-colors relative group',
-                  lightSurface
-                    ? pathname === item.href
-                      ? 'text-purple-deep'
-                      : 'text-gray-700 hover:text-purple-deep'
-                    : pathname === item.href
+                     pathname === item.href
                       ? 'text-gold-400'
-                      : 'text-white/90 hover:text-white'
+                      : 'text-gray-700 hover:text-gold-400'
                 )}
               >
                 {item.name}
                 <span
                   className={cn(
                     'absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full',
-                    lightSurface ? 'bg-purple-deep' : 'bg-gold-400'
+                    'bg-gold-400'
                   )}
                 />
               </Link>
@@ -126,9 +129,7 @@ export default function Header() {
                 href={getDashboardPath(user.role)}
                 className={cn(
                   'text-sm font-medium transition-colors',
-                  lightSurface
-                    ? 'text-purple-deep hover:text-gold-royal'
-                    : 'text-white/90 hover:text-gold-400'
+                  'text-purple-deep hover:text-gold-royal'
                 )}
               >
                 Dashboard
@@ -138,9 +139,7 @@ export default function Header() {
                 href="/login"
                 className={cn(
                   'text-sm font-medium transition-colors',
-                  lightSurface
-                    ? 'text-purple-deep hover:text-gold-royal'
-                    : 'text-white/90 hover:text-gold-400'
+                  'text-purple-deep hover:text-gold-royal'
                 )}
               >
                 Login
@@ -148,56 +147,68 @@ export default function Header() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={cn(
-              'lg:hidden p-2 rounded-lg transition-colors',
-              lightSurface
-                ? 'text-purple-deep hover:bg-purple-100'
-                : 'text-white hover:bg-white/10'
-            )}
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={cn(
-            'lg:hidden overflow-hidden transition-all duration-300',
-            mobileMenuOpen ? 'max-h-[500px] pb-6' : 'max-h-0'
-          )}
-        >
-          <div className="flex flex-col gap-4 pt-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  'text-base font-medium py-2 px-4 rounded-lg transition-colors',
-                  pathname === item.href
-                    ? 'bg-purple-100 text-purple-deep'
-                    : 'text-gray-700 hover:bg-gray-100'
-                )}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                className="lg:hidden p-2 rounded-lg text-purple-deep transition-colors hover:bg-purple-100"
+                aria-label="Open menu"
               >
-                {item.name}
-              </Link>
-            ))}
-            {user ? (
-              <Link href={getDashboardPath(user.role)} className="mt-2">
-                <Button variant="outline" className="w-full">Dashboard</Button>
-              </Link>
-            ) : (
-              <Link href="/login" className="text-base font-medium py-2 px-4 text-gray-700">
-                Login
-              </Link>
-            )}
-          </div>
+                <Menu className="w-6 h-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="flex w-[min(100%,20rem)] flex-col gap-0 border-purple-100 p-0 lg:hidden"
+            >
+              <SheetHeader className="border-b border-purple-50 px-6 py-5 text-left">
+                <SheetTitle className="font-display text-xl text-purple-deep">
+                  GZURA
+                </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Site navigation
+                </SheetDescription>
+              </SheetHeader>
+              <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+                {navigation.map((item) => (
+                  <SheetClose asChild key={item.name}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        'rounded-lg px-3 py-2.5 text-base font-medium transition-colors',
+                        pathname === item.href
+                          ? 'bg-purple-100 text-purple-deep'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      )}
+                    >
+                      {item.name}
+                    </Link>
+                  </SheetClose>
+                ))}
+              </nav>
+              <div className="border-t border-purple-50 p-4">
+                {user ? (
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link
+                      href={getDashboardPath(user.role)}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  </Button>
+                ) : (
+                  <SheetClose asChild>
+                    <Link
+                      href="/login"
+                      className="block rounded-lg px-3 py-2.5 text-base font-medium text-gray-700 hover:bg-gray-100"
+                    >
+                      Login
+                    </Link>
+                  </SheetClose>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
     </header>

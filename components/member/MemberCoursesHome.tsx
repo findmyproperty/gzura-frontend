@@ -21,7 +21,7 @@ export default function MemberCoursesHome({ events }: { events: Event[] }) {
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Modern Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-white py-14 lg:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 text-white py-8 lg:py-20">
         {/* Background glow effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 -right-20 w-96 h-96 rounded-full bg-amber-500/15 blur-3xl" />

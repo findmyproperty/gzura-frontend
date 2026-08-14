@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gzura.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_API_URL!),
   title: "GZURA | Empowering Men & Women Entrepreneurs",
   description:
     "GZURA is a platform dedicated to entrepreneurship, leadership development, networking, and personal growth.",

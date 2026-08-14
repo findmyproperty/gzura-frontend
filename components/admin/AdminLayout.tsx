@@ -470,7 +470,7 @@ function AdminLayoutShell({
           <div
             className={cn(
               'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
-              'my-3 ml-3 mr-3 rounded-[22px]',
+              'md:my-3 md:mx-3 rounded-[22px]',
             )}
           >
             <header className="flex items-center justify-between gap-4 px-4 sm:px-6 pt-4 pb-3 shrink-0">

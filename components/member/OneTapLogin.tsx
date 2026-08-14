@@ -68,7 +68,6 @@ const OneTapLogin = ({ children }: PropsWithChildren) => {
         variant: "destructive",
       });
     },
-    auto_select: true,
     cancel_on_tap_outside: false,
   });
 

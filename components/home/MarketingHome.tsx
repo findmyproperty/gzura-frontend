@@ -1,5 +1,4 @@
 import HeroSection from '@/components/sections/HeroSection';
-import LogoStrip from '@/components/sections/LogoStrip';
 import AboutSection from '@/components/sections/AboutSection';
 import ProgramsSection from '@/components/sections/ProgramsSection';
 import JoinSection from '@/components/sections/JoinSection';
@@ -12,7 +11,6 @@ export default function MarketingHome() {
   return (
     <>
       <HeroSection />
-      <LogoStrip />
       <AboutSection />
       <ProgramsSection />
       <JoinSection />

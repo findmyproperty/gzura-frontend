@@ -23,9 +23,11 @@ import {
   AdminTablePagination,
   AdminTableRow,
   ADMIN_TABLE_MIN_WIDTH,
+  adminActionLabelClass,
   adminActionOutlineClass,
   adminCol,
   adminFilterTriggerClass,
+  adminMobileIconActionClass,
   runAdminBulk,
   formatAdminDate,
   getInitialsFromName,
@@ -294,6 +296,7 @@ export default function AdminUsersPage() {
         onSearchChange={setSearch}
         searchPlaceholder="Search users."
         loading={loading}
+        filtersActive={roleFilter !== 'all' || statusFilter !== 'all'}
         filters={
           <>
             {roleFilter !== 'all' ? (
@@ -334,9 +337,9 @@ export default function AdminUsersPage() {
           </>
         }
         actions={
-          <Button className="btn-admin" onClick={openCreate}>
-            <Plus className="w-4 h-4" />
-            Add new user
+          <Button className={cn('btn-admin', adminMobileIconActionClass)} onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            <span className={adminActionLabelClass}>Add new user</span>
           </Button>
         }
         bulkBar={

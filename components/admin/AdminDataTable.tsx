@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ListFilter,
   MoreHorizontal,
   Pencil,
   Search,
@@ -20,6 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
 export const AVATAR_COLORS = [
@@ -42,7 +51,7 @@ export const adminCol = {
   type: 'w-[12%]',
   status: 'w-[15%]',
   number: 'w-[11%]',
-  actions: 'w-[72px]',
+  actions: 'w-[72px] text-right',
 } as const;
 
 export const adminFilterTriggerClass =
@@ -53,6 +62,11 @@ export const adminActionOutlineClass =
 
 export const adminIconButtonClass =
   'rounded-md p-1 text-gray-400 transition-colors hover:bg-purple-50 hover:text-purple-deep';
+
+export const adminActionLabelClass = 'hidden md:inline';
+
+export const adminMobileIconActionClass =
+  'h-9 w-9 px-0 md:w-auto md:px-3.5';
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
@@ -180,6 +194,8 @@ export function AdminDataTable({
   onSearchChange,
   searchPlaceholder = 'Search...',
   filters,
+  filtersActive = false,
+  sheetExtras,
   actions,
   bulkBar,
   loading,
@@ -192,6 +208,8 @@ export function AdminDataTable({
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   filters?: React.ReactNode;
+  filtersActive?: boolean;
+  sheetExtras?: React.ReactNode;
   actions?: React.ReactNode;
   bulkBar?: React.ReactNode;
   loading?: boolean;
@@ -200,21 +218,33 @@ export function AdminDataTable({
   fill?: boolean;
   children: React.ReactNode;
 }) {
-  const searchField = onSearchChange ? (
-    <div className="relative w-full min-w-0 sm:w-[228px] sm:shrink-0">
-      <Search
-        strokeWidth={1.75}
-        className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
-      />
-      <input
-        type="text"
-        value={search ?? ''}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder={searchPlaceholder}
-        className="box-border h-9 w-full rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-3 text-[13px] leading-none text-zinc-900 outline-none placeholder:text-gray-400 focus:border-gold-royal"
-      />
-    </div>
-  ) : null;
+  const [filterOpen, setFilterOpen] = useState(false);
+  const hasSearch = Boolean(onSearchChange);
+  const hasFilters = Boolean(filters || sheetExtras);
+  const showFilterSheet = hasSearch || hasFilters;
+  const filterBadge = filtersActive || Boolean(search?.trim());
+
+  const searchField = (fullWidth = false) =>
+    onSearchChange ? (
+      <div
+        className={cn(
+          'relative min-w-0',
+          fullWidth ? 'w-full' : 'w-full md:w-[228px] md:shrink-0',
+        )}
+      >
+        <Search
+          strokeWidth={1.75}
+          className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
+        />
+        <input
+          type="text"
+          value={search ?? ''}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={searchPlaceholder}
+          className="box-border h-9 w-full rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-3 text-[13px] leading-none text-zinc-900 outline-none placeholder:text-gray-400 focus:border-gold-royal"
+        />
+      </div>
+    ) : null;
 
   return (
     <div
@@ -223,22 +253,62 @@ export function AdminDataTable({
         fill ? 'min-h-0 flex-1' : 'h-auto',
       )}
     >
-      {(onSearchChange || filters || actions || bulkBar) && (
-        <div className="shrink-0 space-y-3 px-5 pb-4 pt-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      {(hasSearch || filters || actions || bulkBar) && (
+        <div className="shrink-0 space-y-3 px-4 pb-4 pt-4 md:px-5 md:pt-5">
+          <div className="flex items-center gap-2 md:hidden">
+            {showFilterSheet ? (
+              <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+                <SheetTrigger asChild>
+                  <button
+                    type="button"
+                    className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-gray-600 hover:border-purple-deep hover:text-purple-deep"
+                    aria-label="Open filters"
+                  >
+                    <ListFilter className="h-4 w-4" />
+                    {filterBadge ? (
+                      <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-gold-royal" />
+                    ) : null}
+                  </button>
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  className="flex w-[min(100%,20rem)] flex-col gap-0 border-purple-100 p-0"
+                >
+                  <SheetHeader className="border-b border-purple-50 px-6 py-5 text-left">
+                    <SheetTitle className="text-lg font-semibold text-zinc-900">
+                      Filters
+                    </SheetTitle>
+                    <SheetDescription className="sr-only">
+                      Search and filter this list
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-3 overflow-y-auto px-5 py-5 [&_button[role=combobox]]:w-full">
+                    {searchField(true)}
+                    {filters}
+                    {sheetExtras}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            ) : null}
+            {actions ? (
+              <div className="ml-auto flex items-center gap-2">{actions}</div>
+            ) : null}
+          </div>
+
+          <div className="hidden items-center gap-3 md:flex">
             {filters ? (
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 {filters}
               </div>
             ) : null}
-            {(searchField || actions) ? (
+            {hasSearch || actions ? (
               <div
                 className={cn(
                   'flex min-w-0 flex-wrap items-center gap-2',
-                  filters && 'sm:ml-auto',
+                  filters && 'ml-auto',
                 )}
               >
-                {searchField}
+                {searchField()}
                 {actions}
               </div>
             ) : null}
@@ -319,8 +389,8 @@ export function AdminTablePagination({
   const pages = getPaginationRange(page, totalPages);
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-[13px] text-gray-400">
+    <div className="flex items-center justify-between gap-2">
+      <p className="hidden text-[13px] text-gray-400 sm:block">
         Page {page} of {totalPages}
         <span className="sr-only">
           {' '}
@@ -454,7 +524,7 @@ export function AdminTable({
 }
 
 const headerCellClass =
-  'bg-[#F4F5F7] text-left text-[12px] font-medium text-gray-400 px-4 py-3 first:pl-4 last:pr-4 first:rounded-tl-xl last:rounded-tr-xl';
+  'bg-[#F4F5F7] text-left text-[12px] font-medium text-gray-400 px-4 py-3 first:pl-4 last:pr-3 last:text-right first:rounded-tl-xl last:rounded-tr-xl';
 
 export function AdminTableHead({ children }: { children: React.ReactNode }) {
   return (
@@ -526,7 +596,7 @@ export function AdminTableCell({
   return (
     <td
       className={cn(
-        'border-b border-[#F3F4F6] px-4 py-[14px] align-middle first:pl-4 last:pr-4 text-[14px] text-gray-600',
+        'border-b border-[#F3F4F6] px-4 py-[14px] align-middle first:pl-4 last:pr-3 last:text-right text-[14px] text-gray-600',
         className,
       )}
       onClick={onClick}

@@ -126,7 +126,7 @@ export default function JoinSection() {
         aria-labelledby="success-heading"
       >
         <div className="container-custom relative z-10">
-          <div className="relative rounded-[1.75rem] md:rounded-[2rem] overflow-hidden min-h-[420px] shadow-2xl">
+          <div className="relative rounded md:rounded-[2rem] overflow-hidden min-h-[420px] shadow-2xl">
             <Image
               src={HERO_IMAGE}
               alt=""
@@ -139,8 +139,8 @@ export default function JoinSection() {
               className="absolute inset-0 bg-gradient-to-br from-purple-deep/95 via-purple-800/90 to-purple-950/85"
               aria-hidden
             />
-            <div className="relative z-10 flex items-center justify-center p-8 md:p-12 min-h-[420px]">
-              <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl max-w-md w-full text-center animate-scale-in">
+            <div className="relative z-10 flex items-center justify-center p-2 md:p-12 min-h-[420px]">
+              <div className="bg-white rounded-xl p-2 md:p-12 shadow-2xl max-w-md w-full text-center animate-scale-in">
                 <div
                   className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center"
                   aria-hidden="true"
@@ -175,7 +175,7 @@ export default function JoinSection() {
     >
       <div className="container-custom relative z-10">
         <ScrollAnimate animation="fade-up">
-          <div className="relative rounded-[1.75rem] md:rounded-[2rem] overflow-hidden shadow-2xl shadow-purple-900/20">
+          <div className="relative rounded-xl md:rounded-[2rem] overflow-hidden shadow-2xl shadow-purple-900/20">
             {/* Background image */}
             <div className="absolute inset-0">
               <Image
@@ -202,7 +202,7 @@ export default function JoinSection() {
               />
             </div>
 
-            <div className="relative z-10 grid lg:grid-cols-[1fr_minmax(0,26rem)] xl:grid-cols-[1fr_minmax(0,28rem)] gap-8 lg:gap-10 xl:gap-14 p-5 sm:p-7 md:p-10 lg:p-12 xl:p-14 min-h-[640px] lg:min-h-[680px]">
+            <div className="relative z-10 grid lg:grid-cols-[1fr_minmax(0,26rem)] xl:grid-cols-[1fr_minmax(0,28rem)] gap-8 lg:gap-10 xl:gap-14 p-2 sm:p-7 md:p-10 lg:p-12 xl:p-14 min-h-[640px] lg:min-h-[680px]">
               {/* Left: hero copy */}
               <div className="flex flex-col justify-end order-2 lg:order-1 text-white lg:pr-4 lg:pb-2">
                 <div className="inline-flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/25 px-3.5 py-1.5 mb-5 w-fit shadow-lg">
@@ -258,7 +258,7 @@ export default function JoinSection() {
 
               {/* Right: floating form card */}
               <div className="flex items-stretch lg:items-center order-1 lg:order-2">
-                <div className="w-full bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-white/60 p-5 sm:p-6 md:p-8 flex flex-col">
+                <div className="w-full bg-white rounded-xl md:rounded-3xl shadow-2xl border border-white/60 p-2 sm:p-6 md:p-8 flex flex-col">
                   <div className="flex items-start justify-between gap-3 mb-5 md:mb-6">
                     <div>
                       <h3 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">

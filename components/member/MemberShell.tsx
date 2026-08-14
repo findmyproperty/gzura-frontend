@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell, ChevronDown, FileText, LogOut, Receipt, Search, User, UserCheck } from 'lucide-react';
+import { Bell, Book, ChevronDown, FileText, LogOut, Receipt, Search, User, UserCheck } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -31,8 +31,8 @@ export default function MemberShell({
     : 'G';
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
+    <>
+      <header className="sticky top-0 w-full z-40 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             <div className="flex items-center gap-8 min-w-0">
@@ -144,6 +144,7 @@ export default function MemberShell({
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/my-learnings">
+                        <Book className="w-4 h-4 mr-2" />
                         My Learnings
                       </Link>
                     </DropdownMenuItem>
@@ -177,7 +178,7 @@ export default function MemberShell({
           </div>
         </div>
       </header>
-      <main>{children}</main>
-    </div>
+      <main className="flex-1">{children}</main>
+    </>
   );
 }

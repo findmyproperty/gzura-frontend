@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { adminActionOutlineClass } from '@/components/admin/AdminDataTable';
+import {
+  adminActionLabelClass,
+  adminActionOutlineClass,
+  adminMobileIconActionClass,
+} from '@/components/admin/AdminDataTable';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,15 +79,15 @@ export function AdminExportMenu({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className={adminActionOutlineClass}
+          className={cn(adminActionOutlineClass, adminMobileIconActionClass)}
           disabled={disabled || exporting !== null}
         >
           {exporting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Download className="w-4 h-4" />
+            <Download className="h-4 w-4" />
           )}
-          Export
+          <span className={adminActionLabelClass}>Export</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

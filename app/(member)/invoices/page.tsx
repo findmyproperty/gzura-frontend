@@ -150,106 +150,129 @@ export default function MemberInvoicesPage() {
   if (authLoading) return null;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Receipt className="w-8 h-8 text-purple-deep" />
-            My Invoices & Receipts
-          </h1>
-          <p className="text-gray-600 mt-1">
-            View and download tax invoices for all your event enrollments and ticket purchases.
-          </p>
-        </div>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="flex items-center gap-2 text-lg font-bold text-gray-900 sm:gap-3 sm:text-3xl">
+          <Receipt className="h-5 w-5 shrink-0 text-purple-deep sm:h-8 sm:w-8" />
+          My Invoices & Receipts
+        </h1>
+        <p className="mt-1 text-sm text-gray-600 sm:text-base">
+          Download receipts for your event enrollments.
+        </p>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="w-8 h-8 text-purple-deep animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple-deep" />
         </div>
       ) : registrations.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center">
-          <FileText className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-6 py-12 text-center">
+          <FileText className="mx-auto mb-3 h-12 w-12 text-gray-400" />
           <h3 className="text-lg font-semibold text-gray-900">No invoices found</h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="mt-1 text-sm text-gray-500">
             You haven&apos;t enrolled in any events yet. Explore upcoming courses to get started.
           </p>
-          <Link href="/events" className="inline-block mt-4">
+          <Link href="/events" className="mt-4 inline-block">
             <Button className="btn-primary">Explore Events</Button>
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {registrations.map((reg) => {
             const invoiceNo = `INV-${reg.id.slice(0, 8).toUpperCase()}`;
             const isPaid = reg.paymentStatus === 'PAID';
+            const issuedOn = new Date(reg.createdAt).toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            });
+            const eventDate = reg.event?.dateStart
+              ? new Date(reg.event.dateStart).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })
+              : 'Date TBA';
+            const location = reg.event?.location || 'GZURA Online';
 
             return (
-              <div
+              <article
                 key={reg.id}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-center justify-between gap-6"
+                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6"
               >
-                <div className="space-y-2 flex-1">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="font-mono text-xs font-bold text-purple-deep bg-purple-50 px-2.5 py-1 rounded-md border border-purple-100">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-[11px] font-semibold tracking-wide text-purple-deep sm:text-xs">
                       {invoiceNo}
-                    </span>
-                    <Badge className={isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700'}>
-                      {isPaid ? 'PAID' : 'FREE ENROLLMENT'}
-                    </Badge>
-                    <span className="text-xs text-gray-500">
-                      {new Date(reg.createdAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </span>
+                    </p>
+                    <h3 className="mt-1 truncate text-base font-bold text-gray-900 sm:text-lg">
+                      {reg.event?.title || 'Event Ticket'}
+                    </h3>
                   </div>
-
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {reg.event?.title || 'Event Ticket'}
-                  </h3>
-
-                  <div className="flex flex-wrap gap-4 text-xs text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-gold-royal" />
-                      {reg.event?.dateStart
-                        ? new Date(reg.event.dateStart).toLocaleDateString('en-IN')
-                        : 'N/A'}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-gold-royal" />
-                      {reg.event?.location || 'GZURA Online'}
-                    </span>
-                  </div>
+                  <Badge
+                    className={
+                      isPaid
+                        ? 'shrink-0 bg-emerald-100 text-emerald-800 hover:bg-emerald-100'
+                        : 'shrink-0 bg-gray-100 text-gray-700 hover:bg-gray-100'
+                    }
+                  >
+                    {isPaid ? 'Paid' : 'Free'}
+                  </Badge>
                 </div>
 
-                <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 border-t pt-4 md:border-t-0 md:pt-0">
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Amount Paid</p>
-                    <p className="text-xl font-bold text-purple-deep">
+                <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs text-gray-600 sm:flex sm:flex-wrap sm:gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5 shrink-0 text-gold-royal" />
+                    <div className="min-w-0">
+                      <dt className="sr-only">Event date</dt>
+                      <dd>{eventDate}</dd>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Receipt className="h-3.5 w-3.5 shrink-0 text-gold-royal" />
+                    <div className="min-w-0">
+                      <dt className="sr-only">Issued</dt>
+                      <dd>Issued {issuedOn}</dd>
+                    </div>
+                  </div>
+                  <div className="col-span-2 flex items-start gap-1.5 sm:col-span-1">
+                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-royal" />
+                    <div className="min-w-0">
+                      <dt className="sr-only">Location</dt>
+                      <dd className="line-clamp-1" title={location}>
+                        {location}
+                      </dd>
+                    </div>
+                  </div>
+                </dl>
+
+                <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
+                      Amount paid
+                    </p>
+                    <p className="text-lg font-bold text-purple-deep">
                       {reg.amountPaid ? `₹${reg.amountPaid}` : 'Free'}
                     </p>
                   </div>
-
                   <Button
                     variant="outline"
                     size="sm"
                     disabled={downloadingId === reg.id}
                     onClick={() => handleDownloadInvoice(reg)}
-                    className="border-purple-200 text-purple-deep hover:bg-purple-50"
+                    className="w-full border-purple-200 text-purple-deep hover:bg-purple-50 sm:w-auto"
                   >
                     {downloadingId === reg.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        <Download className="w-4 h-4 mr-2" />
-                        Download Invoice
+                        <Download className="mr-2 h-4 w-4" />
+                        Download
                       </>
                     )}
                   </Button>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

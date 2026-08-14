@@ -66,11 +66,11 @@ export default function MemberProfilePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <h1 className="md:text-3xl text-xl font-bold text-gray-900 flex items-center gap-3">
           <UserCheck className="w-8 h-8 text-purple-deep" />
           Edit Profile
         </h1>
-        <p className="text-gray-600 mt-1">
+        <p className="md:text-base text-sm text-gray-600 mt-1">
           Update your personal information, contact details, and account email.
         </p>
       </div>

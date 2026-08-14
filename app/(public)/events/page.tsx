@@ -18,7 +18,7 @@ export default async function EventsPage() {
 
   return (
     <>
-      <section className="gradient-bg pt-32 pb-20 relative overflow-hidden">
+      <section className="gradient-bg p-5 md:p-20 relative overflow-hidden">
         <div className="container-custom relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">

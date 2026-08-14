@@ -39,7 +39,7 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative h-[100svh] max-h-[100svh] overflow-hidden bg-white"
+      className="relative overflow-hidden bg-white"
       aria-labelledby="hero-heading"
     >
       {/* Soft purple abstract shapes (Fundpro style) */}
@@ -49,7 +49,7 @@ export default function HeroSection() {
         <div className="absolute bottom-0 left-1/3 h-48 w-48 2xl:h-64 2xl:w-64 rounded-full bg-gold-100/40 blur-2xl" />
       </div>
 
-      <div className="container-custom relative z-10 flex h-full flex-col justify-center pt-20 pb-3 sm:pb-4">
+      <div className="container-custom relative z-10 flex h-full flex-col justify-center pt-3 pb-3 sm:pb-4">
         <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-6 xl:gap-10 2xl:gap-20">
           {/* ── LEFT: copy + video ── */}
           <div className="lg:col-span-5 xl:col-span-4 2xl:col-span-4">

@@ -37,9 +37,11 @@ import {
   AdminTablePagination,
   AdminTableRow,
   ADMIN_TABLE_MIN_WIDTH,
+  adminActionLabelClass,
   adminActionOutlineClass,
   adminCol,
   adminFilterTriggerClass,
+  adminMobileIconActionClass,
   formatAdminDate,
   getAvatarColor,
   getInitialsFromFullName,
@@ -505,6 +507,7 @@ export default function AdminEventsPage() {
         onSearchChange={setSearch}
         searchPlaceholder="Search events."
         loading={loading}
+        filtersActive={statusFilter !== 'all'}
         filters={
           <>
             {statusFilter !== 'all' && statusFilter !== 'APPROVAL' ? (
@@ -530,6 +533,48 @@ export default function AdminEventsPage() {
             </Select>
           </>
         }
+        sheetExtras={
+          <>
+            {isAdmin ? (
+              <Button
+                variant="outline"
+                className={cn(
+                  adminActionOutlineClass,
+                  'w-full justify-between',
+                  statusFilter === 'APPROVAL' &&
+                    'border-gold-royal bg-gold-50 text-zinc-900 hover:border-gold-royal hover:bg-gold-50 hover:text-zinc-900',
+                )}
+                onClick={() =>
+                  setStatusFilter((prev) => (prev === 'APPROVAL' ? 'all' : 'APPROVAL'))
+                }
+              >
+                Pending for review
+                <span
+                  className={cn(
+                    'flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold',
+                    approvalRequests.length > 0
+                      ? 'bg-gold-royal text-zinc-900'
+                      : 'bg-purple-deep text-white',
+                  )}
+                >
+                  {approvalRequests.length}
+                </span>
+              </Button>
+            ) : null}
+            {!isAdmin && rejectedEvents.length > 0 ? (
+              <Button
+                variant="outline"
+                className={cn(adminActionOutlineClass, 'w-full justify-between')}
+                onClick={() => setRejectedListOpen(true)}
+              >
+                Rejected list
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-purple-deep px-1 text-[10px] font-bold text-white">
+                  {rejectedEvents.length}
+                </span>
+              </Button>
+            ) : null}
+          </>
+        }
         actions={
           <div className="flex items-center gap-2">
             {isAdmin ? (
@@ -537,6 +582,7 @@ export default function AdminEventsPage() {
                 variant="outline"
                 className={cn(
                   adminActionOutlineClass,
+                  'hidden md:inline-flex',
                   statusFilter === 'APPROVAL' &&
                     'border-gold-royal bg-gold-50 text-zinc-900 hover:border-gold-royal hover:bg-gold-50 hover:text-zinc-900',
                 )}
@@ -560,7 +606,7 @@ export default function AdminEventsPage() {
             {!isAdmin && rejectedEvents.length > 0 && (
               <Button
                 variant="outline"
-                className={adminActionOutlineClass}
+                className={cn(adminActionOutlineClass, 'hidden md:inline-flex')}
                 onClick={() => setRejectedListOpen(true)}
               >
                 Rejected list
@@ -569,10 +615,10 @@ export default function AdminEventsPage() {
                 </span>
               </Button>
             )}
-            <Button asChild className="btn-admin">
+            <Button asChild className={cn('btn-admin', adminMobileIconActionClass)}>
               <Link href="/admin/events/new">
-                <Plus className="w-4 h-4" />
-                Add new event
+                <Plus className="h-4 w-4" />
+                <span className={adminActionLabelClass}>Add new event</span>
               </Link>
             </Button>
           </div>
