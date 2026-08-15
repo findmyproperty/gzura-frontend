@@ -69,20 +69,6 @@ const teamMembers = [
     image: '/images/team/founder-ceo.png',
     objectPosition: '50% 18%',
   },
-  {
-    name: 'Priya Sharma',
-    role: 'Director of Community',
-    bio: 'Community builder with expertise in creating thriving networks.',
-    image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400',
-    objectPosition: '50% 20%',
-  },
-  {
-    name: 'James Williams',
-    role: 'Head of Mentorship',
-    bio: 'Executive coach who has mentored over 500 emerging leaders.',
-    image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
-    objectPosition: '50% 20%',
-  },
 ];
 
 export default function AboutPage() {
