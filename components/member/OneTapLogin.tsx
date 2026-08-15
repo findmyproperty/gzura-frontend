@@ -1,5 +1,4 @@
 "use client";
-import { PropsWithChildren } from "react";
 import { useGoogleOneTapLogin } from "@react-oauth/google";
 import { useCallback } from "react";
 import { resolvePostLoginRedirect } from "@/lib/auth-utils";
@@ -9,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { isOnboardingComplete } from "@/lib/member-onboarding";
 import { toast } from "@/hooks/use-toast";
 
-const OneTapLogin = ({ children }: PropsWithChildren) => {
+const OneTapLogin = () => {
   const { login, user, loading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -71,7 +70,7 @@ const OneTapLogin = ({ children }: PropsWithChildren) => {
     cancel_on_tap_outside: false,
   });
 
-  return children;
+  return null;
 };
 
 export default OneTapLogin;
