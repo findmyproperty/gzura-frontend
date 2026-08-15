@@ -21,6 +21,11 @@ import {
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -81,6 +86,7 @@ function AdminLayoutShell({
   const { pageHeader } = useAdminChrome();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   type NotificationItem = {
@@ -319,19 +325,14 @@ function AdminLayoutShell({
           collapsed ? 'flex flex-col items-center px-0 pb-4 pt-3' : 'px-3 pb-3 pt-2',
         )}
       >
-        {user && (
+        {user && collapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
                 title="Profile menu"
                 aria-label="Open profile menu"
-                className={cn(
-                  'flex min-w-0 items-center transition-colors',
-                  collapsed
-                    ? 'justify-center rounded-2xl p-0.5 hover:bg-[#F5F5F5]'
-                    : 'w-full gap-2.5 rounded-2xl border border-[#EBEBEB] bg-white px-2.5 py-2 hover:bg-[#FAFAFA]',
-                )}
+                className="flex min-w-0 items-center justify-center rounded-2xl p-0.5 transition-colors hover:bg-[#F5F5F5]"
               >
                 <Avatar className="h-9 w-9 shrink-0">
                   {user.avatarUrl ? (
@@ -341,77 +342,136 @@ function AdminLayoutShell({
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                {!collapsed && (
-                  <>
-                    <div className="min-w-0 flex-1 text-left">
-                      <p className="truncate text-[13px] font-medium leading-tight text-zinc-900">
-                        {user.firstName} {user.lastName}
-                      </p>
-                      <p className="truncate text-[11px] text-[#A1A1A1]">
-                        {formatUserRole(user.role)}
-                      </p>
-                    </div>
-                    <ChevronDown className="h-4 w-4 shrink-0 text-zinc-300" />
-                  </>
-                )}
               </button>
             </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="right"
-                align="end"
-                sideOffset={10}
-                className="w-64 p-1.5"
-              >
-                <DropdownMenuLabel className="font-normal p-2">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 shrink-0 ring-1 ring-zinc-200">
-                      {user.avatarUrl ? (
-                        <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
-                      ) : null}
-                      <AvatarFallback className="bg-purple-deep text-sm font-semibold text-white">
-                        {userInitials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-zinc-900 truncate">
-                        {user.firstName} {user.lastName}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {formatUserRole(user.role)}
-                      </p>
-                    </div>
+            <DropdownMenuContent
+              side="right"
+              align="end"
+              sideOffset={10}
+              className="w-64 p-1.5"
+            >
+              <DropdownMenuLabel className="font-normal p-2">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 shrink-0 ring-1 ring-zinc-200">
+                    {user.avatarUrl ? (
+                      <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
+                    ) : null}
+                    <AvatarFallback className="bg-purple-deep text-sm font-semibold text-white">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-zinc-900 truncate">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {formatUserRole(user.role)}
+                    </p>
                   </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/admin/profile"
-                    onClick={onNavigate}
-                    className="cursor-pointer"
-                  >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/" onClick={onNavigate} className="cursor-pointer">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    View Website
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/admin/profile"
+                  onClick={onNavigate}
+                  className="cursor-pointer"
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/" onClick={onNavigate} className="cursor-pointer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View Website
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  onNavigate?.();
+                  handleLogout();
+                }}
+                className="text-red-600 focus:text-red-600 cursor-pointer"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {user && !collapsed && (
+          <Collapsible
+            open={profileMenuOpen}
+            onOpenChange={setProfileMenuOpen}
+            className="w-full overflow-hidden rounded-2xl border border-[#EBEBEB] bg-white"
+          >
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                title="Profile menu"
+                aria-expanded={profileMenuOpen}
+                aria-label="Open profile menu"
+                className="flex w-full min-w-0 items-center gap-2.5 px-2.5 py-2 text-left transition-colors hover:bg-[#FAFAFA]"
+              >
+                <Avatar className="h-9 w-9 shrink-0">
+                  {user.avatarUrl ? (
+                    <AvatarImage src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="object-cover" />
+                  ) : null}
+                  <AvatarFallback className="bg-purple-deep text-[11px] font-semibold text-white">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-medium leading-tight text-zinc-900">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="truncate text-[11px] text-[#A1A1A1]">
+                    {formatUserRole(user.role)}
+                  </p>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    'h-4 w-4 shrink-0 text-zinc-300 transition-transform',
+                    profileMenuOpen && 'rotate-180',
+                  )}
+                />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="border-t border-[#EBEBEB]">
+              <div className="flex flex-col p-1.5">
+                <Link
+                  href="/admin/profile"
+                  onClick={onNavigate}
+                  className="flex items-center rounded-xl px-2.5 py-2 text-[13px] text-zinc-800 transition-colors hover:bg-[#F5F5F5]"
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit profile
+                </Link>
+                <Link
+                  href="/"
+                  onClick={onNavigate}
+                  className="flex items-center rounded-xl px-2.5 py-2 text-[13px] text-zinc-800 transition-colors hover:bg-[#F5F5F5]"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View Website
+                </Link>
+                <button
+                  type="button"
                   onClick={() => {
                     onNavigate?.();
                     handleLogout();
                   }}
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
+                  className="flex items-center rounded-xl px-2.5 py-2 text-left text-[13px] text-red-600 transition-colors hover:bg-red-50"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </button>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </div>
     </div>
@@ -445,7 +505,10 @@ function AdminLayoutShell({
           {mobileOpen && (
             <div
               className="fixed inset-0 z-50 bg-zinc-900/30 lg:hidden"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => {
+                setProfileMenuOpen(false);
+                setMobileOpen(false);
+              }}
             />
           )}
           <aside
@@ -463,7 +526,12 @@ function AdminLayoutShell({
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <SidebarContent onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent
+              onNavigate={() => {
+                setProfileMenuOpen(false);
+                setMobileOpen(false);
+              }}
+            />
           </aside>
 
           {/* Main panel */}
