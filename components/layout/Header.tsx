@@ -124,11 +124,11 @@ export default function Header() {
           {/* Auth */}
           <div className="hidden lg:flex items-center gap-4">
             {user ? (
-              <Button  asChild>
+              <Button  asChild className="rounded-full">
                 <Link href={getDashboardPath(user.role)}>Dashboard</Link>
               </Button>
             ) : (
-              <Button  asChild>
+              <Button  asChild className="rounded-full">
                 <Link href="/login">Login</Link>
               </Button>
             )}

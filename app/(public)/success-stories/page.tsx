@@ -18,7 +18,7 @@ const featuredStories = [
     story:
       'Before GZURA, I was a middle manager feeling stuck. The Leadership Development Program gave me the skills and confidence to start my own company. Today, TechVenture has raised $15M in funding and employs 80 people. The mentorship I received was invaluable - my mentor helped me navigate every major decision in my first year.',
     achievement: 'From manager to CEO, raised $15M funding',
-    image: 'https://images.pexels.com/photos/7749094/pexels-photo-7749094.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: '/images/success-stories/sarah-chen.png',
     program: 'Leadership Development + Incubator',
     year: '2022',
     featured: true,
@@ -30,7 +30,7 @@ const featuredStories = [
     story:
       'The Entrepreneurship Incubator changed my life. I went from having a vague business idea to launching a company that now serves clients in 12 countries. The structured approach, expert mentors, and amazing community made all the difference. GZURA didn\'t just teach me business skills - it changed how I think.',
     achievement: 'Launched company, now in 12 countries',
-    image: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: '/images/success-stories/marcus-williams.png',
     program: 'Entrepreneurship Incubator',
     year: '2021',
     featured: true,
@@ -45,7 +45,8 @@ const allStories = [
     story:
       'The GZURA network opened doors I never knew existed. I found mentors, business partners, and lifelong friends. My career trajectory has completely changed.',
     achievement: '3x salary increase in 2 years',
-    image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400',
+    image: '/images/success-stories/priya-patel.png',
+    objectPosition: '50% 20%',
     program: 'Leadership Development',
     year: '2023',
   },
@@ -56,7 +57,8 @@ const allStories = [
     story:
       'I wish I had found GZURA earlier. The mentorship and community pushed me to think bigger. Now I\'ve successfully exited two startups.',
     achievement: '2 successful startup exits',
-    image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
+    image: '/images/success-stories/david-kim.png',
+    objectPosition: '50% 20%',
     program: 'Success Accelerator',
     year: '2022',
   },
@@ -67,7 +69,8 @@ const allStories = [
     story:
       'The leadership program helped me overcome imposter syndrome and step into executive roles with confidence. Worth every moment invested.',
     achievement: 'Promoted 3 times in 18 months',
-    image: 'https://images.pexels.com/photos/1181533/pexels-photo-1181533.jpeg?auto=compress&cs=tinysrgb&w=400',
+    image: '/images/success-stories/aisha-mohammed.png',
+    objectPosition: '50% 20%',
     program: 'Leadership Development',
     year: '2023',
   },
@@ -78,7 +81,8 @@ const allStories = [
     story:
       'GZURA helped me turn my passion for social change into a sustainable business. My company now serves over 10,000 families.',
     achievement: 'Impact on 10,000+ families',
-    image: 'https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg?auto=compress&cs=tinysrgb&w=400',
+    image: '/images/success-stories/carlos-rodriguez.png',
+    objectPosition: '50% 20%',
     program: 'Entrepreneurship Incubator',
     year: '2022',
   },
@@ -89,7 +93,8 @@ const allStories = [
     story:
       'After 15 years in corporate, GZURA gave me the framework and confidence to start my own consulting practice. Best career decision ever.',
     achievement: 'Successful career transition at 45',
-    image: 'https://images.pexels.com/photos/7749094/pexels-photo-7749094.jpeg?auto=compress&cs=tinysrgb&w=400',
+    image: '/images/success-stories/emma-thompson.png',
+    objectPosition: '50% 20%',
     program: 'Success Accelerator',
     year: '2023',
   },
@@ -100,7 +105,8 @@ const allStories = [
     story:
       'The pitch training and investor connections through GZURA helped us raise our seed round. Now scaling across the Middle East.',
     achievement: 'Raised $2M seed funding',
-    image: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400',
+    image: '/images/success-stories/ahmed-hassan.png',
+    objectPosition: '50% 20%',
     program: 'Entrepreneurship Incubator',
     year: '2024',
   },
@@ -166,58 +172,58 @@ export default function SuccessStoriesPage() {
             </span>
           </div>
 
-          <div className="space-y-16">
+          <div className="space-y-12 md:space-y-16">
             {featuredStories.map((story, index) => (
               <div
                 key={story.name}
-                className={`grid lg:grid-cols-2 gap-12 items-center ${
-                  index % 2 === 1 ? 'lg:flex-row-reverse' : ''
+                className={`grid items-center gap-8 lg:gap-12 ${
+                  index % 2 === 1
+                    ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]'
+                    : 'lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]'
                 }`}
               >
-                <div className={index % 2 === 1 ? 'lg:order-2' : ''}>
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/20">
-                    <img
+                <div className={index % 2 === 1 ? 'lg:order-2' : undefined}>
+                  <div className="relative mx-auto aspect-[4/5] w-full max-w-[18rem] overflow-hidden rounded-2xl shadow-xl shadow-purple-500/15">
+                    <Image
                       src={story.image}
                       alt={story.name}
-                      className="w-full aspect-[3/4] object-cover"
+                      fill
+                      sizes="288px"
+                      className="object-cover object-top"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-purple-deep/80 via-transparent to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-8">
-                      <p className="text-gold-400 text-sm font-semibold mb-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="mb-1 text-xs font-semibold text-gold-400">
                         {story.program}
                       </p>
-                      <h3 className="text-2xl font-bold text-white mb-1">
+                      <h3 className="mb-0.5 text-xl font-bold text-white">
                         {story.name}
                       </h3>
-                      <p className="text-white/80">{story.role}</p>
+                      <p className="text-sm text-white/80">{story.role}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className={index % 2 === 1 ? 'lg:order-1' : ''}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Quote className="w-8 h-8 text-purple-200" />
+                <div className={index % 2 === 1 ? 'lg:order-1' : undefined}>
+                  <div className="mb-4 flex items-center gap-2">
+                    <Quote className="h-8 w-8 text-purple-200" />
                   </div>
-                  <blockquote className="text-xl text-gray-700 leading-relaxed mb-6 italic">
+                  <blockquote className="mb-6 text-lg italic leading-relaxed text-gray-700 md:text-xl">
                     &ldquo;{story.story}&rdquo;
                   </blockquote>
 
-                  <div className="flex items-center gap-4 mb-6">
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {story.name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {story.location} • Class of {story.year}
-                      </p>
-                    </div>
+                  <div className="mb-6">
+                    <p className="font-semibold text-gray-900">{story.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {story.location} • Class of {story.year}
+                    </p>
                   </div>
 
-                  <div className="bg-purple-50 rounded-xl p-4 border-l-4 border-gold-500">
-                    <p className="text-sm text-purple-700 font-medium mb-1">
+                  <div className="rounded-xl border-l-4 border-gold-500 bg-purple-50 p-4">
+                    <p className="mb-1 text-sm font-medium text-purple-700">
                       Achievement
                     </p>
-                    <p className="text-gray-900 font-semibold">
+                    <p className="font-semibold text-gray-900">
                       {story.achievement}
                     </p>
                   </div>
@@ -248,10 +254,13 @@ export default function SuccessStoriesPage() {
                 className="bg-white rounded-2xl overflow-hidden shadow-lg shadow-purple-500/5 border border-gray-100 card-hover"
               >
                 <div className="relative h-48 overflow-hidden">
-                  <img
+                  <Image
                     src={story.image}
                     alt={story.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                    className="object-cover"
+                    style={{ objectPosition: story.objectPosition }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-deep/60 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">

@@ -18,8 +18,9 @@ const facts = [
 ];
 
 const leadership = [
-  { name: 'Dr. Angela Okonkwo', role: 'Founder & CEO' },
-  { name: 'Michael Chen', role: 'Chief Program Officer' },
+  { name: 'Founder', role: 'Founder' },
+  { name: 'Yathish', role: 'Co-Founder' },
+  { name: 'Vaishnavi Raj.An', role: 'Operation Head' },
   { name: 'Priya Sharma', role: 'Director of Community' },
   { name: 'James Williams', role: 'Head of Mentorship' },
 ];

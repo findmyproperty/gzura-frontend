@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Image from 'next/image';
 import { Target, Heart, Users, Lightbulb, Award, Globe } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -48,28 +49,39 @@ const values = [
 
 const teamMembers = [
   {
-    name: 'Dr. Angela Okonkwo',
-    role: 'Founder & CEO',
-    bio: 'Former Fortune 500 executive with 20+ years in leadership development.',
-    image: 'https://images.pexels.com/photos/7749094/pexels-photo-7749094.jpeg?auto=compress&cs=tinysrgb&w=400',
+    name: 'Pramodhini',
+    role: 'Founder',
+    bio: 'Leading GZURA’s mission to empower leaders and entrepreneurs.',
+    image: '/images/team/founder.png',
+    objectPosition: '50% 18%',
   },
   {
-    name: 'Michael Chen',
-    role: 'Chief Program Officer',
-    bio: 'Serial entrepreneur who has built and exited 3 successful ventures.',
-    image: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400',
+    name: 'Yathish',
+    role: 'Co-Founder',
+    bio: 'Building programs and partnerships that help members grow.',
+    image: '/images/team/chief-program-officer.png',
+    objectPosition: '50% 28%',
+  },
+  {
+    name: 'Vaishnavi Raj.An',
+    role: 'Operation Head',
+    bio: 'Keeping GZURA’s operations running so the community can thrive.',
+    image: '/images/team/founder-ceo.png',
+    objectPosition: '50% 18%',
   },
   {
     name: 'Priya Sharma',
     role: 'Director of Community',
     bio: 'Community builder with expertise in creating thriving networks.',
     image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400',
+    objectPosition: '50% 20%',
   },
   {
     name: 'James Williams',
     role: 'Head of Mentorship',
     bio: 'Executive coach who has mentored over 500 emerging leaders.',
     image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
+    objectPosition: '50% 20%',
   },
 ];
 
@@ -132,7 +144,7 @@ export default function AboutPage() {
                   ripples outward to create change far beyond our community.&rdquo;
                 </p>
                 <p className="text-purple-700 font-semibold mt-4">
-                  — Dr. Angela Okonkwo, Founder
+                  — Founder
                 </p>
               </div>
             </div>
@@ -209,23 +221,28 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {teamMembers.map((member) => (
               <div
-                key={member.name}
+                key={member.name || member.role}
                 className="group bg-white rounded-2xl overflow-hidden shadow-lg shadow-purple-500/5 border border-gray-100"
               >
-                <div className="aspect-square overflow-hidden">
-                  <img
+                <div className="relative aspect-square overflow-hidden">
+                  <Image
                     src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    alt={member.name || member.role}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={{ objectPosition: member.objectPosition }}
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {member.name}
-                  </h3>
+                  {member.name ? (
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {member.name}
+                    </h3>
+                  ) : null}
                   <p className="text-purple-700 text-sm font-medium mb-3">
                     {member.role}
                   </p>
