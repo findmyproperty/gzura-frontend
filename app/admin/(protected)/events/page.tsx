@@ -18,6 +18,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { api, Event, User, eventForEditor, getEventRejectionReason, hasPendingEdits } from '@/lib/api';
+import { revalidateEventsCache } from '@/lib/events-revalidate';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import {
   AdminBulkBar,
@@ -419,6 +420,7 @@ export default function AdminEventsPage() {
       let saved: Event;
       if (editingId) {
         saved = await api.updateEvent(editingId, savePayload);
+        await revalidateEventsCache(saved?.id ?? editingId);
         toast({
           title: resubmitting
             ? 'Event resubmitted for review'
@@ -435,6 +437,7 @@ export default function AdminEventsPage() {
         ...savePayload,
         slug: slugify(form.title),
       });
+      await revalidateEventsCache(saved?.id);
       toast({ title: 'Event created' });
 
       if (saved?.id) {
@@ -462,6 +465,7 @@ export default function AdminEventsPage() {
     try {
       const ids = eventsToDelete.map((event) => event.id);
       const { ok, failed } = await runAdminBulk(ids, (id) => api.deleteEvent(id));
+      await revalidateEventsCache(ids);
       toast({
         title: failed
           ? `Deleted ${ok}, ${failed} failed`
@@ -487,6 +491,7 @@ export default function AdminEventsPage() {
       const { ok, failed } = await runAdminBulk(selectedIds, (id) =>
         api.updateEvent(id, { status }),
       );
+      await revalidateEventsCache(selectedIds);
       toast({
         title: failed ? `Updated ${ok}, ${failed} failed` : `Updated ${ok} event${ok === 1 ? '' : 's'}`,
         variant: failed ? 'destructive' : 'default',

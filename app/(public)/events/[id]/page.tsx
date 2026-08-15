@@ -1,11 +1,18 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import EventDetailView from '@/components/events/EventDetailView';
-import { getEvent } from '@/lib/events-server';
+import { getEvent, getEvents } from '@/lib/events-server';
 import { richTextExcerpt } from '@/lib/rich-text';
+
+export const revalidate = 60;
 
 interface Props {
   params: { id: string };
+}
+
+export async function generateStaticParams() {
+  const events = await getEvents();
+  return events.map((event) => ({ id: event.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

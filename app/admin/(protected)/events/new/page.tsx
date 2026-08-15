@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { toast } from '@/hooks/use-toast';
 import { api, Event } from '@/lib/api';
+import { revalidateEventsCache } from '@/lib/events-revalidate';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import { isFullAdmin } from '@/lib/user-roles';
 import { normalizeRichText } from '@/lib/rich-text';
@@ -236,6 +237,7 @@ export default function CreateEventPage() {
         hostId: hostId,
       };
       const saved: Event = await api.createEvent(savePayload);
+      await revalidateEventsCache(saved?.id);
       toast({ title: 'Event created' });
 
       if (saved?.id) {

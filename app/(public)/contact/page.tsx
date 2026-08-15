@@ -6,8 +6,8 @@ import {
   Mail,
   Phone,
   Clock,
-  Send,
   MessageSquare,
+  MapPin,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -99,6 +99,32 @@ export default function ContactPage() {
                       Monday - Friday
                     </p>
                     <p className="text-gray-500">9:00 AM - 6:00 PM EST</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-deep to-purple-700 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-sm mb-1">Location</p>
+                    <p className="text-gray-900 font-medium">
+                      12 Block BDA Layout
+                    </p>
+                    <p className="text-gray-500">
+                      Stage 2, Nagarbhavi
+                      <br />
+                      Bengaluru, Karnataka 560072
+                    </p>
+                    <Button variant="link" className="h-auto p-0" asChild>
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('12 Block BDA Layout, Stage 2, Nagarbhavi, Bengaluru, Karnataka 560072')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open in Maps
+                      </a>
+                    </Button>
                   </div>
                 </div>
               </div>

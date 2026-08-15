@@ -28,6 +28,7 @@ import RichTextContent from '@/components/ui/rich-text-content';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api, Event, getEventRejectionReason, hasPendingEdits } from '@/lib/api';
+import { revalidateEventsCache } from '@/lib/events-revalidate';
 import { getEventCoverImage } from '@/lib/event-images';
 import { isGoogleMeetLink } from '@/lib/meeting';
 import { formatEventPrice } from '@/lib/price';
@@ -126,6 +127,7 @@ export default function AdminEventViewPage() {
         ? await api.updateEvent(event.id, { approvePendingChanges: true })
         : await api.updateEvent(event.id, { status: 'PUBLISHED', rejectionReason: '' });
       setEvent(updated);
+      await revalidateEventsCache(event.id);
       toast({
         title: hasPendingEdits(event)
           ? 'Edits approved and published'
@@ -152,6 +154,7 @@ export default function AdminEventViewPage() {
             rejectionReason: rejectReason,
           });
       setEvent(updated);
+      await revalidateEventsCache(event.id);
       setRejectModalOpen(false);
       setRejectReason('');
       toast({

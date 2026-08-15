@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { api, EventContentItem, EventContentType } from '@/lib/api';
+import { revalidateEventsCache } from '@/lib/events-revalidate';
 
 const FILE_ACCEPT =
   '.pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -75,6 +76,7 @@ export default function EventContentManager({ eventId }: { eventId: string }) {
       });
       resetForm();
       loadContent();
+      await revalidateEventsCache(eventId);
       toast({ title: 'Content added' });
     } catch (err) {
       toast({
@@ -109,6 +111,7 @@ export default function EventContentManager({ eventId }: { eventId: string }) {
       });
       resetForm();
       loadContent();
+      await revalidateEventsCache(eventId);
       toast({ title: 'File uploaded' });
     } catch (err) {
       toast({
@@ -125,6 +128,7 @@ export default function EventContentManager({ eventId }: { eventId: string }) {
     try {
       await api.deleteEventContent(eventId, contentId);
       setItems((current) => current.filter((item) => item.id !== contentId));
+      await revalidateEventsCache(eventId);
       toast({ title: 'Content removed' });
     } catch (err) {
       toast({

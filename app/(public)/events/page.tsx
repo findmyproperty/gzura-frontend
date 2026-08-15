@@ -7,6 +7,8 @@ import { getEventCoverImage } from '@/lib/event-images';
 import { formatEventPrice } from '@/lib/price';
 import { richTextExcerpt } from '@/lib/rich-text';
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: 'Events | GZURA',
   description:

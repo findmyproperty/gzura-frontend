@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 /**
  * Fundpro-style split hero for GZURA.
  * Left: copy + video card · Center: men & women leaders pose · Right: float cards
- * Viewport-locked · purple theme
  */
 
 const HERO_POSE = '/images/hero-leaders.jpg';
@@ -39,7 +38,7 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative overflow-hidden bg-white"
+      className="relative flex min-h-[calc(100svh-var(--header-height))] flex-col overflow-hidden bg-white"
       aria-labelledby="hero-heading"
     >
       <div
@@ -47,19 +46,12 @@ export default function HeroSection() {
         aria-hidden
       />
 
-      <div className="container relative z-10 flex h-full flex-col justify-center pt-3 pb-3 sm:pb-4">
-        <div
-          className="pointer-events-none absolute -right-6 top-12 hidden h-[22rem] w-[22rem] lg:block xl:-right-10"
-          aria-hidden
-        >
-          <div className="absolute inset-0 rounded-[2.5rem] bg-purple-100/90 rotate-6" />
-          <div className="absolute left-8 top-16 h-[17rem] w-[17rem] rounded-[2rem] bg-purple-200/45 -rotate-3" />
-        </div>
-        <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-8 xl:gap-10">
+      <div className="container relative z-10 flex flex-1 flex-col justify-center py-6 sm:py-8 4k:py-12">
+        <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-8 xl:gap-10 4k:gap-14">
           {/* ── LEFT: copy + video ── */}
-          <div className="min-w-0 lg:col-span-5">
+          <div className="min-w-0 text-left lg:col-span-5">
             <p
-              className={cn(show, 'mb-4 text-sm text-neutral-500')}
+              className={cn(show, 'mb-4 text-sm text-neutral-500 3xl:text-base 4k:mb-6 4k:text-xl')}
               style={d(0)}
             >
               Welcome to{' '}
@@ -73,7 +65,7 @@ export default function HeroSection() {
               id="hero-heading"
               className={cn(
                 show,
-                'text-3xl font-bold leading-[1.15] tracking-tight text-neutral-900 sm:text-4xl lg:text-[2.5rem] xl:text-[2.75rem]'
+                'text-3xl font-bold leading-[1.15] tracking-tight text-neutral-900 sm:text-4xl lg:text-[2.5rem] xl:text-[2.75rem] 3xl:text-[3.5rem] 4k:text-[4.5rem] 4k:leading-[1.2]'
               )}
               style={d(60)}
             >
@@ -90,7 +82,7 @@ export default function HeroSection() {
             <p
               className={cn(
                 show,
-                'mt-4 max-w-md text-sm leading-relaxed text-neutral-500 sm:text-base'
+                'mt-4 max-w-md text-sm leading-relaxed text-neutral-500 sm:text-base 3xl:max-w-lg 3xl:text-lg 4k:mt-6 4k:max-w-2xl 4k:text-2xl'
               )}
               style={d(120)}
             >
@@ -100,7 +92,7 @@ export default function HeroSection() {
 
             {/* Video card */}
             <div
-              className={cn(show, 'mt-6 max-w-sm sm:mt-8')}
+              className={cn(show, 'mt-6 max-w-sm sm:mt-8 3xl:max-w-md 4k:mt-10 4k:max-w-lg')}
               style={d(180)}
             >
               <Link
@@ -113,16 +105,16 @@ export default function HeroSection() {
                     alt="GZURA community workshop"
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="400px"
+                    sizes="(min-width: 2560px) 512px, 400px"
                     priority
                   />
                   <div className="absolute inset-0 bg-purple-deep/10 transition-colors group-hover:bg-purple-deep/20" />
                 </div>
               </Link>
-              <p className="mt-2.5 text-sm font-medium text-neutral-700">
+              <p className="mt-2.5 text-sm font-medium text-neutral-700 3xl:text-base 4k:text-xl">
                 Seamless growth starts here
               </p>
-              <p className="text-xs text-neutral-400">Watch our 2‑min story</p>
+              <p className="text-xs text-neutral-400 3xl:text-sm 4k:text-base">Watch our 2‑min story</p>
             </div>
           </div>
 
@@ -131,16 +123,15 @@ export default function HeroSection() {
             className={cn(show, 'relative min-w-0 lg:col-span-4')}
             style={d(140)}
           >
-            <div className="relative mx-auto aspect-[3/4] max-h-[min(58svh,520px)] w-full max-w-md overflow-hidden rounded-[1.75rem] bg-purple-100 shadow-2xl shadow-purple-900/15 ring-1 ring-purple-100/80 sm:max-h-[min(62svh,560px)] lg:max-w-none">
+            <div className="relative mx-auto aspect-[3/4] max-h-[min(58svh,520px)] w-full max-w-md overflow-hidden rounded-[1.75rem] bg-purple-100 shadow-2xl shadow-purple-900/15 ring-1 ring-purple-100/80 sm:max-h-[min(62svh,560px)] lg:max-w-none 3xl:max-h-[min(68svh,40rem)] 4k:max-h-[min(74svh,48rem)]">
               <Image
                 src={HERO_POSE}
                 alt="Men and women leaders standing together with confidence"
                 fill
                 className="object-cover object-top"
-                sizes="(max-width: 1024px) 90vw, 40vw"
+                sizes="(max-width: 1024px) 90vw, (min-width: 2560px) 40vw, 40vw"
                 priority
               />
-              {/* Soft bottom fade for polish */}
               <div
                 className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-purple-deep/20 to-transparent"
                 aria-hidden
@@ -152,17 +143,16 @@ export default function HeroSection() {
           <div
             className={cn(
               show,
-              'flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-3'
+              'flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-3 4k:gap-7'
             )}
             style={d(200)}
           >
-            {/* Rating card */}
-            <div className="rounded-2xl bg-white p-5 shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6">
-              <p className="text-3xl font-bold tracking-tight text-purple-deep sm:text-4xl">
+            <div className="rounded-2xl bg-white p-5 text-left shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6 4k:p-8">
+              <p className="text-3xl font-bold tracking-tight text-purple-deep sm:text-4xl 3xl:text-5xl 4k:text-7xl">
                 4.9
-                <span className="text-2xl text-neutral-400">/5</span>
+                <span className="text-2xl text-neutral-400 3xl:text-3xl 4k:text-4xl">/5</span>
               </p>
-              <p className="mt-1.5 text-xs leading-relaxed text-neutral-500 sm:text-sm">
+              <p className="mt-1.5 text-xs leading-relaxed text-neutral-500 sm:text-sm 3xl:text-base 4k:text-lg">
                 Member satisfaction across leadership & entrepreneurship programs
               </p>
               <div className="mt-3 flex gap-0.5" aria-label="5 star rating">
@@ -176,13 +166,12 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* Avatars pill */}
             <div className="inline-flex w-fit items-center gap-1 rounded-full bg-white py-2 pl-2 pr-3 shadow-lg shadow-purple-900/10 ring-1 ring-purple-100/80">
               <div className="flex -space-x-2">
                 {avatars.map((src) => (
                   <span
                     key={src}
-                    className="relative h-9 w-9 overflow-hidden rounded-full ring-2 ring-white"
+                    className="relative h-9 w-9 overflow-hidden rounded-full ring-2 ring-white 4k:h-12 4k:w-12"
                   >
                     <Image
                       src={src}
@@ -197,32 +186,30 @@ export default function HeroSection() {
               </div>
               <Link
                 href="/join"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-deep text-lg font-semibold text-white transition-transform hover:scale-105"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-deep text-lg font-semibold text-white transition-transform hover:scale-105 4k:h-12 4k:w-12 4k:text-xl"
                 aria-label="Join community"
               >
                 +
               </Link>
             </div>
 
-            {/* CTA card */}
-            <div className="rounded-2xl bg-white p-5 shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6">
-              <h2 className="text-lg font-bold leading-snug text-neutral-900 sm:text-xl">
+            <div className="rounded-2xl bg-white p-5 text-left shadow-xl shadow-purple-900/10 ring-1 ring-purple-100/80 sm:p-6 4k:p-8">
+              <h2 className="text-lg font-bold leading-snug text-neutral-900 sm:text-xl 3xl:text-2xl 4k:text-3xl">
                 Get To Know
                 <span className="block">Our Community</span>
               </h2>
               <Link
                 href="/join"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-deep transition-colors hover:text-purple-600"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-deep transition-colors hover:text-purple-600 3xl:text-base 4k:text-lg"
               >
                 Let&apos;s Get Started
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            {/* Secondary CTA — programs */}
             <Link
               href="/programs"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-purple-deep px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-900/25 transition-all hover:bg-purple-800 hover:shadow-xl sm:w-fit"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-purple-deep px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-900/25 transition-all hover:bg-purple-800 hover:shadow-xl sm:w-fit 3xl:px-6 3xl:text-base 4k:px-8 4k:py-4 4k:text-xl"
             >
               Explore Programs
               <ArrowRight className="h-4 w-4" />

@@ -113,8 +113,8 @@ export default function Header() {
                 {item.name}
                 <span
                   className={cn(
-                    'absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full',
-                    'bg-gold-400'
+                    'absolute -bottom-1 left-0 h-0.5 bg-gold-400 transition-all',
+                    pathname === item.href ? 'w-full' : 'w-0 group-hover:w-full'
                   )}
                 />
               </Link>
@@ -124,25 +124,13 @@ export default function Header() {
           {/* Auth */}
           <div className="hidden lg:flex items-center gap-4">
             {user ? (
-              <Link
-                href={getDashboardPath(user.role)}
-                className={cn(
-                  'text-sm font-medium transition-colors',
-                  'text-purple-deep hover:text-gold-royal'
-                )}
-              >
-                Dashboard
-              </Link>
+              <Button  asChild>
+                <Link href={getDashboardPath(user.role)}>Dashboard</Link>
+              </Button>
             ) : (
-              <Link
-                href="/login"
-                className={cn(
-                  'text-sm font-medium transition-colors',
-                  'text-purple-deep hover:text-gold-royal'
-                )}
-              >
-                Login
-              </Link>
+              <Button  asChild>
+                <Link href="/login">Login</Link>
+              </Button>
             )}
           </div>
 

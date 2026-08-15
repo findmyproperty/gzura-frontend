@@ -7,6 +7,7 @@ import {
   Youtube,
   Mail,
   Phone,
+  MapPin,
 } from 'lucide-react';
 
 const footerLinks = {
@@ -153,7 +154,8 @@ export default function Footer() {
 
         {/* Contact Info */}
         <div className="mt-16 border-t border-purple-800/50 pt-8">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <section className="flex flex-col gap-4">
             <a
               href="mailto:teamgzura@gmail.com"
               className="flex items-center gap-3 group"
@@ -170,15 +172,36 @@ export default function Footer() {
             </a>
             <a
               href="tel:+916360685656"
-              className="flex items-center gap-3 group sm:text-right"
+              className="flex items-center gap-3 group"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-800/50 sm:order-2">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-800/50">
                 <Phone className="h-5 w-5 text-gold-400" />
               </div>
-              <div className="sm:order-1">
+              <div>
                 <p className="text-sm text-white/50">Call Us</p>
                 <p className="text-white transition-colors group-hover:text-gold-400">
                   +91 63606 85656
+                </p>
+              </div>
+            </a>
+            </section>
+
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('12 Block BDA Layout, Stage 2, Nagarbhavi, Bengaluru, Karnataka 560072')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 group"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-800/50">
+                <MapPin className="h-5 w-5 text-gold-400" />
+              </div>
+              <div>
+                <p className="text-sm text-white/50">Location</p>
+                <p className="text-white transition-colors group-hover:text-gold-400">
+                  12 Block BDA Layout, Stage 2, Nagarbhavi
+                </p>
+                <p className="text-white/70 transition-colors group-hover:text-gold-400">
+                  Bengaluru, Karnataka 560072
                 </p>
               </div>
             </a>

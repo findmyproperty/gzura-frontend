@@ -25,6 +25,10 @@ const config: Config = {
       },
     },
     extend: {
+      screens: {
+        '3xl': '1920px',
+        '4k': '2560px',
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

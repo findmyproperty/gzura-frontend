@@ -47,6 +47,12 @@ const trustChips = [
   { label: 'Entrepreneur Network', icon: Users },
 ];
 
+const hostSteps = [
+  { step: '01', title: 'Apply in minutes', detail: 'Share your background and the course you want to host.' },
+  { step: '02', title: 'Reviewed in 48 hours', detail: 'We check fit and reply with clear next steps.' },
+  { step: '03', title: 'Go live on GZURA', detail: 'Teach a community already looking to grow.' },
+];
+
 /** Darker seminar stage — left side stays readable under purple wash */
 const HERO_IMAGE =
   'https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1600';
@@ -202,10 +208,10 @@ export default function JoinSection() {
               />
             </div>
 
-            <div className="relative z-10 grid lg:grid-cols-[1fr_minmax(0,26rem)] xl:grid-cols-[1fr_minmax(0,28rem)] gap-8 lg:gap-10 xl:gap-14 p-2 sm:p-7 md:p-10 lg:p-12 xl:p-14 min-h-[640px] lg:min-h-[680px]">
-              {/* Left: hero copy */}
-              <div className="flex flex-col justify-end order-2 lg:order-1 text-white lg:pr-4 lg:pb-2">
-                <div className="inline-flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/25 px-3.5 py-1.5 mb-5 w-fit shadow-lg">
+            <div className="relative z-10 grid items-stretch gap-6 p-5 sm:p-6 md:p-8 lg:grid-cols-2 lg:gap-8 lg:p-10">
+              {/* Left: hero copy — stretches to match the form so the bottom is not empty */}
+              <div className="order-2 flex h-full min-h-0 flex-col items-start text-left text-white lg:order-1 lg:pr-2">
+                <div className="inline-flex items-start gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/25 px-3.5 py-1.5 mb-5 w-fit shadow-lg">
                   <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" aria-hidden />
                   <span className="text-gold-300 text-xs sm:text-sm font-semibold tracking-wide">
                     Teach on GZURA
@@ -242,7 +248,25 @@ export default function JoinSection() {
                   })}
                 </div>
 
-                <div className="flex flex-wrap gap-6 sm:gap-10 pt-5 border-t border-white/25">
+                <ol className="w-full max-w-md space-y-3.5 mb-8">
+                  {hostSteps.map((item) => (
+                    <li key={item.step} className="flex items-start gap-3 text-left">
+                      <span className="mt-0.5 shrink-0 text-sm font-bold tabular-nums text-gold-400">
+                        {item.step}
+                      </span>
+                      <div>
+                        <p className="text-sm sm:text-base font-semibold text-white leading-snug">
+                          {item.title}
+                        </p>
+                        <p className="text-white/75 text-xs sm:text-sm mt-0.5 leading-relaxed">
+                          {item.detail}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+
+                <div className="mt-auto flex w-full flex-wrap gap-6 sm:gap-10 pt-5 border-t border-white/25">
                   {highlightStats.map((stat) => (
                     <div key={stat.label}>
                       <p className="text-2xl sm:text-3xl font-bold text-gold-400 drop-shadow-md">
@@ -257,8 +281,8 @@ export default function JoinSection() {
               </div>
 
               {/* Right: floating form card */}
-              <div className="flex items-stretch lg:items-center order-1 lg:order-2">
-                <div className="w-full bg-white rounded-xl md:rounded-3xl shadow-2xl border border-white/60 p-2 sm:p-6 md:p-8 flex flex-col">
+              <div className="order-1 flex items-start lg:order-2">
+                <div className="flex w-full flex-col rounded-xl border border-white/60 bg-white p-5 shadow-2xl sm:p-6 md:rounded-3xl md:p-7">
                   <div className="flex items-start justify-between gap-3 mb-5 md:mb-6">
                     <div>
                       <h3 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">

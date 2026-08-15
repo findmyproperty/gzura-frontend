@@ -4,6 +4,8 @@ import EventDetailView from '@/components/events/EventDetailView';
 import { getEvent } from '@/lib/events-server';
 import { richTextExcerpt } from '@/lib/rich-text';
 
+export const revalidate = 60;
+
 interface Props {
   params: { id: string };
 }
