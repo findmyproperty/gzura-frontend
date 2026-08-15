@@ -225,7 +225,7 @@ function AdminLayoutShell({
             : 'gap-3 rounded-2xl px-3 py-[9px]',
           active
             ? 'bg-purple-50 text-purple-deep'
-            : 'text-[#8A8A8A] hover:bg-purple-50 hover:text-purple-deep',
+            : 'text-gray-500 hover:bg-purple-50 hover:text-purple-deep',
         )}
       >
         <item.icon
