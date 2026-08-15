@@ -54,11 +54,11 @@ export function middleware(request: NextRequest) {
   const payload = token ? decodeJwtPayload(token) : null;
   const role = payload?.role;
 
-  if (pathname === '/' && token) {
-    const url = request.nextUrl.clone();
-    url.pathname = isAdminAreaRole(role) ? '/admin' : '/home';
-    return NextResponse.redirect(url);
-  }
+  // if (pathname === '/' && token) {
+  //   const url = request.nextUrl.clone();
+  //   url.pathname = isAdminAreaRole(role) ? '/admin' : '/home';
+  //   return NextResponse.redirect(url);
+  // }
 
   if (pathname === '/admin/login') {
     const url = request.nextUrl.clone();
