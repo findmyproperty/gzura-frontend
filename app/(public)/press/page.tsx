@@ -36,7 +36,7 @@ export default function PressPage() {
       />
 
       <section className="section-padding bg-white">
-        <div className="container-custom">
+        <div className="container">
           <div className="grid lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2 space-y-12">
               <div>

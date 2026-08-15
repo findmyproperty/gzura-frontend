@@ -37,7 +37,7 @@ export default function EventDetailView({
           isMemberShell ? 'pt-8 sm:pt-10' : 'pt-32',
         )}
       >
-        <div className="container-custom">
+        <div className="container">
           <Link
             href={backHref}
             className="mb-4 inline-block text-sm text-white/70 hover:text-gold-400"
@@ -75,7 +75,7 @@ export default function EventDetailView({
       </section>
 
       <section className={cn('bg-white', isMemberShell ? 'py-10 sm:py-12' : 'section-padding')}>
-        <div className="container-custom grid gap-8 lg:grid-cols-3 lg:gap-12">
+        <div className="container grid gap-8 lg:grid-cols-3 lg:gap-12">
           <div className="space-y-8 lg:col-span-2">
             {images.length > 0 ? (
               <div

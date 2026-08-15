@@ -125,7 +125,7 @@ export default function JoinSection() {
         className="section-padding scroll-mt-20 bg-gray-50 relative overflow-hidden"
         aria-labelledby="success-heading"
       >
-        <div className="container-custom relative z-10">
+        <div className="container relative z-10">
           <div className="relative rounded md:rounded-[2rem] overflow-hidden min-h-[420px] shadow-2xl">
             <Image
               src={HERO_IMAGE}
@@ -173,7 +173,7 @@ export default function JoinSection() {
       className="scroll-mt-20 section-padding bg-gray-50 relative overflow-hidden"
       aria-labelledby="join-heading"
     >
-      <div className="container-custom relative z-10">
+      <div className="container relative z-10">
         <ScrollAnimate animation="fade-up">
           <div className="relative rounded-xl md:rounded-[2rem] overflow-hidden shadow-2xl shadow-purple-900/20">
             {/* Background image */}

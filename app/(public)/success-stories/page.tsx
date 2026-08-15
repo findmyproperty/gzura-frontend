@@ -121,7 +121,7 @@ export default function SuccessStoriesPage() {
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJ2Mmgydi0yem0tMTAgMGgtMnYyaDJ2LTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-repeat" />
         </div>
-        <div className="container-custom relative z-10">
+        <div className="container relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
               <Star className="w-4 h-4 text-gold-400" />
@@ -143,7 +143,7 @@ export default function SuccessStoriesPage() {
 
       {/* Stats */}
       <section className="py-16 bg-white border-b border-gray-100">
-        <div className="container-custom">
+        <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
@@ -159,7 +159,7 @@ export default function SuccessStoriesPage() {
 
       {/* Featured Stories */}
       <section className="section-padding bg-gray-50">
-        <div className="container-custom">
+        <div className="container">
           <div className="inline-flex items-center gap-2 bg-purple-100 rounded-full px-4 py-2 mb-8">
             <span className="text-purple-700 text-sm font-semibold">
               FEATURED STORIES
@@ -230,7 +230,7 @@ export default function SuccessStoriesPage() {
 
       {/* All Stories Grid */}
       <section className="section-padding bg-white">
-        <div className="container-custom">
+        <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="heading-lg text-gray-900 mb-4">
               More <span className="gradient-text">Transformations</span>
@@ -285,7 +285,7 @@ export default function SuccessStoriesPage() {
 
       {/* CTA */}
       <section className="section-padding gradient-bg relative overflow-hidden">
-        <div className="container-custom relative z-10">
+        <div className="container relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="heading-lg text-white mb-6">
               Ready to Write Your Success Story?

@@ -108,7 +108,7 @@ export default function BlogPage() {
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJ2Mmgydi0yem0tMTAgMGgtMnYyaDJ2LTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-repeat" />
         </div>
-        <div className="container-custom relative z-10">
+        <div className="container relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
               <span className="text-gold-400 text-sm font-semibold">
@@ -129,7 +129,7 @@ export default function BlogPage() {
 
       {/* Filter & Search */}
       <section className="py-8 bg-white border-b border-gray-100 sticky top-20 z-40">
-        <div className="container-custom">
+        <div className="container">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
@@ -159,7 +159,7 @@ export default function BlogPage() {
 
       {/* Featured Post */}
       <section className="section-padding bg-gray-50">
-        <div className="container-custom">
+        <div className="container">
           <div className="inline-flex items-center gap-2 bg-gold-100 rounded-full px-4 py-2 mb-8">
             <span className="text-gold-700 text-sm font-semibold">
               FEATURED ARTICLE
@@ -227,7 +227,7 @@ export default function BlogPage() {
 
       {/* Blog Posts Grid */}
       <section className="section-padding bg-white">
-        <div className="container-custom">
+        <div className="container">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogPosts.map((post, index) => (
               <article
@@ -292,7 +292,7 @@ export default function BlogPage() {
 
       {/* Newsletter CTA */}
       <section className="section-padding gradient-bg relative overflow-hidden">
-        <div className="container-custom relative z-10">
+        <div className="container relative z-10">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="heading-lg text-white mb-4">
               Stay Informed

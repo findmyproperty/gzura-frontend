@@ -35,9 +35,12 @@ export default function AboutSection() {
   return (
     <section className="pt-10 pb-12 md:pt-12 md:pb-16 lg:pt-14 lg:pb-20 2xl:pt-16 2xl:pb-24 bg-white relative overflow-hidden" aria-labelledby="about-heading">
       {/* Background Accent */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-purple-50 to-transparent" aria-hidden="true" />
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 w-[min(36vw,32rem)] bg-gradient-to-l from-purple-50 via-purple-50/70 to-transparent"
+        aria-hidden
+      />
 
-      <div className="container-custom relative">
+      <div className="container relative">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Content */}
           <ScrollAnimate animation="slide-left">

@@ -38,7 +38,7 @@ export default function TestimonialsSection() {
       {/* Background Accent */}
       <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-purple-50 to-transparent -z-10" aria-hidden="true" />
 
-      <div className="container-custom">
+      <div className="container">
         {/* Header */}
         <ScrollAnimate animation="fade-up">
           <header className="text-center max-w-3xl mx-auto mb-8 md:mb-10">

@@ -70,7 +70,7 @@ export default function CareersPage() {
       />
 
       <section className="section-padding bg-white">
-        <div className="container-custom">
+        <div className="container">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="heading-lg text-gray-900 mb-6">
               Build with a <span className="gradient-text">mission-focused</span> team

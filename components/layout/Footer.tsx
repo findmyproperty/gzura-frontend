@@ -46,7 +46,7 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-b from-purple-950 to-purple-950 text-white">
       {/* Main Footer */}
-      <div className="container-custom section-padding">
+      <div className="container section-padding">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
@@ -152,43 +152,43 @@ export default function Footer() {
         </div>
 
         {/* Contact Info */}
-        <div className="mt-16 pt-8 border-t border-purple-800/50">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-purple-800/50 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-gold-400" />
+        <div className="mt-16 border-t border-purple-800/50 pt-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <a
+              href="mailto:teamgzura@gmail.com"
+              className="flex items-center gap-3 group"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-800/50">
+                <Mail className="h-5 w-5 text-gold-400" />
               </div>
               <div>
-                <p className="text-white/50 text-sm">Email Us</p>
-                <a
-                  href="mailto:teamgzura@gmail.com"
-                  className="text-white hover:text-gold-400 transition-colors"
-                >
+                <p className="text-sm text-white/50">Email Us</p>
+                <p className="text-white transition-colors group-hover:text-gold-400">
                   teamgzura@gmail.com
-                </a>
+                </p>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-purple-800/50 flex items-center justify-center">
-                <Phone className="w-5 h-5 text-gold-400" />
+            </a>
+            <a
+              href="tel:+916360685656"
+              className="flex items-center gap-3 group sm:text-right"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-800/50 sm:order-2">
+                <Phone className="h-5 w-5 text-gold-400" />
               </div>
-              <div>
-                <p className="text-white/50 text-sm">Call Us</p>
-                <a
-                  href="tel:6360685656"
-                  className="text-white hover:text-gold-400 transition-colors"
-                >
-                  6360685656
-                </a>
+              <div className="sm:order-1">
+                <p className="text-sm text-white/50">Call Us</p>
+                <p className="text-white transition-colors group-hover:text-gold-400">
+                  +91 63606 85656
+                </p>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="border-t border-purple-800/30">
-        <div className="container-custom py-6">
+        <div className="container py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/50 text-sm">
               © {new Date().getFullYear()} GZURA. All rights reserved.

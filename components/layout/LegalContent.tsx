@@ -22,7 +22,7 @@ export default function LegalContent({
 }: LegalContentProps) {
   return (
     <section className="section-padding bg-white">
-      <div className="container-custom">
+      <div className="container">
         <article className="max-w-3xl mx-auto">
           <p className="text-sm text-purple-700 font-medium mb-8">
             Last updated: {lastUpdated}

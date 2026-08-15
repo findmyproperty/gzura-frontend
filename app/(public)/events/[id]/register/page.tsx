@@ -109,7 +109,7 @@ export default function EventRegisterPage() {
   return (
     <>
       <section className="gradient-bg pt-32 pb-8">
-        <div className="container-custom max-w-2xl">
+        <div className="container max-w-2xl">
           <Link href={`/events/${id}`} className="text-white/70 hover:text-gold-400 text-sm flex items-center gap-1 mb-4">
             <ArrowLeft className="w-4 h-4" /> Back to course
           </Link>
@@ -129,7 +129,7 @@ export default function EventRegisterPage() {
       </section>
 
       <section className="section-padding bg-gray-50">
-        <div className="container-custom max-w-xl">
+        <div className="container max-w-xl">
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 space-y-5">
             <div className="space-y-2">
               <Label>Full Name *</Label>

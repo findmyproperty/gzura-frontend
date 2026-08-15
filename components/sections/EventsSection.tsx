@@ -47,7 +47,7 @@ export default function EventsSection() {
       <div className="absolute top-0 left-0 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl" />
 
-      <div className="container-custom relative z-10">
+      <div className="container relative z-10">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">

@@ -80,7 +80,7 @@ export default function Header() {
         'sticky top-0 z-50 w-full bg-white shadow-sm shadow-purple-900/5',
       )}
     >
-      <nav className="container-custom">
+      <nav className="container">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">

@@ -20,7 +20,7 @@ export default function CTASection() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-full blur-3xl" aria-hidden="true" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-gold-500/10 to-transparent rounded-full blur-3xl" aria-hidden="true" />
 
-      <div className="container-custom relative z-10">
+      <div className="container relative z-10">
         <div className="max-w-4xl mx-auto">
           <ScrollAnimate animation="scale-in">
             <div className="gradient-bg relative overflow-hidden rounded-2xl p-6 text-center sm:rounded-3xl sm:p-8 md:p-12 lg:p-16">

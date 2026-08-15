@@ -40,7 +40,7 @@ export default function SuccessStoriesSection() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-100/50 rounded-full blur-3xl opacity-60" aria-hidden="true" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-gold-100/30 rounded-full blur-3xl opacity-60" aria-hidden="true" />
 
-      <div className="container-custom relative z-10">
+      <div className="container relative z-10">
         {/* Header */}
         <ScrollAnimate animation="fade-up">
           <header className="text-center max-w-3xl mx-auto mb-8 md:mb-10">

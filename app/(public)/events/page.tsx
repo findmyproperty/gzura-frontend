@@ -19,7 +19,7 @@ export default async function EventsPage() {
   return (
     <>
       <section className="gradient-bg p-5 md:p-20 relative overflow-hidden">
-        <div className="container-custom relative z-10">
+        <div className="container relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
               <Calendar className="w-4 h-4 text-gold-400" />
@@ -36,7 +36,7 @@ export default async function EventsPage() {
       </section>
 
       <section className="section-padding bg-white">
-        <div className="container-custom">
+        <div className="container">
           {events.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg">No upcoming events at the moment.</p>

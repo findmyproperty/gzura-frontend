@@ -95,7 +95,7 @@ export default function FaqPage() {
       />
 
       <section className="section-padding bg-white">
-        <div className="container-custom">
+        <div className="container">
           <div className="max-w-3xl mx-auto">
             <FaqAccordion groups={faqGroups} />
 
