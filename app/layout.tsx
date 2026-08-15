@@ -19,6 +19,9 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
   title: "GZURA | Empowering Men & Women Entrepreneurs",
   description:
     "GZURA is a platform dedicated to entrepreneurship, leadership development, networking, and personal growth.",
