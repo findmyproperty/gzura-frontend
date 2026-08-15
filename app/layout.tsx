@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import GoogleAuthProvider from "@/components/provider/google-auth-provider";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,7 +18,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_API_URL!),
+  metadataBase: new URL(getSiteUrl()),
   title: "GZURA | Empowering Men & Women Entrepreneurs",
   description:
     "GZURA is a platform dedicated to entrepreneurship, leadership development, networking, and personal growth.",
