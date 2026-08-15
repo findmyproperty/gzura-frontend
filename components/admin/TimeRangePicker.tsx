@@ -22,6 +22,7 @@ type TimeRangePickerProps = {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  triggerClassName?: string;
   variant?: 'card' | 'bare';
 };
 
@@ -31,6 +32,7 @@ export default function TimeRangePicker({
   value,
   onChange,
   className,
+  triggerClassName,
   variant = 'card',
 }: TimeRangePickerProps) {
   const { start, end } = useMemo(() => parseTimeLabel(value), [value]);
@@ -44,6 +46,7 @@ export default function TimeRangePicker({
       'h-11 w-full min-w-0 border-purple-100 bg-white/90 text-left text-sm shadow-sm transition-all',
       'focus:ring-purple-deep/20 focus:border-purple-300 [&>span]:truncate',
       filled && 'border-purple-200 ring-1 ring-purple-100',
+      triggerClassName,
     );
 
   const content = (

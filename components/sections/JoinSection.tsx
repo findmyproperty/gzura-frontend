@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import TimeRangePicker from '@/components/admin/TimeRangePicker';
 import {
   CheckCircle2,
   ArrowRight,
@@ -398,7 +399,7 @@ export default function JoinSection() {
                         />
                       </div>
 
-                      <div className="space-y-1.5 sm:col-span-2">
+                      <div className="space-y-1.5">
                         <Label htmlFor="interest" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
                           Course topic *
                         </Label>
@@ -437,17 +438,15 @@ export default function JoinSection() {
                         />
                       </div>
 
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <Label htmlFor="preferredTime" className="text-gray-500 font-medium text-xs uppercase tracking-wide">
                           Preferred Time <span className="normal-case tracking-normal font-normal text-gray-400">(optional)</span>
                         </Label>
-                        <Input
-                          id="preferredTime"
-                          type="text"
+                        <TimeRangePicker
+                          variant="bare"
                           value={formData.preferredTime}
-                          onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
-                          placeholder="e.g., 5:00 PM - 7:00 PM IST"
-                          className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"
+                          onChange={(preferredTime) => setFormData({ ...formData, preferredTime })}
+                          triggerClassName="bg-gray-50/80 border-gray-200 rounded-xl shadow-none focus:ring-purple-500"
                         />
                       </div>
 
