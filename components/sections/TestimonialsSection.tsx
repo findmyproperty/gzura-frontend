@@ -1,36 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import ScrollAnimate from '@/components/animations/ScrollAnimate';
 import Link from 'next/link';
-import { Quote, Star, ArrowRight } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-const testimonials = [
-  {
-    name: 'Sarah Chen',
-    role: 'CEO, TechVenture Inc.',
-    content:
-      'GZURA transformed my approach to leadership. The mentorship program connected me with industry veterans who helped me scale my business from $1M to $10M in just two years.',
-    rating: 5,
-    image: 'https://images.pexels.com/photos/7749094/pexels-photo-7749094.jpeg?auto=compress&cs=tinysrgb&w=400',
-  },
-  {
-    name: 'Marcus Williams',
-    role: 'Founder, GreenTech Solutions',
-    content:
-      'The entrepreneurship incubator gave me the framework and confidence to leave my corporate job and launch my dream venture. Today we employ 50 people and are making real impact.',
-    rating: 5,
-    image: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400',
-  },
-  {
-    name: 'Priya Patel',
-    role: 'Director, Innovation Labs',
-    content:
-      'Being part of GZURA opened doors I never knew existed. The network alone is worth its weight in gold. I have found mentors, partners, and lifelong friends.',
-    rating: 5,
-    image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400',
-  },
-];
+import { Star, ArrowRight } from 'lucide-react';
+import { transformationStories } from '@/lib/success-stories';
 
 export default function TestimonialsSection() {
   return (
@@ -63,53 +37,40 @@ export default function TestimonialsSection() {
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {testimonials.map((testimonial, index) => (
-            <ScrollAnimate key={testimonial.name} animation="fade-up" delay={index * 150}>
-              <article
-                className="bg-white rounded-2xl p-6 md:p-8 shadow-xl shadow-purple-500/10 border border-gray-100 relative overflow-hidden group h-full flex flex-col"
-              >
-                {/* Quote Icon */}
-                <div className="absolute top-6 right-6 w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-100 flex items-center justify-center opacity-50 group-hover:opacity-100 transition-opacity" aria-hidden="true">
-                  <Quote className="w-5 h-5 md:w-6 md:h-6 text-purple-700" />
-                </div>
-
-                {/* Rating */}
-                <div className="flex gap-1 mb-6" aria-label={`${testimonial.rating} out of 5 stars`}>
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 text-gold-500 fill-gold-500"
-                      aria-hidden="true"
-                    />
-                  ))}
-                </div>
-
-                {/* Content */}
-                <blockquote className="text-gray-600 leading-relaxed mb-8 italic flex-1 text-sm md:text-base">
-                  &ldquo;{testimonial.content}&rdquo;
-                </blockquote>
-
-                {/* Author */}
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-12 h-12 md:w-14 md:h-14">
-                    <AvatarImage src={testimonial.image} alt={`Photo of ${testimonial.name}`} />
-                    <AvatarFallback className="bg-purple-200 text-purple-700 font-semibold">
-                      {testimonial.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm md:text-base">
-                      {testimonial.name}
+          {transformationStories.slice(0, 3).map((story, index) => (
+            <ScrollAnimate key={story.name} animation="fade-up" delay={index * 100}>
+              <article className="bg-white rounded-2xl overflow-hidden shadow-lg shadow-purple-500/5 border border-gray-100 card-hover h-full">
+                <div className="relative h-48 overflow-hidden">
+                  <Image
+                    src={story.image}
+                    alt={story.name}
+                    fill
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                    className="object-cover"
+                    style={{ objectPosition: story.objectPosition }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-deep/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <p className="text-gold-400 text-xs font-semibold">
+                      {story.program}
                     </p>
-                    <p className="text-xs md:text-sm text-gray-500">{testimonial.role}</p>
+                    <h3 className="text-lg font-bold text-white">{story.name}</h3>
                   </div>
                 </div>
 
-                {/* Bottom Gradient */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-deep to-gold-500 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                <div className="p-6">
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                    &ldquo;{story.story}&rdquo;
+                  </p>
+                  <p className="text-gray-500 text-xs mb-3">
+                    {story.role} • {story.location}
+                  </p>
+                  <div className="pt-3 border-t border-gray-100">
+                    <p className="text-purple-700 font-semibold text-sm">
+                      {story.achievement}
+                    </p>
+                  </div>
+                </div>
               </article>
             </ScrollAnimate>
           ))}
