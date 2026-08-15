@@ -23,7 +23,7 @@ export default function CTASection() {
       <div className="container-custom relative z-10">
         <div className="max-w-4xl mx-auto">
           <ScrollAnimate animation="scale-in">
-            <div className="gradient-bg rounded-3xl p-8 md:p-12 lg:p-16 text-center relative overflow-hidden">
+            <div className="gradient-bg relative overflow-hidden rounded-2xl p-6 text-center sm:rounded-3xl sm:p-8 md:p-12 lg:p-16">
               {/* Decorative Pattern */}
               <div className="absolute inset-0 opacity-5" aria-hidden="true">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRoLTJ2Mmgydi0yem0tMTAgMGgtMnYyaDJ2LTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-repeat" />
@@ -31,23 +31,28 @@ export default function CTASection() {
 
               {/* Content */}
               <div className="relative z-10">
-                <h2 id="cta-heading" className="heading-lg text-white mb-4">
+                <h2
+                  id="cta-heading"
+                  className="mb-3 text-2xl font-bold leading-tight text-white sm:mb-4 sm:text-3xl md:text-4xl lg:text-5xl"
+                >
                   Join the GZURA Community
                 </h2>
-                <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto mb-8 md:mb-10">
+                <p className="mx-auto mb-6 max-w-2xl text-sm text-white/80 sm:text-base md:mb-10 md:text-lg">
                   Become part of a thriving community of leaders and
                   entrepreneurs. Get access to resources, mentorship, and
                   opportunities to accelerate your growth.
                 </p>
 
-                {/* Benefits */}
-                <ul className="flex flex-wrap justify-center gap-4 mb-8 md:mb-10 list-none p-0">
+                <ul className="mx-auto mb-6 flex w-full max-w-md list-none flex-col items-start gap-3 p-0 text-left md:mb-10 md:max-w-3xl md:flex-row md:flex-wrap md:justify-center md:gap-x-6 md:gap-y-3">
                   {benefits.map((benefit) => (
                     <li
                       key={benefit}
-                      className="flex items-center gap-2 text-white/90 text-sm md:text-base"
+                      className="flex w-full items-start gap-2.5 text-sm text-white/90 md:w-auto md:items-center md:text-base"
                     >
-                      <CheckCircle2 className="w-5 h-5 text-gold-400 flex-shrink-0" aria-hidden="true" />
+                      <CheckCircle2
+                        className="mt-0.5 h-5 w-5 shrink-0 text-gold-400 md:mt-0"
+                        aria-hidden="true"
+                      />
                       <span>{benefit}</span>
                     </li>
                   ))}

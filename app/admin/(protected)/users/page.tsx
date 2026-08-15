@@ -493,113 +493,115 @@ export default function AdminUsersPage() {
       </AdminDataTable>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
+        <DialogContent className="flex max-h-[90dvh] w-[calc(100%-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+          <DialogHeader className="shrink-0 border-b border-gray-100 px-5 py-4 pr-12 text-left">
             <DialogTitle className="text-purple-deep">
               {editingId ? 'Edit User' : 'Add User'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSave} className="space-y-4 pt-2">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>First Name</Label>
+          <form onSubmit={handleSave} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                <div className="space-y-1.5">
+                  <Label>First Name</Label>
+                  <Input
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Last Name</Label>
+                  <Input
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Email</Label>
                 <Input
-                  value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Last Name</Label>
+              <div className="space-y-1.5">
+                <Label>{editingId ? 'New Password (optional)' : 'Password'}</Label>
                 <Input
-                  value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  required
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required={!editingId}
+                  minLength={6}
+                  placeholder={editingId ? 'Leave blank to keep current' : ''}
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>{editingId ? 'New Password (optional)' : 'Password'}</Label>
-              <Input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required={!editingId}
-                minLength={6}
-                placeholder={editingId ? 'Leave blank to keep current' : ''}
-              />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Role</Label>
-                <Select
-                  value={form.role}
-                  onValueChange={(v) =>
-                    setForm({ ...form, role: v as UserRole })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {USER_ROLE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                <div className="space-y-1.5">
+                  <Label>Role</Label>
+                  <Select
+                    value={form.role}
+                    onValueChange={(v) =>
+                      setForm({ ...form, role: v as UserRole })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {USER_ROLE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Status</Label>
+                  <Select
+                    value={form.status}
+                    onValueChange={(v) =>
+                      setForm({ ...form, status: v as 'ACTIVE' | 'BLOCKED' })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="BLOCKED">Blocked</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) =>
-                    setForm({ ...form, status: v as 'ACTIVE' | 'BLOCKED' })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="BLOCKED">Blocked</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                <div className="space-y-1.5">
+                  <Label>Phone</Label>
+                  <Input
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>City</Label>
+                  <Input
+                    value={form.city}
+                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  />
+                </div>
               </div>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>City</Label>
-                <Input
-                  value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+            <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-gray-100 px-5 py-3 sm:flex-row sm:justify-end sm:gap-3">
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={saving} className="btn-primary">
+              <Button type="submit" disabled={saving} className="btn-primary w-full sm:w-auto">
                 {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : editingId ? (
                   'Save changes'
                 ) : (

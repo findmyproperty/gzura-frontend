@@ -77,8 +77,7 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300 bg-white/90',
-        lightSurface && 'shadow-sm shadow-purple-900/5'
+        'sticky top-0 z-50 w-full bg-white shadow-sm shadow-purple-900/5',
       )}
     >
       <nav className="container-custom">
