@@ -1,35 +1,16 @@
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import EventDetailView from '@/components/events/EventDetailView';
-import { getEvent, getEvents } from '@/lib/events-server';
-import { richTextExcerpt } from '@/lib/rich-text';
+'use client';
 
-export const revalidate = 60;
+import { useParams } from 'next/navigation';
+import EventDetailClient from '@/components/events/EventDetailClient';
 
-interface Props {
-  params: { id: string };
-}
+export default function EventDetailPage() {
+  const { id } = useParams<{ id: string }>();
 
-export async function generateStaticParams() {
-  const events = await getEvents();
-  return events.map((event) => ({ id: event.id }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const event = await getEvent(params.id);
-  return {
-    title: event ? `${event.title} | GZURA` : 'Event | GZURA',
-    description: event?.description ? richTextExcerpt(event.description, 160) : undefined,
-  };
-}
-
-export default async function EventDetailPage({ params }: Props) {
-  const event = await getEvent(params.id);
-  if (!event) notFound();
+  if (!id) return null;
 
   return (
-    <EventDetailView
-      event={event}
+    <EventDetailClient
+      eventId={id}
       backHref="/events"
       backLabel="← All Events"
       shell="public"
