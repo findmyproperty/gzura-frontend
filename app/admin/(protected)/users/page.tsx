@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { api, User } from '@/lib/api';
 import {
   AdminAvatar,
@@ -87,6 +87,7 @@ export default function AdminUsersPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [showPassword, setShowPassword] = useState(false);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -150,6 +151,7 @@ export default function AdminUsersPage() {
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setShowPassword(false);
     setDialogOpen(true);
   };
 
@@ -166,6 +168,7 @@ export default function AdminUsersPage() {
       role: user.role,
       status: user.status ?? 'ACTIVE',
     });
+    setShowPassword(false);
     setDialogOpen(true);
   };
 
@@ -530,14 +533,29 @@ export default function AdminUsersPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>{editingId ? 'New Password (optional)' : 'Password'}</Label>
-                <Input
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  required={!editingId}
-                  minLength={6}
-                  placeholder={editingId ? 'Leave blank to keep current' : ''}
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    required={!editingId}
+                    minLength={6}
+                    placeholder={editingId ? 'Leave blank to keep current' : ''}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 <div className="space-y-1.5">
