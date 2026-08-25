@@ -82,6 +82,27 @@
     border: 0;
   }
 
+  .qr-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #16061f;
+  }
+
+  .qr-viewport > div,
+  .qr-viewport video,
+  .qr-viewport canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: cover;
+  }
+
+  .qr-viewport video {
+    display: block;
+  }
+
   .gradient-text {
     @apply bg-gradient-to-r from-purple-deep via-purple-600 to-gold-500 bg-clip-text text-transparent;
   }

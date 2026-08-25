@@ -26,7 +26,9 @@ function isInstructorAdminPath(pathname: string) {
   }
   return (
     pathname === '/admin/events' ||
-    pathname.startsWith('/admin/events/')
+    pathname.startsWith('/admin/events/') ||
+    pathname === '/admin/qr-scanner' ||
+    pathname.startsWith('/admin/qr-scanner/')
   );
 }
 

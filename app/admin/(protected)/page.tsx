@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/chart';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
-import { api, DashboardStats, Event, hasPendingEdits } from '@/lib/api';
+import { api, DashboardStats, Event, eventStatusBadge, hasPendingEdits, needsAdminApproval } from '@/lib/api';
 import { AdminPageHeader } from '@/components/admin/admin-chrome';
 import { isFullAdmin } from '@/lib/user-roles';
 
@@ -114,10 +114,8 @@ function StatCard({
 }
 
 function hostStatusBadge(status: Event['status']) {
-  if (status === 'PUBLISHED') return <StatusBadge label="Approved" tone="success" />;
-  if (status === 'REJECTED') return <StatusBadge label="Rejected" tone="danger" />;
-  if (status === 'PENDING') return <StatusBadge label="Pending" tone="warning" />;
-  return <StatusBadge label="Draft" tone="muted" />;
+  const badge = eventStatusBadge(status);
+  return <StatusBadge label={badge.label} tone={badge.tone} />;
 }
 
 function HostStatCard({
@@ -174,7 +172,7 @@ function HostDashboard() {
   const created = events.length;
   const approved = events.filter((event) => event.status === 'PUBLISHED').length;
   const rejected = events.filter((event) => event.status === 'REJECTED');
-  const pending = events.filter((event) => event.status === 'PENDING');
+  const pending = events.filter(needsAdminApproval);
   const attention = [...rejected, ...pending];
   const recent = [...events]
     .sort(
@@ -337,11 +335,7 @@ function AdminDashboard() {
     ])
       .then(([statsData, eventsData]) => {
         setStats(statsData);
-        setPendingEvents(
-          eventsData.filter(
-            (e) => e.status === 'PENDING' || hasPendingEdits(e),
-          ),
-        );
+        setPendingEvents(eventsData.filter(needsAdminApproval));
       })
       .catch((err) => setError(err.message || 'Failed to load dashboard'))
       .finally(() => setLoading(false));

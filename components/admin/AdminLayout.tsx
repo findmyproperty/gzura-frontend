@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   Pencil,
+  QrCode,
   Users,
   X,
 } from 'lucide-react';
@@ -44,7 +45,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { api, CommunityRegistration } from '@/lib/api';
+import { api, CommunityRegistration, needsAdminApproval } from '@/lib/api';
 import { AdminChromeProvider, useAdminChrome } from '@/components/admin/admin-chrome';
 import { formatUserRole, isFullAdmin } from '@/lib/user-roles';
 import { cn } from '@/lib/utils';
@@ -150,14 +151,14 @@ function AdminLayoutShell({
         }));
 
         const pendingEvents: NotificationItem[] = events
-          .filter(e => e.status === 'PENDING')
+          .filter(needsAdminApproval)
           .map(e => ({
             id: e.id,
             type: 'EVENT_APPROVAL',
             title: 'Event approval request',
             subtitle: `${e.title}`,
             createdAt: e.createdAt ?? e.updatedAt ?? e.dateStart,
-            href: `/admin/events?status=PENDING`,
+            href: `/admin/events/${e.id}`,
           }));
 
         const all = [...hostRequests, ...pendingEvents]
@@ -382,6 +383,16 @@ function AdminLayoutShell({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link
+                  href="/admin/qr-scanner"
+                  onClick={onNavigate}
+                  className="cursor-pointer"
+                >
+                  <QrCode className="mr-2 h-4 w-4" />
+                  QR Scanner
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link href="/" onClick={onNavigate} className="cursor-pointer">
                   <ExternalLink className="mr-2 h-4 w-4" />
                   View Website
@@ -449,6 +460,14 @@ function AdminLayoutShell({
                 >
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit profile
+                </Link>
+                <Link
+                  href="/admin/qr-scanner"
+                  onClick={onNavigate}
+                  className="flex items-center rounded-xl px-2.5 py-2 text-[13px] text-zinc-800 transition-colors hover:bg-[#F5F5F5]"
+                >
+                  <QrCode className="mr-2 h-4 w-4" />
+                  QR Scanner
                 </Link>
                 <Link
                   href="/"

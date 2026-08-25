@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, QrCode } from 'lucide-react';
 import {
   AdminAvatar,
   AdminDataTable,
@@ -17,12 +17,15 @@ import {
   AdminTablePagination,
   AdminTableRow,
   ADMIN_TABLE_MIN_WIDTH,
+  adminActionOutlineClass,
   adminCol,
+  formatAdminDateTime,
   getInitialsFromFullName,
   PillBadge,
   StatusBadge,
   useAdminTablePaging,
 } from '@/components/admin/AdminDataTable';
+import { Button } from '@/components/ui/button';
 import { api, Event, EventRegistration } from '@/lib/api';
 
 function formatEnrolledAt(date: string) {
@@ -80,6 +83,7 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
 
   const isOffline = event.type === 'Offline';
   const colSpan = (isOffline ? 7 : 5) + 1;
+  const presentCount = registrations.filter((row) => row.checkedInAt).length;
 
   return (
     <AdminDataTable
@@ -88,6 +92,23 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
       onSearchChange={setSearch}
       searchPlaceholder="Search enrolled users."
       loading={loading}
+      filters={
+        isOffline && registrations.length > 0 ? (
+          <span className="inline-flex h-9 items-center rounded-lg border border-[#E5E7EB] bg-white px-3 text-[13px] font-medium text-gray-700">
+            {presentCount}/{registrations.length} present
+          </span>
+        ) : null
+      }
+      actions={
+        isOffline ? (
+          <Button asChild variant="outline" className={adminActionOutlineClass}>
+            <Link href={`/admin/qr-scanner?eventId=${event.id}`}>
+              <QrCode className="h-4 w-4" />
+              Scan QR
+            </Link>
+          </Button>
+        ) : null
+      }
       emptyMessage={
         registrations.length === 0
           ? 'No one has enrolled in this event yet.'
@@ -126,7 +147,7 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
           <AdminTableHeaderCell className="w-[12%]">Location</AdminTableHeaderCell>
           <AdminTableHeaderCell className="w-[16%]">Enrolled</AdminTableHeaderCell>
           <AdminTableHeaderCell className="w-[12%]">Payment</AdminTableHeaderCell>
-          {isOffline ? <AdminTableHeaderCell className={adminCol.status}>Check-in</AdminTableHeaderCell> : null}
+          {isOffline ? <AdminTableHeaderCell className={adminCol.status}>Attendance</AdminTableHeaderCell> : null}
           {isOffline ? <AdminTableHeaderCell className={adminCol.actions}>Pass</AdminTableHeaderCell> : null}
         </AdminTableHead>
         <AdminTableBody>
@@ -183,9 +204,14 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
                 {isOffline ? (
                   <AdminTableCell>
                     {row.checkedInAt ? (
-                      <StatusBadge label="Checked in" tone="success" />
+                      <div className="space-y-1">
+                        <StatusBadge label="Present" tone="success" />
+                        <p className="text-[11px] text-gray-500">
+                          {formatAdminDateTime(row.checkedInAt)}
+                        </p>
+                      </div>
                     ) : (
-                      <StatusBadge label="Not checked in" tone="muted" />
+                      <StatusBadge label="Absent" tone="muted" />
                     )}
                   </AdminTableCell>
                 ) : null}

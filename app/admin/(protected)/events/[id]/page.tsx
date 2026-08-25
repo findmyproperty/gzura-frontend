@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Check,
   History,
+  QrCode,
   X,
 } from 'lucide-react';
 import { AdminDetailLayout } from '@/components/admin/AdminDetailLayout';
@@ -27,7 +28,16 @@ import EventEnrolledUsers from '@/components/admin/EventEnrolledUsers';
 import RichTextContent from '@/components/ui/rich-text-content';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { api, Event, getEventRejectionReason, hasPendingEdits } from '@/lib/api';
+import {
+  api,
+  approveEventReview,
+  Event,
+  eventStatusBadge,
+  getEventRejectionReason,
+  hasPendingEdits,
+  needsAdminApproval,
+  rejectEventReview,
+} from '@/lib/api';
 import { revalidateEventsCache } from '@/lib/events-revalidate';
 import { getEventCoverImage } from '@/lib/event-images';
 import { isGoogleMeetLink } from '@/lib/meeting';
@@ -36,15 +46,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { isFullAdmin } from '@/lib/user-roles';
 import { toast } from '@/hooks/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { EventRejectDialog } from '@/components/admin/EventRejectDialog';
 
 function resolveMeetLink(event: Event) {
   if (isGoogleMeetLink(event.meetingUrl)) return event.meetingUrl!;
@@ -119,22 +121,27 @@ export default function AdminEventViewPage() {
 
   const isAdmin = user ? isFullAdmin(user.role) : false;
 
+  const awaitingReview = event ? needsAdminApproval(event) : false;
+  const pendingEdits = event ? hasPendingEdits(event) : false;
+
   const handleApprove = async () => {
     if (!event) return;
     try {
       setUpdating(true);
-      const updated = hasPendingEdits(event)
-        ? await api.updateEvent(event.id, { approvePendingChanges: true })
-        : await api.updateEvent(event.id, { status: 'PUBLISHED', rejectionReason: '' });
+      const updated = await approveEventReview(event);
       setEvent(updated);
       await revalidateEventsCache(event.id);
       toast({
-        title: hasPendingEdits(event)
+        title: pendingEdits
           ? 'Edits approved and published'
           : 'Event approved and published',
       });
     } catch (err) {
-      toast({ title: 'Error approving event', variant: 'destructive' });
+      toast({
+        title: 'Error approving event',
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      });
     } finally {
       setUpdating(false);
     }
@@ -144,24 +151,20 @@ export default function AdminEventViewPage() {
     if (!event || !rejectReason.trim()) return;
     try {
       setUpdating(true);
-      const updated = hasPendingEdits(event)
-        ? await api.updateEvent(event.id, {
-            rejectPendingChanges: true,
-            rejectionReason: rejectReason,
-          })
-        : await api.updateEvent(event.id, {
-            status: 'REJECTED',
-            rejectionReason: rejectReason,
-          });
+      const updated = await rejectEventReview(event, rejectReason);
       setEvent(updated);
       await revalidateEventsCache(event.id);
       setRejectModalOpen(false);
       setRejectReason('');
       toast({
-        title: hasPendingEdits(event) ? 'Edits rejected' : 'Event rejected',
+        title: pendingEdits ? 'Edits rejected' : 'Event rejected',
       });
     } catch (err) {
-      toast({ title: 'Error rejecting event', variant: 'destructive' });
+      toast({
+        title: 'Error rejecting event',
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      });
     } finally {
       setUpdating(false);
     }
@@ -200,6 +203,7 @@ export default function AdminEventViewPage() {
   const meetLink = resolveMeetLink(event);
   const enrolledCount = event._count?.registrations ?? 0;
   const isOnline = event.type === 'Online';
+  const statusBadge = eventStatusBadge(event.status);
 
   return (
     <AdminDetailLayout
@@ -213,15 +217,24 @@ export default function AdminEventViewPage() {
             <History className="w-4 h-4 mr-2" />
             Show log
           </Button>
-          {isAdmin && (event.status === 'PENDING' || hasPendingEdits(event)) ? (
+          {isAdmin && awaitingReview ? (
             <>
-              <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => setRejectModalOpen(true)} disabled={updating}>
+              <Button
+                variant="outline"
+                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setRejectModalOpen(true)}
+                disabled={updating}
+              >
                 <X className="w-4 h-4 mr-2" />
-                {hasPendingEdits(event) ? 'Reject edits' : 'Reject'}
+                {pendingEdits ? 'Reject edits' : 'Reject'}
               </Button>
               <Button className="btn-admin" onClick={handleApprove} disabled={updating}>
-                {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-                {hasPendingEdits(event) ? 'Approve edits' : 'Approve'}
+                {updating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4 mr-2" />
+                )}
+                {pendingEdits ? 'Approve edits' : 'Approve'}
               </Button>
             </>
           ) : null}
@@ -233,6 +246,14 @@ export default function AdminEventViewPage() {
               </a>
             </Button>
           ) : null}
+          {!isOnline ? (
+            <Button asChild variant="outline">
+              <Link href={`/admin/qr-scanner?eventId=${event.id}`}>
+                <QrCode className="w-4 h-4 mr-2" />
+                Scan QR
+              </Link>
+            </Button>
+          ) : null}
           <Button asChild className="btn-admin">
             <Link href={`/admin/events?edit=${event.id}`}>
               <Pencil className="w-4 h-4 mr-2" />
@@ -242,7 +263,7 @@ export default function AdminEventViewPage() {
         </div>
       }
     >
-      {hasPendingEdits(event) && (
+      {pendingEdits ? (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
           <h3 className="font-semibold text-amber-900">Host edits awaiting approval</h3>
           <p className="mt-1 text-sm text-amber-800">
@@ -260,7 +281,18 @@ export default function AdminEventViewPage() {
             </p>
           ) : null}
         </div>
-      )}
+      ) : awaitingReview ? (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <h3 className="font-semibold text-amber-900">
+            {event.status === 'RESUBMITTED'
+              ? 'Resubmitted event awaiting approval'
+              : 'Event awaiting approval'}
+          </h3>
+          <p className="mt-1 text-sm text-amber-800">
+            This event is not live yet. Approve to publish it, or reject it with a reason for the host.
+          </p>
+        </div>
+      ) : null}
 
       {event.status === 'REJECTED' && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
@@ -301,26 +333,7 @@ export default function AdminEventViewPage() {
               <PillBadge>
                 {event.type}
               </PillBadge>
-              <StatusBadge
-                label={
-                  event.status === 'PUBLISHED'
-                    ? 'Published'
-                    : event.status === 'PENDING'
-                      ? 'Pending'
-                      : event.status === 'REJECTED'
-                        ? 'Rejected'
-                        : 'Draft'
-                }
-                tone={
-                  event.status === 'PUBLISHED'
-                    ? 'success'
-                    : event.status === 'PENDING'
-                      ? 'warning'
-                      : event.status === 'REJECTED'
-                        ? 'danger'
-                        : 'muted'
-                }
-              />
+              <StatusBadge label={statusBadge.label} tone={statusBadge.tone} />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 text-sm text-gray-600">
@@ -496,35 +509,15 @@ export default function AdminEventViewPage() {
         onOpenChange={setLogOpen}
       />
 
-      <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-red-600">
-              {hasPendingEdits(event) ? 'Reject edits' : 'Reject Event'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Reason for rejection</Label>
-              <Textarea
-                placeholder="Explain what needs to be fixed..."
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                rows={4}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={updating || !rejectReason.trim()}>
-              {updating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Confirm Rejection
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EventRejectDialog
+        open={rejectModalOpen}
+        onOpenChange={setRejectModalOpen}
+        title={pendingEdits ? 'Reject edits' : 'Reject Event'}
+        reason={rejectReason}
+        onReasonChange={setRejectReason}
+        onConfirm={handleReject}
+        confirming={updating}
+      />
     </AdminDetailLayout>
   );
 }

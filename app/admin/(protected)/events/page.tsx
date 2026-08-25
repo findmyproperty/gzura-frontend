@@ -7,17 +7,31 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Calendar,
   BookOpen,
+  Check,
   History,
   Loader2,
   MapPin,
   Pencil,
   Plus,
+  QrCode,
   Trash2,
   Users,
   Video,
   AlertCircle,
+  X,
 } from 'lucide-react';
-import { api, Event, User, eventForEditor, getEventRejectionReason, hasPendingEdits } from '@/lib/api';
+import {
+  api,
+  approveEventReview,
+  Event,
+  User,
+  eventForEditor,
+  eventStatusBadge,
+  getEventRejectionReason,
+  hasPendingEdits,
+  needsAdminApproval,
+  rejectEventReview,
+} from '@/lib/api';
 import { revalidateEventsCache } from '@/lib/events-revalidate';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import {
@@ -37,7 +51,6 @@ import {
   AdminTableHeaderCell,
   AdminTablePagination,
   AdminTableRow,
-  ADMIN_TABLE_MIN_WIDTH,
   adminActionLabelClass,
   adminActionOutlineClass,
   adminCol,
@@ -68,6 +81,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EventRejectDialog } from '@/components/admin/EventRejectDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,15 +130,6 @@ const RichTextEditor = dynamic(() => import('@/components/ui/rich-text-editor'),
     <div className="min-h-[200px] animate-pulse rounded-md border border-input bg-muted/30" />
   ),
 });
-
-function isPendingReview(event: Event) {
-  return (
-    event.status === 'PENDING' ||
-    event.status === 'PENDING_APPROVAL' ||
-    event.status === 'RESUBMITTED' ||
-    hasPendingEdits(event)
-  );
-}
 
 const emptyForm = {
   title: '',
@@ -183,6 +188,9 @@ export default function AdminEventsPage() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [logEvent, setLogEvent] = useState<Event | null>(null);
   const [rejectedListOpen, setRejectedListOpen] = useState(false);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<Event | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const loadEvents = () => {
     setLoading(true);
@@ -248,7 +256,11 @@ export default function AdminEventsPage() {
 
       const matchesStatus =
         statusFilter === 'all' ||
-        (statusFilter === 'APPROVAL' && isPendingReview(event)) ||
+        (statusFilter === 'APPROVAL' && needsAdminApproval(event)) ||
+        (statusFilter === 'PENDING' &&
+          (event.status === 'PENDING' ||
+            event.status === 'PENDING_APPROVAL' ||
+            event.status === 'RESUBMITTED')) ||
         event.status === statusFilter;
 
       return matchesSearch && matchesStatus;
@@ -260,7 +272,7 @@ export default function AdminEventsPage() {
     [events],
   );
   const approvalRequests = useMemo(
-    () => events.filter(isPendingReview),
+    () => events.filter(needsAdminApproval),
     [events],
   );
 
@@ -484,6 +496,51 @@ export default function AdminEventsPage() {
     }
   };
 
+  const handleApprove = async (event: Event) => {
+    setReviewingId(event.id);
+    try {
+      await approveEventReview(event);
+      await revalidateEventsCache(event.id);
+      toast({
+        title: hasPendingEdits(event)
+          ? 'Edits approved and published'
+          : 'Event approved and published',
+      });
+      loadEvents();
+    } catch (err) {
+      toast({
+        title: 'Error approving event',
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      });
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    setReviewingId(rejectTarget.id);
+    try {
+      await rejectEventReview(rejectTarget, rejectReason);
+      await revalidateEventsCache(rejectTarget.id);
+      toast({
+        title: hasPendingEdits(rejectTarget) ? 'Edits rejected' : 'Event rejected',
+      });
+      setRejectTarget(null);
+      setRejectReason('');
+      loadEvents();
+    } catch (err) {
+      toast({
+        title: 'Error rejecting event',
+        description: err instanceof Error ? err.message : undefined,
+        variant: 'destructive',
+      });
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
   const handleBulkStatus = async (status: 'PUBLISHED' | 'DRAFT') => {
     if (selectedIds.length === 0) return;
     setBulkBusy(true);
@@ -620,6 +677,12 @@ export default function AdminEventsPage() {
                 </span>
               </Button>
             )}
+            <Button asChild variant="outline" className={cn(adminActionOutlineClass, adminMobileIconActionClass)}>
+              <Link href="/admin/qr-scanner">
+                <QrCode className="h-4 w-4" />
+                <span className={adminActionLabelClass}>Scan QR</span>
+              </Link>
+            </Button>
             <Button asChild className={cn('btn-admin', adminMobileIconActionClass)}>
               <Link href="/admin/events/new">
                 <Plus className="h-4 w-4" />
@@ -674,7 +737,7 @@ export default function AdminEventsPage() {
           ) : null
         }
       >
-        <AdminTable minWidth={ADMIN_TABLE_MIN_WIDTH}>
+        <AdminTable minWidth="1100px">
           <AdminTableHead>
             <AdminTableCheckboxCell
               header
@@ -696,11 +759,14 @@ export default function AdminEventsPage() {
             <AdminTableHeaderCell className={adminCol.type}>Type</AdminTableHeaderCell>
             <AdminTableHeaderCell className={adminCol.status}>Status</AdminTableHeaderCell>
             <AdminTableHeaderCell className={adminCol.number}>Registrations</AdminTableHeaderCell>
-            <AdminTableHeaderCell className={adminCol.actions} />
+            <AdminTableHeaderCell className="w-[220px] text-right" />
           </AdminTableHead>
           <AdminTableBody>
             {paginatedEvents.map((event) => {
               const cover = getEventCoverImage(event);
+              const statusBadge = eventStatusBadge(event.status);
+              const canReview = isAdmin && needsAdminApproval(event);
+              const busy = reviewingId === event.id;
               return (
               <AdminTableRow
                 key={event.id}
@@ -754,17 +820,7 @@ export default function AdminEventsPage() {
                 </AdminTableCell>
                 <AdminTableCell>
                   <div className="flex flex-col gap-1">
-                    {event.status === 'PUBLISHED' || event.status === 'APPROVED' ? (
-                      <StatusBadge label="Approved & Live" tone="success" />
-                    ) : event.status === 'PENDING_APPROVAL' || event.status === 'PENDING' ? (
-                      <StatusBadge label="Pending Approval" tone="warning" />
-                    ) : event.status === 'RESUBMITTED' ? (
-                      <StatusBadge label="Resubmitted" tone="warning" />
-                    ) : event.status === 'REJECTED' ? (
-                      <StatusBadge label="Rejected" tone="danger" />
-                    ) : (
-                      <StatusBadge label="Draft" tone="muted" />
-                    )}
+                    <StatusBadge label={statusBadge.label} tone={statusBadge.tone} />
                     {hasPendingEdits(event) ? (
                       <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
                         Edits pending
@@ -783,30 +839,74 @@ export default function AdminEventsPage() {
                   className="px-3"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <AdminRowActions
-                    menu={
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <AdminMoreButton />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                          <DropdownMenuItem onClick={() => void openEdit(event)}>
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-600 focus:text-red-600"
-                            onClick={() =>
-                              setEventsToDelete([event])
-                            }
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    }
-                  />
+                  <div className="flex items-center justify-end gap-2">
+                    {canReview ? (
+                      <>
+                        <Button
+                          size="sm"
+                          className="btn-admin h-8"
+                          disabled={busy}
+                          onClick={() => void handleApprove(event)}
+                        >
+                          {busy && !rejectTarget ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <>
+                              <Check className="w-3.5 h-3.5 mr-1" />
+                              Approve
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                          disabled={busy}
+                          onClick={() => {
+                            setRejectReason('');
+                            setRejectTarget(event);
+                          }}
+                        >
+                          <X className="w-3.5 h-3.5 mr-1" />
+                          Reject
+                        </Button>
+                      </>
+                    ) : null}
+                    <AdminRowActions
+                      menu={
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <AdminMoreButton />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            {event.type === 'Offline' ? (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(`/admin/qr-scanner?eventId=${event.id}`)
+                                }
+                              >
+                                <QrCode className="w-4 h-4 mr-2" />
+                                Scan QR
+                              </DropdownMenuItem>
+                            ) : null}
+                            <DropdownMenuItem onClick={() => void openEdit(event)}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-600 focus:text-red-600"
+                              onClick={() =>
+                                setEventsToDelete([event])
+                              }
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      }
+                    />
+                  </div>
                 </AdminTableCell>
               </AdminTableRow>
               );
@@ -1320,6 +1420,25 @@ export default function AdminEventsPage() {
         onOpenChange={(open) => {
           if (!open) setLogEvent(null);
         }}
+      />
+
+      <EventRejectDialog
+        open={!!rejectTarget}
+        onOpenChange={(open) => {
+          if (!open && reviewingId !== rejectTarget?.id) {
+            setRejectTarget(null);
+            setRejectReason('');
+          }
+        }}
+        title={
+          rejectTarget && hasPendingEdits(rejectTarget)
+            ? 'Reject edits'
+            : 'Reject Event'
+        }
+        reason={rejectReason}
+        onReasonChange={setRejectReason}
+        onConfirm={handleReject}
+        confirming={!!rejectTarget && reviewingId === rejectTarget.id}
       />
 
       <Dialog open={rejectedListOpen} onOpenChange={setRejectedListOpen}>

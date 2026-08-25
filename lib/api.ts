@@ -114,6 +114,37 @@ export function hasPendingEdits(event?: Pick<Event, 'pendingChanges'> | null) {
   return event?.pendingChanges?.status === 'PENDING';
 }
 
+export function needsAdminApproval(
+  event?: Pick<Event, 'status' | 'pendingChanges'> | null,
+) {
+  if (!event) return false;
+  return (
+    event.status === 'PENDING' ||
+    event.status === 'PENDING_APPROVAL' ||
+    event.status === 'RESUBMITTED' ||
+    hasPendingEdits(event)
+  );
+}
+
+export function eventStatusBadge(status: Event['status']): {
+  label: string;
+  tone: 'success' | 'warning' | 'danger' | 'muted';
+} {
+  if (status === 'PUBLISHED' || status === 'APPROVED') {
+    return { label: 'Approved & Live', tone: 'success' };
+  }
+  if (status === 'PENDING_APPROVAL' || status === 'PENDING') {
+    return { label: 'Pending Approval', tone: 'warning' };
+  }
+  if (status === 'RESUBMITTED') {
+    return { label: 'Resubmitted', tone: 'warning' };
+  }
+  if (status === 'REJECTED') {
+    return { label: 'Rejected', tone: 'danger' };
+  }
+  return { label: 'Draft', tone: 'muted' };
+}
+
 export function eventForEditor(event: Event): Event {
   const payload = event.pendingChanges?.payload;
   if (!payload) return event;
@@ -196,10 +227,11 @@ export type UpdateProfileInput = {
 
 export interface PassValidationResult {
   valid: boolean;
-  status: 'enrolled' | 'checked_in' | 'invalid';
+  status: 'enrolled' | 'checked_in' | 'already_checked_in' | 'invalid';
   message: string;
   attendee?: {
     id?: string;
+    eventId?: string;
     fullName: string;
     email: string;
     eventTitle: string;
@@ -581,10 +613,16 @@ export const api = {
       body: JSON.stringify({ accessToken }),
     }),
 
-  checkInPass: (accessToken: string) =>
+  checkInPass: (accessToken: string, eventId?: string) =>
     fetchApi<PassValidationResult>(
       '/registrations/check-in',
-      { method: 'POST', body: JSON.stringify({ accessToken }) },
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          accessToken,
+          ...(eventId ? { eventId } : {}),
+        }),
+      },
       true,
     ),
 
@@ -680,3 +718,24 @@ export const api = {
   contact: (data: Record<string, string>) =>
     fetchApi('/contact', { method: 'POST', body: JSON.stringify(data) }),
 };
+
+export async function approveEventReview(event: Event) {
+  if (hasPendingEdits(event)) {
+    return api.updateEvent(event.id, { approvePendingChanges: true });
+  }
+  return api.approveEvent(event.id);
+}
+
+export async function rejectEventReview(event: Event, reason: string) {
+  const trimmed = reason.trim();
+  if (!trimmed) {
+    throw new Error('Rejection reason is required');
+  }
+  if (hasPendingEdits(event)) {
+    return api.updateEvent(event.id, {
+      rejectPendingChanges: true,
+      rejectionReason: trimmed,
+    });
+  }
+  return api.rejectEvent(event.id, trimmed);
+}
