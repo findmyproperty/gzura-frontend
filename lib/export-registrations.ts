@@ -12,9 +12,9 @@ import {
 } from 'docx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 import { AdminRegistrationRow } from '@/lib/api';
 import { formatAdminDate } from '@/components/admin/AdminDataTable';
+import { downloadExcel, excelDateStamp } from '@/lib/export-excel';
 import {
   formatInterestLabel,
   formatRegistrationStatusLabel,
@@ -34,9 +34,7 @@ const EXPORT_HEADERS = [
 
 type ExportRecord = Record<(typeof EXPORT_HEADERS)[number], string>;
 
-function dateStamp() {
-  return new Date().toISOString().slice(0, 10);
-}
+const dateStamp = excelDateStamp;
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -70,11 +68,11 @@ export function mapRegistrationsForExport(
 }
 
 export function exportRegistrationsExcel(rows: AdminRegistrationRow[]) {
-  const data = mapRegistrationsForExport(rows);
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
-  XLSX.writeFile(workbook, `gzura-registrations-${dateStamp()}.xlsx`);
+  downloadExcel(
+    mapRegistrationsForExport(rows),
+    `gzura-registrations-${dateStamp()}`,
+    'Registrations',
+  );
 }
 
 export async function exportRegistrationsWord(rows: AdminRegistrationRow[]) {

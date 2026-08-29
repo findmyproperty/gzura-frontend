@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell, Book, ChevronDown, FileText, LogOut, Receipt, Search, User, UserCheck } from 'lucide-react';
+import { ArrowLeftRight, Bell, Book, ChevronDown, FileText, LogOut, Receipt, Search, User, UserCheck } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useWorkspaceRoleSwitch } from '@/hooks/use-workspace-role-switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ export default function MemberShell({
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { switching, switchTo, canSwitchToHost } = useWorkspaceRoleSwitch();
 
   const initials = user
     ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
@@ -160,6 +162,15 @@ export default function MemberShell({
                         Edit Profile
                       </Link>
                     </DropdownMenuItem>
+                    {canSwitchToHost ? (
+                      <DropdownMenuItem
+                        disabled={switching}
+                        onClick={() => void switchTo('HOST')}
+                      >
+                        <ArrowLeftRight className="w-4 h-4 mr-2" />
+                        Switch to host
+                      </DropdownMenuItem>
+                    ) : null}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {

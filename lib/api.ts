@@ -4,6 +4,7 @@ export interface User {
   id: string;
   email: string;
   role: 'MEMBER' | 'HOST' | 'ADMIN';
+  canHost?: boolean;
   status?: 'ACTIVE' | 'BLOCKED';
   lastLoginAt?: string | null;
   firstName: string;
@@ -487,6 +488,13 @@ export const api = {
 
   refreshAuth: () =>
     fetchApi<AuthResponse>('/auth/refresh', { method: 'POST' }, true),
+
+  switchRole: (role: 'MEMBER' | 'HOST') =>
+    fetchApi<AuthResponse>(
+      '/auth/switch-role',
+      { method: 'POST', body: JSON.stringify({ role }) },
+      true,
+    ),
 
   updateProfile: (data: Record<string, unknown> | UpdateProfileInput) =>
     fetchApi<User>(

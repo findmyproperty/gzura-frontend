@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { AdminPageHeader } from '@/components/admin/admin-chrome';
 import { MobileNumberLink } from '@/components/auth/MobileNumberLink';
+import { WorkspaceRoleSwitch } from '@/components/auth/WorkspaceRoleSwitch';
 import { CloudinaryUpload } from '@/components/cloudinary/CloudinaryUpload';
 import { api } from '@/lib/api';
 import { formatUserRole } from '@/lib/user-roles';
@@ -313,6 +314,8 @@ export default function AdminProfilePage() {
               </div>
             </div>
           </section>
+
+          <WorkspaceRoleSwitch tone="admin" />
 
           <section className="flex flex-1 flex-col rounded-3xl border border-purple-100/80 bg-white p-6 shadow-[0_12px_40px_-24px_rgba(45,10,78,0.35)] sm:p-8">
             <p className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">

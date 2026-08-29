@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  ArrowLeftRight,
   Bell,
   Calendar,
   ChevronDown,
@@ -46,7 +47,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { api, CommunityRegistration, needsAdminApproval } from '@/lib/api';
+import { useWorkspaceRoleSwitch } from '@/hooks/use-workspace-role-switch';
+import { api, needsAdminApproval } from '@/lib/api';
 import { AdminChromeProvider, useAdminChrome } from '@/components/admin/admin-chrome';
 import { formatUserRole, isFullAdmin } from '@/lib/user-roles';
 import { cn } from '@/lib/utils';
@@ -65,6 +67,38 @@ const instructorNavItems = [
 ];
 
 const SIDEBAR_KEY = 'gzura_admin_sidebar_open';
+const SEEN_NOTIFICATIONS_KEY = 'gzura_admin_seen_notifications';
+
+type NotificationItem = {
+  id: string;
+  type: 'HOST_REQUEST' | 'ROLE_REQUEST' | 'EVENT_APPROVAL';
+  title: string;
+  subtitle: string;
+  createdAt: string;
+  href: string;
+};
+
+function notificationKey(item: NotificationItem) {
+  return `${item.type}:${item.id}`;
+}
+
+function seenStorageKey(userId: string) {
+  return `${SEEN_NOTIFICATIONS_KEY}:${userId}`;
+}
+
+function readSeenNotificationIds(userId?: string) {
+  if (!userId || typeof window === 'undefined') return new Set<string>();
+  try {
+    const raw = localStorage.getItem(seenStorageKey(userId));
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function writeSeenNotificationIds(userId: string, ids: Set<string>) {
+  localStorage.setItem(seenStorageKey(userId), JSON.stringify([...ids]));
+}
 
 export default function AdminLayout({
   children,
@@ -86,22 +120,16 @@ function AdminLayoutShell({
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { switching, switchTo, canSwitchToMember } = useWorkspaceRoleSwitch();
   const { pageHeader } = useAdminChrome();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  type NotificationItem = {
-    id: string;
-    type: 'HOST_REQUEST' | 'ROLE_REQUEST' | 'EVENT_APPROVAL';
-    title: string;
-    subtitle: string;
-    createdAt: string;
-    href: string;
-  };
-
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [seenIds, setSeenIds] = useState<Set<string>>(() => new Set());
+  const [bellOpen, setBellOpen] = useState(false);
   const isAdmin = user ? isFullAdmin(user.role) : false;
   const navItems = isAdmin ? adminNavItems : instructorNavItems;
 
@@ -112,6 +140,10 @@ function AdminLayoutShell({
     }
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (user?.id) setSeenIds(readSeenNotificationIds(user.id));
+  }, [user?.id]);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -127,31 +159,32 @@ function AdminLayoutShell({
               createdAt: e.createdAt ?? e.updatedAt ?? e.dateStart,
               href: `/admin/events/${e.id}`,
             }));
-            
+
           const recent = rejectedEvents
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .slice(0, 5);
-            
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
           setNotifications(recent);
         })
         .catch(() => setNotifications([]));
       return;
     }
-    
+
     Promise.all([
       api.getCommunityRegistrations(),
       api.getEvents(true),
       api.getRoleRequests('pending'),
     ])
       .then(([regs, events, roleRequests]) => {
-        const hostRequests: NotificationItem[] = regs.map(reg => ({
-          id: reg.id,
-          type: 'HOST_REQUEST',
-          title: 'New host request',
-          subtitle: `${reg.fullName} wants to host on GZURA`,
-          createdAt: reg.createdAt,
-          href: '/admin/registrations',
-        }));
+        const hostRequests: NotificationItem[] = regs
+          .filter((reg) => reg.status === 'pending')
+          .map((reg) => ({
+            id: reg.id,
+            type: 'HOST_REQUEST' as const,
+            title: 'New host request',
+            subtitle: `${reg.fullName} wants to host on GZURA`,
+            createdAt: reg.createdAt,
+            href: '/admin/registrations',
+          }));
 
         const memberHostRequests: NotificationItem[] = roleRequests.map((request) => {
           const name =
@@ -172,7 +205,7 @@ function AdminLayoutShell({
           .filter(needsAdminApproval)
           .map(e => ({
             id: e.id,
-            type: 'EVENT_APPROVAL',
+            type: 'EVENT_APPROVAL' as const,
             title: 'Event approval request',
             subtitle: `${e.title}`,
             createdAt: e.createdAt ?? e.updatedAt ?? e.dateStart,
@@ -180,24 +213,31 @@ function AdminLayoutShell({
           }));
 
         const all = [...hostRequests, ...memberHostRequests, ...pendingEvents]
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 5);
-          
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
         setNotifications(all);
       })
       .catch(() => setNotifications([]));
-  }, [isAdmin]);
+  }, [isAdmin, pathname]);
 
   const userInitials = user
     ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
     : 'A';
 
-  const newNotificationCount = notifications.filter((reg) => {
-    const created = new Date(reg.createdAt);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return created >= weekAgo;
-  }).length;
+  const unreadNotifications = notifications.filter(
+    (item) => !seenIds.has(notificationKey(item)),
+  );
+  const unreadCount = unreadNotifications.length;
+
+  const markNotificationsSeen = (items: NotificationItem[]) => {
+    if (!user?.id || items.length === 0) return;
+    setSeenIds((prev) => {
+      const next = new Set(prev);
+      items.forEach((item) => next.add(notificationKey(item)));
+      writeSeenNotificationIds(user.id, next);
+      return next;
+    });
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen((prev) => {
@@ -416,6 +456,19 @@ function AdminLayoutShell({
                   View Website
                 </Link>
               </DropdownMenuItem>
+              {canSwitchToMember ? (
+                <DropdownMenuItem
+                  disabled={switching}
+                  onClick={() => {
+                    onNavigate?.();
+                    void switchTo('MEMBER');
+                  }}
+                  className="cursor-pointer"
+                >
+                  <ArrowLeftRight className="mr-2 h-4 w-4" />
+                  Switch to member
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
@@ -495,6 +548,20 @@ function AdminLayoutShell({
                   <ExternalLink className="mr-2 h-4 w-4" />
                   View Website
                 </Link>
+                {canSwitchToMember ? (
+                  <button
+                    type="button"
+                    disabled={switching}
+                    onClick={() => {
+                      onNavigate?.();
+                      void switchTo('MEMBER');
+                    }}
+                    className="flex items-center rounded-xl px-2.5 py-2 text-left text-[13px] text-zinc-800 transition-colors hover:bg-[#F5F5F5] disabled:opacity-60"
+                  >
+                    <ArrowLeftRight className="mr-2 h-4 w-4" />
+                    Switch to member
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {
@@ -604,16 +671,26 @@ function AdminLayoutShell({
                 )}
               </div>
               <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                <Popover>
+                <Popover
+                  open={bellOpen}
+                  onOpenChange={(open) => {
+                    setBellOpen(open);
+                    if (!open) markNotificationsSeen(notifications);
+                  }}
+                >
                   <PopoverTrigger asChild>
                     <button
                       className="relative p-2 rounded-full text-gray-500 hover:text-purple-deep hover:bg-purple-50 transition-colors"
-                      aria-label="Notifications"
+                      aria-label={
+                        unreadCount > 0
+                          ? `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}`
+                          : 'Notifications'
+                      }
                     >
                       <Bell className="w-5 h-5" />
-                      {newNotificationCount > 0 && (
+                      {unreadCount > 0 && !bellOpen && (
                         <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold-royal px-1 text-[10px] font-bold text-purple-deep">
-                          {newNotificationCount > 9 ? '9+' : newNotificationCount}
+                          {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                       )}
                     </button>
@@ -622,46 +699,67 @@ function AdminLayoutShell({
                     <div className="border-b px-4 py-3">
                       <p className="font-semibold text-zinc-900">Notifications</p>
                       <p className="text-xs text-gray-500">
-                        {isAdmin ? 'Recent host and event requests' : 'Important updates about your events'}
+                        {isAdmin
+                          ? unreadCount > 0
+                            ? `${unreadCount} unread request${unreadCount === 1 ? '' : 's'}`
+                            : 'No unread requests'
+                          : 'Important updates about your events'}
                       </p>
                     </div>
                     <div className="scrollbar-none max-h-72 overflow-y-auto">
                       {notifications.length === 0 ? (
                         <p className="px-4 py-8 text-center text-sm text-gray-500">
-                          No notifications yet
+                          You&apos;re all caught up
                         </p>
                       ) : (
-                        notifications.map((notif) => (
-                          <Link
-                            key={`${notif.type}-${notif.id}`}
-                            href={notif.href}
-                            className="flex flex-col gap-0.5 border-b border-gray-100 px-4 py-3 last:border-0 hover:bg-gray-50 transition-colors"
-                          >
-                            <p className="text-sm font-medium text-zinc-900">
-                              {notif.title}
-                            </p>
-                            <p className="text-xs text-gray-600 truncate">
-                              {notif.subtitle}
-                            </p>
-                            <p className="text-[11px] text-gray-400">
-                              {new Date(notif.createdAt).toLocaleDateString('en-IN', {
-                                day: 'numeric',
-                                month: 'short',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </p>
-                          </Link>
-                        ))
+                        notifications.map((notif) => {
+                          const unread = unreadNotifications.some(
+                            (item) => notificationKey(item) === notificationKey(notif),
+                          );
+                          return (
+                            <Link
+                              key={notificationKey(notif)}
+                              href={notif.href}
+                              className={cn(
+                                'relative flex flex-col gap-0.5 border-b border-gray-100 px-4 py-3 pl-6 last:border-0 transition-colors hover:bg-gray-50',
+                                unread && 'bg-gold-50/70',
+                              )}
+                            >
+                              {unread ? (
+                                <span className="absolute left-2.5 top-4 h-1.5 w-1.5 rounded-full bg-gold-royal" />
+                              ) : null}
+                              <p className="text-sm font-medium text-zinc-900">
+                                {notif.title}
+                              </p>
+                              <p className="text-xs text-gray-600 truncate">
+                                {notif.subtitle}
+                              </p>
+                              <p className="text-[11px] text-gray-400">
+                                {new Date(notif.createdAt).toLocaleDateString('en-IN', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </p>
+                            </Link>
+                          );
+                        })
                       )}
                     </div>
                     {notifications.length > 0 && isAdmin && (
                       <div className="border-t p-2">
                         <Link
-                          href="/admin/registrations"
+                          href={
+                            notifications.some((item) => item.type === 'ROLE_REQUEST')
+                              ? '/admin/role-requests'
+                              : '/admin/registrations'
+                          }
                           className="block rounded-xl px-3 py-2 text-center text-xs font-medium text-zinc-900 hover:bg-gold-50 hover:text-gold-800 transition-colors"
                         >
-                          View all host requests
+                          {notifications.some((item) => item.type === 'ROLE_REQUEST')
+                            ? 'View role requests'
+                            : 'View all host requests'}
                         </Link>
                       </div>
                     )}

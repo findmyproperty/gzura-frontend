@@ -58,6 +58,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { AdminExcelDownload } from '@/components/admin/AdminExcelDownload';
+import { excelDateStamp } from '@/lib/export-excel';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
@@ -340,10 +342,29 @@ export default function AdminUsersPage() {
           </>
         }
         actions={
-          <Button className={cn('btn-admin', adminMobileIconActionClass)} onClick={openCreate}>
-            <Plus className="h-4 w-4" />
-            <span className={adminActionLabelClass}>Add new user</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <AdminExcelDownload
+              disabled={loading}
+              filename={`gzura-users-${excelDateStamp()}`}
+              sheetName="Users"
+              emptyDescription="Adjust your filters or wait for users to load."
+              rows={filteredUsers.map((user) => ({
+                Name: `${user.firstName} ${user.lastName}`.trim(),
+                Email: user.email,
+                Phone: user.phone || '',
+                City: user.city || '',
+                Profession: user.profession || '',
+                Role: formatUserRole(user.role),
+                Status: (user.status ?? 'ACTIVE') === 'ACTIVE' ? 'Active' : 'Blocked',
+                Joined: formatAdminDate(user.createdAt),
+                'Last Sign In': formatAdminDate(user.lastLoginAt),
+              }))}
+            />
+            <Button className={cn('btn-admin', adminMobileIconActionClass)} onClick={openCreate}>
+              <Plus className="h-4 w-4" />
+              <span className={adminActionLabelClass}>Add new user</span>
+            </Button>
+          </div>
         }
         bulkBar={
           <AdminBulkBar count={selectedIds.length} onClear={() => setSelectedIds([])}>

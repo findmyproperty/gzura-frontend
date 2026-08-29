@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { MobileNumberLink } from '@/components/auth/MobileNumberLink';
+import { WorkspaceRoleSwitch } from '@/components/auth/WorkspaceRoleSwitch';
 import { api, RoleRequest } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
@@ -171,7 +172,7 @@ export default function MemberProfilePage() {
         </div>
       </div>
 
-      {user.role === 'MEMBER' ? <BecomeHostCard /> : null}
+      {user.canHost ? <WorkspaceRoleSwitch /> : <BecomeHostCard />}
     </div>
   );
 }
