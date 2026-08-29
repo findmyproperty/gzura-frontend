@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   Pencil,
+  UserCog,
   Users,
   X,
 } from 'lucide-react';
@@ -53,6 +54,7 @@ const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/events', label: 'Events', icon: Calendar },
   { href: '/admin/registrations', label: 'Host Requests', icon: ClipboardList },
+  { href: '/admin/role-requests', label: 'Role Requests', icon: UserCog },
   { href: '/admin/users', label: 'Users', icon: Users },
 ];
 
@@ -91,7 +93,7 @@ function AdminLayoutShell({
 
   type NotificationItem = {
     id: string;
-    type: 'HOST_REQUEST' | 'EVENT_APPROVAL';
+    type: 'HOST_REQUEST' | 'ROLE_REQUEST' | 'EVENT_APPROVAL';
     title: string;
     subtitle: string;
     createdAt: string;
@@ -138,8 +140,9 @@ function AdminLayoutShell({
     Promise.all([
       api.getCommunityRegistrations(),
       api.getEvents(true),
+      api.getRoleRequests('pending'),
     ])
-      .then(([regs, events]) => {
+      .then(([regs, events, roleRequests]) => {
         const hostRequests: NotificationItem[] = regs.map(reg => ({
           id: reg.id,
           type: 'HOST_REQUEST',
@@ -148,6 +151,21 @@ function AdminLayoutShell({
           createdAt: reg.createdAt,
           href: '/admin/registrations',
         }));
+
+        const memberHostRequests: NotificationItem[] = roleRequests.map((request) => {
+          const name =
+            `${request.user?.firstName ?? ''} ${request.user?.lastName ?? ''}`.trim() ||
+            request.user?.email ||
+            'A member';
+          return {
+            id: request.id,
+            type: 'ROLE_REQUEST' as const,
+            title: 'Member wants to become a host',
+            subtitle: name,
+            createdAt: request.createdAt,
+            href: '/admin/role-requests',
+          };
+        });
 
         const pendingEvents: NotificationItem[] = events
           .filter(e => e.status === 'PENDING')
@@ -160,7 +178,7 @@ function AdminLayoutShell({
             href: `/admin/events?status=PENDING`,
           }));
 
-        const all = [...hostRequests, ...pendingEvents]
+        const all = [...hostRequests, ...memberHostRequests, ...pendingEvents]
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 5);
           

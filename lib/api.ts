@@ -219,7 +219,7 @@ export interface RazorpayOrderResponse {
   price: number;
 }
 
-export type EventContentType = 'TEXT' | 'PDF' | 'WORD' | 'EXCEL';
+export type EventContentType = 'TEXT' | 'PDF' | 'WORD' | 'EXCEL' | 'VIDEO' | 'FILE';
 
 export interface EventContentItem {
   id: string;
@@ -235,6 +235,23 @@ export interface EventContentItem {
 }
 
 export type CommunityRegistrationStatus = 'pending' | 'approved' | 'rejected';
+
+export type RoleRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export interface RoleRequest {
+  id: string;
+  userId: string;
+  fromRole: User['role'];
+  toRole: User['role'];
+  message?: string | null;
+  status: RoleRequestStatus;
+  adminNote?: string | null;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+  user?: User;
+}
 
 export interface CommunityRegistration {
   id: string;
@@ -435,6 +452,9 @@ export const api = {
     }),
 
   me: () => fetchApi<User>('/auth/me', {}, true),
+
+  refreshAuth: () =>
+    fetchApi<AuthResponse>('/auth/refresh', { method: 'POST' }, true),
 
   updateProfile: (data: Record<string, unknown> | UpdateProfileInput) =>
     fetchApi<User>(
@@ -656,6 +676,35 @@ export const api = {
     fetchApi<{ deleted: boolean }>(
       `/community-registrations/${id}`,
       { method: 'DELETE' },
+      true,
+    ),
+
+  getMyRoleRequest: () =>
+    fetchApi<{ request: RoleRequest | null }>('/role-requests/me', {}, true).then(
+      (data) => data.request,
+    ),
+
+  createRoleRequest: (message?: string) =>
+    fetchApi<RoleRequest>(
+      '/role-requests',
+      { method: 'POST', body: JSON.stringify({ message: message || undefined }) },
+      true,
+    ),
+
+  getRoleRequests: (status?: RoleRequestStatus) =>
+    fetchApi<RoleRequest[]>(
+      `/role-requests${status ? `?status=${status}` : ''}`,
+      {},
+      true,
+    ),
+
+  approveRoleRequest: (id: string) =>
+    fetchApi<RoleRequest>(`/role-requests/${id}/approve`, { method: 'PATCH' }, true),
+
+  rejectRoleRequest: (id: string, adminNote?: string) =>
+    fetchApi<RoleRequest>(
+      `/role-requests/${id}/reject`,
+      { method: 'PATCH', body: JSON.stringify({ adminNote: adminNote || undefined }) },
       true,
     ),
 

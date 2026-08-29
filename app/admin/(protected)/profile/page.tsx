@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Camera, Loader2, Lock, Mail, Phone, Shield, Trash2, Upload } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,15 +10,9 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { AdminPageHeader } from '@/components/admin/admin-chrome';
 import { MobileNumberLink } from '@/components/auth/MobileNumberLink';
+import { CloudinaryUpload } from '@/components/cloudinary/CloudinaryUpload';
 import { api } from '@/lib/api';
 import { formatUserRole } from '@/lib/user-roles';
-
-const ALLOWED_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-]);
 
 function splitFullName(fullName: string) {
   const trimmed = fullName.trim();
@@ -34,7 +28,6 @@ function splitFullName(fullName: string) {
 
 export default function AdminProfilePage() {
   const { user, login, refreshUser } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [savingPhoto, setSavingPhoto] = useState(false);
@@ -70,32 +63,12 @@ export default function AdminProfilePage() {
     return result.user;
   };
 
-  const handleUploadPhoto = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-
-    if (!ALLOWED_TYPES.has(file.type)) {
-      toast({
-        title: 'Invalid file',
-        description: 'Please choose a PNG or JPEG image.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: 'File too large',
-        description: 'Profile photos must be 10 MB or smaller.',
-        variant: 'destructive',
-      });
-      return;
-    }
+  const handleCloudinaryPhoto = async (files: { url: string }[]) => {
+    const uploaded = files[0];
+    if (!uploaded) return;
 
     setSavingPhoto(true);
     try {
-      const uploaded = await api.uploadProfileAvatar(file);
       await persistProfile({ avatarUrl: uploaded.url });
       toast({ title: 'Photo updated' });
     } catch (err) {
@@ -199,90 +172,94 @@ export default function AdminProfilePage() {
     <div className="flex min-h-0 flex-1 flex-col">
       <AdminPageHeader breadcrumb="Admin / Profile" title="Profile" />
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        className="hidden"
-        onChange={handleUploadPhoto}
-      />
-
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(260px,32%)_minmax(0,1fr)]">
         <aside className="relative overflow-hidden rounded-3xl border border-purple-100/80 bg-white p-8 shadow-[0_12px_40px_-24px_rgba(45,10,78,0.35)]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_0%,rgba(201,162,39,0.18),transparent_58%),linear-gradient(180deg,#F5F0FA_0%,#ffffff_62%)]" />
-          <div className="relative flex h-full flex-col items-center justify-center text-center">
-            <div className="relative shrink-0">
-              <Avatar className="h-32 w-32 border-[3px] border-white shadow-md ring-1 ring-purple-100">
-                {user?.avatarUrl ? (
-                  <AvatarImage
-                    src={user.avatarUrl}
-                    alt={displayName}
-                    className="object-cover"
-                  />
-                ) : null}
-                <AvatarFallback className="bg-gradient-to-br from-gold-royal to-gold-400 text-purple-deep text-3xl font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <button
-                type="button"
-                disabled={savingPhoto}
-                onClick={() => fileInputRef.current?.click()}
-                aria-label="Change profile photo"
-                className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-purple-deep text-white shadow-md ring-2 ring-white transition-colors hover:bg-purple-700 disabled:opacity-60"
-              >
-                {savingPhoto ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Camera className="h-4 w-4" />
-                )}
-              </button>
-            </div>
+          <CloudinaryUpload
+            resourceType="image"
+            folder="gzura/avatars"
+            maxFileSize={10 * 1024 * 1024}
+            onUploaded={handleCloudinaryPhoto}
+          >
+            {({ open, isUploading }) => {
+              const photoBusy = savingPhoto || isUploading;
+              return (
+                <div className="relative flex h-full flex-col items-center justify-center text-center">
+                  <div className="relative shrink-0">
+                    <Avatar className="h-32 w-32 border-[3px] border-white shadow-md ring-1 ring-purple-100">
+                      {user?.avatarUrl ? (
+                        <AvatarImage
+                          src={user.avatarUrl}
+                          alt={displayName}
+                          className="object-cover"
+                        />
+                      ) : null}
+                      <AvatarFallback className="bg-gradient-to-br from-gold-royal to-gold-400 text-purple-deep text-3xl font-bold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <button
+                      type="button"
+                      disabled={photoBusy}
+                      onClick={() => open()}
+                      aria-label="Change profile photo"
+                      className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-purple-deep text-white shadow-md ring-2 ring-white transition-colors hover:bg-purple-700 disabled:opacity-60"
+                    >
+                      {photoBusy ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
 
-            <h2 className="mt-5 text-2xl font-bold tracking-tight text-zinc-900">
-              {displayName}
-            </h2>
-            {user?.role ? (
-              <span className="mt-2 rounded-full bg-purple-deep/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-purple-deep">
-                {formatUserRole(user.role)}
-              </span>
-            ) : null}
-            <p className="mt-2 flex max-w-full items-center justify-center gap-1.5 text-sm text-gray-500">
-              <Mail className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{user?.email}</span>
-            </p>
-            {user?.phone ? (
-              <p className="mt-1.5 flex max-w-full items-center justify-center gap-1.5 text-sm text-gray-500">
-                <Phone className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{user.phone}</span>
-              </p>
-            ) : null}
-            <div className="mt-6 flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={savingPhoto}
-                onClick={() => fileInputRef.current?.click()}
-                className="h-9 rounded-full border-gray-200 bg-white px-4"
-              >
-                <Upload className="mr-1.5 h-3.5 w-3.5" />
-                Upload
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={savingPhoto || !user?.avatarUrl}
-                onClick={handleRemovePhoto}
-                className="h-9 rounded-full px-4 text-gray-500 hover:text-red-600"
-              >
-                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                Remove
-              </Button>
-            </div>
-            <p className="mt-4 text-xs text-gray-400">PNGs and JPEGs, up to 10 MB.</p>
-          </div>
+                  <h2 className="mt-5 text-2xl font-bold tracking-tight text-zinc-900">
+                    {displayName}
+                  </h2>
+                  {user?.role ? (
+                    <span className="mt-2 rounded-full bg-purple-deep/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-purple-deep">
+                      {formatUserRole(user.role)}
+                    </span>
+                  ) : null}
+                  <p className="mt-2 flex max-w-full items-center justify-center gap-1.5 text-sm text-gray-500">
+                    <Mail className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{user?.email}</span>
+                  </p>
+                  {user?.phone ? (
+                    <p className="mt-1.5 flex max-w-full items-center justify-center gap-1.5 text-sm text-gray-500">
+                      <Phone className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{user.phone}</span>
+                    </p>
+                  ) : null}
+                  <div className="mt-6 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={photoBusy}
+                      onClick={() => open()}
+                      className="h-9 rounded-full border-gray-200 bg-white px-4"
+                    >
+                      <Upload className="mr-1.5 h-3.5 w-3.5" />
+                      Upload
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={photoBusy || !user?.avatarUrl}
+                      onClick={handleRemovePhoto}
+                      className="h-9 rounded-full px-4 text-gray-500 hover:text-red-600"
+                    >
+                      <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                      Remove
+                    </Button>
+                  </div>
+                  <p className="mt-4 text-xs text-gray-400">PNGs and JPEGs, up to 10 MB.</p>
+                </div>
+              );
+            }}
+          </CloudinaryUpload>
         </aside>
 
         <div className="flex min-h-0 flex-col gap-4">
