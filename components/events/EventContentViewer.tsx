@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import {
   BookOpen,
   Download,
+  File,
   FileSpreadsheet,
   FileText,
   FileType2,
+  Film,
   Loader2,
   Lock,
 } from 'lucide-react';
@@ -17,6 +19,8 @@ function contentIcon(type: EventContentType) {
   if (type === 'PDF') return FileText;
   if (type === 'WORD') return FileType2;
   if (type === 'EXCEL') return FileSpreadsheet;
+  if (type === 'VIDEO') return Film;
+  if (type === 'FILE') return File;
   return FileText;
 }
 
@@ -135,6 +139,14 @@ export default function EventContentViewer({ eventId }: { eventId: string }) {
                 <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
                   {item.textContent}
                 </p>
+              ) : item.contentType === 'VIDEO' && item.fileUrl ? (
+                <video
+                  src={item.fileUrl}
+                  controls
+                  className="mt-1 w-full max-w-xl rounded-lg bg-black"
+                >
+                  Your browser does not support the video tag.
+                </video>
               ) : item.fileUrl ? (
                 <a
                   href={item.fileUrl}

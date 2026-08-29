@@ -60,8 +60,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const profile = await api.me();
-      setUser(profile);
-      cacheUser(profile);
+      const currentToken = getToken();
+      const payload = currentToken ? decodeJwtPayload(currentToken) : null;
+      if (payload?.role && payload.role !== profile.role) {
+        const refreshed = await api.refreshAuth();
+        setToken(refreshed.accessToken);
+        const latest = await api.me();
+        setUser(latest);
+        cacheUser(latest);
+      } else {
+        setUser(profile);
+        cacheUser(profile);
+      }
     } catch {
       clearToken();
       setUser(null);

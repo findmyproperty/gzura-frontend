@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import {
+  File,
   FileSpreadsheet,
   FileText,
   FileType2,
+  Film,
   Loader2,
   Plus,
   Trash2,
@@ -15,16 +17,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { CloudinaryUpload } from '@/components/cloudinary/CloudinaryUpload';
+import { mapCloudinaryToContentType } from '@/components/cloudinary/map-content-type';
 import { api, EventContentItem, EventContentType } from '@/lib/api';
 import { revalidateEventsCache } from '@/lib/events-revalidate';
-
-const FILE_ACCEPT =
-  '.pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 function contentIcon(type: EventContentType) {
   if (type === 'PDF') return FileText;
   if (type === 'WORD') return FileType2;
   if (type === 'EXCEL') return FileSpreadsheet;
+  if (type === 'VIDEO') return Film;
+  if (type === 'FILE') return File;
   return FileText;
 }
 
@@ -35,7 +38,6 @@ export default function EventContentManager({ eventId }: { eventId: string }) {
   const [mode, setMode] = useState<'text' | 'file'>('text');
   const [title, setTitle] = useState('');
   const [textContent, setTextContent] = useState('');
-  const [file, setFile] = useState<File | null>(null);
 
   const loadContent = () => {
     setLoading(true);
@@ -53,7 +55,6 @@ export default function EventContentManager({ eventId }: { eventId: string }) {
   const resetForm = () => {
     setTitle('');
     setTextContent('');
-    setFile(null);
   };
 
   const handleAddText = async () => {
@@ -81,41 +82,6 @@ export default function EventContentManager({ eventId }: { eventId: string }) {
     } catch (err) {
       toast({
         title: 'Could not add content',
-        description: err instanceof Error ? err.message : 'Please try again',
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleAddFile = async () => {
-    if (!title.trim() || !file) {
-      toast({
-        title: 'Missing fields',
-        description: 'Add a title and choose a file.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const uploaded = await api.uploadEventContent(file);
-      await api.createEventContent(eventId, {
-        title: title.trim(),
-        contentType: uploaded.contentType,
-        fileUrl: uploaded.url,
-        fileName: uploaded.originalName,
-        sortOrder: items.length,
-      });
-      resetForm();
-      loadContent();
-      await revalidateEventsCache(eventId);
-      toast({ title: 'File uploaded' });
-    } catch (err) {
-      toast({
-        title: 'Upload failed',
         description: err instanceof Error ? err.message : 'Please try again',
         variant: 'destructive',
       });
@@ -197,26 +163,76 @@ export default function EventContentManager({ eventId }: { eventId: string }) {
               </Button>
             </div>
           ) : (
-            <div>
-              <Label htmlFor="content-file">File (PDF, Word, Excel)</Label>
-              <Input
-                id="content-file"
-                type="file"
-                accept={FILE_ACCEPT}
-                className="mt-1.5"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              />
-              <p className="mt-1 text-xs text-gray-500">Max 15 MB. PDF, .doc, .docx, .xls, .xlsx</p>
-              <Button
-                type="button"
-                className="mt-3 btn-primary"
-                disabled={saving}
-                onClick={handleAddFile}
-              >
-                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Upload file
-              </Button>
-            </div>
+            <CloudinaryUpload
+              resourceType="auto"
+              folder="gzura/content"
+              onUploaded={async (files) => {
+                const uploaded = files[0];
+                if (!uploaded) return;
+                if (!title.trim()) {
+                  toast({
+                    title: 'Missing fields',
+                    description: 'Add a title, then upload again.',
+                    variant: 'destructive',
+                  });
+                  return;
+                }
+
+                setSaving(true);
+                try {
+                  await api.createEventContent(eventId, {
+                    title: title.trim(),
+                    contentType: mapCloudinaryToContentType(uploaded),
+                    fileUrl: uploaded.url,
+                    fileName: uploaded.originalFilename || 'file',
+                    sortOrder: items.length,
+                  });
+                  resetForm();
+                  loadContent();
+                  await revalidateEventsCache(eventId);
+                  toast({ title: 'File uploaded' });
+                } catch (err) {
+                  toast({
+                    title: 'Upload failed',
+                    description: err instanceof Error ? err.message : 'Please try again',
+                    variant: 'destructive',
+                  });
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {({ open, isUploading }) => (
+                <div>
+                  <p className="text-xs text-gray-500">
+                    PDF, Word, Excel, video, or other files via Cloudinary.
+                  </p>
+                  <Button
+                    type="button"
+                    className="mt-3 btn-primary"
+                    disabled={saving || isUploading}
+                    onClick={() => {
+                      if (!title.trim()) {
+                        toast({
+                          title: 'Missing fields',
+                          description: 'Add a title and then choose a file.',
+                          variant: 'destructive',
+                        });
+                        return;
+                      }
+                      open();
+                    }}
+                  >
+                    {saving || isUploading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="mr-2 h-4 w-4" />
+                    )}
+                    Upload file
+                  </Button>
+                </div>
+              )}
+            </CloudinaryUpload>
           )}
         </div>
       </div>
