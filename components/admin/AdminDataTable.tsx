@@ -13,6 +13,10 @@ import {
   Search,
   X,
 } from 'lucide-react';
+import {
+  AdminExcelDownload,
+  type AdminExcelConfig,
+} from '@/components/admin/AdminExcelDownload';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
@@ -196,6 +200,7 @@ export function AdminDataTable({
   filters,
   filtersActive = false,
   sheetExtras,
+  excel,
   actions,
   bulkBar,
   loading,
@@ -210,6 +215,7 @@ export function AdminDataTable({
   filters?: React.ReactNode;
   filtersActive?: boolean;
   sheetExtras?: React.ReactNode;
+  excel?: AdminExcelConfig;
   actions?: React.ReactNode;
   bulkBar?: React.ReactNode;
   loading?: boolean;
@@ -223,6 +229,16 @@ export function AdminDataTable({
   const hasFilters = Boolean(filters || sheetExtras);
   const showFilterSheet = hasSearch || hasFilters;
   const filterBadge = filtersActive || Boolean(search?.trim());
+  const excelButton = excel ? (
+    <AdminExcelDownload {...excel} disabled={loading || excel.disabled} />
+  ) : null;
+  const toolbarActions =
+    excelButton || actions ? (
+      <>
+        {excelButton}
+        {actions}
+      </>
+    ) : null;
 
   const searchField = (fullWidth = false) =>
     onSearchChange ? (
@@ -253,7 +269,7 @@ export function AdminDataTable({
         fill ? 'min-h-0 flex-1' : 'h-auto',
       )}
     >
-      {(hasSearch || filters || actions || bulkBar) && (
+      {(hasSearch || filters || toolbarActions || bulkBar) && (
         <div className="shrink-0 space-y-3 px-4 pb-4 pt-4 md:px-5 md:pt-5">
           <div className="flex items-center gap-2 md:hidden">
             {showFilterSheet ? (
@@ -290,8 +306,8 @@ export function AdminDataTable({
                 </SheetContent>
               </Sheet>
             ) : null}
-            {actions ? (
-              <div className="ml-auto flex items-center gap-2">{actions}</div>
+            {toolbarActions ? (
+              <div className="ml-auto flex items-center gap-2">{toolbarActions}</div>
             ) : null}
           </div>
 
@@ -301,7 +317,7 @@ export function AdminDataTable({
                 {filters}
               </div>
             ) : null}
-            {hasSearch || actions ? (
+            {hasSearch || toolbarActions ? (
               <div
                 className={cn(
                   'flex min-w-0 flex-wrap items-center gap-2',
@@ -309,7 +325,7 @@ export function AdminDataTable({
                 )}
               >
                 {searchField()}
-                {actions}
+                {toolbarActions}
               </div>
             ) : null}
           </div>

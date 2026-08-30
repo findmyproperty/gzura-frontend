@@ -25,7 +25,6 @@ import {
   StatusBadge,
   useAdminTablePaging,
 } from '@/components/admin/AdminDataTable';
-import { AdminExcelDownload } from '@/components/admin/AdminExcelDownload';
 import { Button } from '@/components/ui/button';
 import { excelDateStamp } from '@/lib/export-excel';
 import { api, Event, EventRegistration } from '@/lib/api';
@@ -94,6 +93,24 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
       onSearchChange={setSearch}
       searchPlaceholder="Search enrolled users."
       loading={loading}
+      excel={{
+        filename: `gzura-enrolled-${event.slug || event.id}-${excelDateStamp()}`,
+        sheetName: 'Enrolled',
+        emptyDescription: 'No enrolled users match your search.',
+        rows: filtered.map((row) => ({
+          Event: event.title,
+          Name: row.fullName,
+          Email: row.email,
+          Phone: row.phone || '',
+          City: row.city || '',
+          Profession: row.profession || '',
+          Enrolled: formatEnrolledAt(row.createdAt),
+          Payment: row.paymentStatus === 'PAID' ? 'Paid' : 'Free',
+          Amount: row.amountPaid ?? '',
+          Attendance: isOffline ? (row.checkedInAt ? 'Present' : 'Absent') : '',
+          'Checked in': row.checkedInAt ? formatAdminDateTime(row.checkedInAt) : '',
+        })),
+      }}
       filters={
         isOffline && registrations.length > 0 ? (
           <span className="inline-flex h-9 items-center rounded-lg border border-[#E5E7EB] bg-white px-3 text-[13px] font-medium text-gray-700">
@@ -102,35 +119,14 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
         ) : null
       }
       actions={
-        <div className="flex items-center gap-2">
-          <AdminExcelDownload
-            disabled={loading}
-            filename={`gzura-enrolled-${event.slug || event.id}-${excelDateStamp()}`}
-            sheetName="Enrolled"
-            emptyDescription="No enrolled users match your search."
-            rows={filtered.map((row) => ({
-              Event: event.title,
-              Name: row.fullName,
-              Email: row.email,
-              Phone: row.phone || '',
-              City: row.city || '',
-              Profession: row.profession || '',
-              Enrolled: formatEnrolledAt(row.createdAt),
-              Payment: row.paymentStatus === 'PAID' ? 'Paid' : 'Free',
-              Amount: row.amountPaid ?? '',
-              Attendance: isOffline ? (row.checkedInAt ? 'Present' : 'Absent') : '',
-              'Checked in': row.checkedInAt ? formatAdminDateTime(row.checkedInAt) : '',
-            }))}
-          />
-          {isOffline ? (
-            <Button asChild variant="outline" className={adminActionOutlineClass}>
-              <Link href={`/admin/qr-scanner?eventId=${event.id}`}>
-                <QrCode className="h-4 w-4" />
-                Scan QR
-              </Link>
-            </Button>
-          ) : null}
-        </div>
+        isOffline ? (
+          <Button asChild variant="outline" className={adminActionOutlineClass}>
+            <Link href={`/admin/qr-scanner?eventId=${event.id}`}>
+              <QrCode className="h-4 w-4" />
+              Scan QR
+            </Link>
+          </Button>
+        ) : undefined
       }
       emptyMessage={
         registrations.length === 0

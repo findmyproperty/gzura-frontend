@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import { FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  adminActionLabelClass,
-  adminActionOutlineClass,
-  adminMobileIconActionClass,
-} from '@/components/admin/AdminDataTable';
 import { toast } from '@/hooks/use-toast';
 import { downloadExcel, type ExcelRow } from '@/lib/export-excel';
-import { cn } from '@/lib/utils';
+
+export type AdminExcelConfig = {
+  rows: ExcelRow[];
+  filename: string;
+  sheetName?: string;
+  disabled?: boolean;
+  emptyDescription?: string;
+};
 
 export function AdminExcelDownload({
   rows,
@@ -18,13 +20,7 @@ export function AdminExcelDownload({
   sheetName = 'Export',
   disabled = false,
   emptyDescription = 'Adjust your filters or wait for the table to load.',
-}: {
-  rows: ExcelRow[];
-  filename: string;
-  sheetName?: string;
-  disabled?: boolean;
-  emptyDescription?: string;
-}) {
+}: AdminExcelConfig) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = () => {
@@ -59,7 +55,7 @@ export function AdminExcelDownload({
     <Button
       type="button"
       variant="outline"
-      className={cn(adminActionOutlineClass, adminMobileIconActionClass)}
+      className="h-9 gap-2 rounded-lg border-[#E5E7EB] bg-white px-3.5 py-0 text-[13px] font-medium text-gray-700 shadow-none hover:border-purple-deep hover:bg-purple-50 hover:text-purple-deep"
       disabled={disabled || downloading}
       onClick={handleDownload}
     >
@@ -68,7 +64,7 @@ export function AdminExcelDownload({
       ) : (
         <FileSpreadsheet className="h-4 w-4" />
       )}
-      <span className={adminActionLabelClass}>Excel</span>
+      Excel
     </Button>
   );
 }

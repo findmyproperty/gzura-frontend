@@ -102,7 +102,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { EventFormCard } from '@/components/admin/EventFormCard';
-import { AdminExcelDownload } from '@/components/admin/AdminExcelDownload';
 import { EventActivityLogDialog } from '@/components/admin/EventActivityLogDialog';
 import { EventImageGalleryUpload } from '@/components/admin/EventImageGalleryUpload';
 import { excelDateStamp } from '@/lib/export-excel';
@@ -571,6 +570,23 @@ export default function AdminEventsPage() {
         onSearchChange={setSearch}
         searchPlaceholder="Search events."
         loading={loading}
+        excel={{
+          filename: `gzura-events-${excelDateStamp()}`,
+          sheetName: 'Events',
+          emptyDescription: 'Adjust your filters or wait for events to load.',
+          rows: filteredEvents.map((event) => ({
+            Event: event.title,
+            Host: event.host ? labelForHost(event.host) : event.speakerName || '',
+            Date: formatAdminDate(event.dateStart),
+            Time: event.timeLabel || '',
+            Type: event.type,
+            Status: eventStatusBadge(event.status).label,
+            Location: event.location || '',
+            Venue: event.venue || '',
+            Price: event.price ?? 0,
+            Registrations: event._count?.registrations ?? 0,
+          })),
+        }}
         filtersActive={statusFilter !== 'all'}
         filters={
           <>
@@ -679,24 +695,6 @@ export default function AdminEventsPage() {
                 </span>
               </Button>
             )}
-            <AdminExcelDownload
-              disabled={loading}
-              filename={`gzura-events-${excelDateStamp()}`}
-              sheetName="Events"
-              emptyDescription="Adjust your filters or wait for events to load."
-              rows={filteredEvents.map((event) => ({
-                Event: event.title,
-                Host: event.host ? labelForHost(event.host) : event.speakerName || '',
-                Date: formatAdminDate(event.dateStart),
-                Time: event.timeLabel || '',
-                Type: event.type,
-                Status: eventStatusBadge(event.status).label,
-                Location: event.location || '',
-                Venue: event.venue || '',
-                Price: event.price ?? 0,
-                Registrations: event._count?.registrations ?? 0,
-              }))}
-            />
             <Button asChild variant="outline" className={cn(adminActionOutlineClass, adminMobileIconActionClass)}>
               <Link href="/admin/qr-scanner">
                 <QrCode className="h-4 w-4" />

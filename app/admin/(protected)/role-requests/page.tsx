@@ -26,7 +26,6 @@ import {
   StatusBadge,
   useAdminTablePaging,
 } from '@/components/admin/AdminDataTable';
-import { AdminExcelDownload } from '@/components/admin/AdminExcelDownload';
 import { excelDateStamp } from '@/lib/export-excel';
 import { Button } from '@/components/ui/button';
 import {
@@ -123,6 +122,19 @@ export default function AdminRoleRequestsPage() {
         onSearchChange={setSearch}
         searchPlaceholder="Search members."
         loading={loading}
+        excel={{
+          filename: `gzura-role-requests-${excelDateStamp()}`,
+          sheetName: 'Role Requests',
+          emptyDescription: 'Adjust your filters or wait for role requests to load.',
+          rows: filteredRows.map((row) => ({
+            Member: applicantName(row),
+            Email: row.user?.email || '',
+            Message: row.message || '',
+            Status: formatRegistrationStatusLabel(row.status),
+            Submitted: formatAdminDate(row.createdAt),
+            'Admin note': row.adminNote || '',
+          })),
+        }}
         filtersActive={statusFilter !== 'all'}
         filters={
           <>
@@ -144,22 +156,6 @@ export default function AdminRoleRequestsPage() {
               </SelectContent>
             </Select>
           </>
-        }
-        actions={
-          <AdminExcelDownload
-            disabled={loading}
-            filename={`gzura-role-requests-${excelDateStamp()}`}
-            sheetName="Role Requests"
-            emptyDescription="Adjust your filters or wait for role requests to load."
-            rows={filteredRows.map((row) => ({
-              Member: applicantName(row),
-              Email: row.user?.email || '',
-              Message: row.message || '',
-              Status: formatRegistrationStatusLabel(row.status),
-              Submitted: formatAdminDate(row.createdAt),
-              'Admin note': row.adminNote || '',
-            }))}
-          />
         }
         footer={
           filteredRows.length > 0 ? (

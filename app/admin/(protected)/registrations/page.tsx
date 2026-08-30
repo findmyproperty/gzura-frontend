@@ -54,6 +54,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AdminExportMenu } from '@/components/admin/AdminExportMenu';
+import { excelDateStamp } from '@/lib/export-excel';
+import { mapRegistrationsForExport } from '@/lib/export-registrations';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -224,6 +226,12 @@ export default function AdminRegistrationsPage() {
         onSearchChange={setSearch}
         searchPlaceholder="Search host requests."
         loading={loading}
+        excel={{
+          filename: `gzura-host-requests-${excelDateStamp()}`,
+          sheetName: 'Host Requests',
+          emptyDescription: 'Adjust your filters or wait for host requests to load.',
+          rows: mapRegistrationsForExport(exportRows),
+        }}
         filtersActive={statusFilter !== 'all'}
         filters={
           <>
