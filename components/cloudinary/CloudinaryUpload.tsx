@@ -50,6 +50,8 @@ export function CloudinaryUpload({
   children,
 }: CloudinaryUploadProps) {
   const collectedRef = useRef<CloudinaryUploadedFile[]>([]);
+  const onUploadedRef = useRef(onUploaded);
+  onUploadedRef.current = onUploaded;
   const preset = UPLOAD_PRESET;
 
   if (!preset) {
@@ -72,7 +74,7 @@ export function CloudinaryUpload({
   const flushCollected = () => {
     const files = collectedRef.current;
     collectedRef.current = [];
-    if (files.length) onUploaded(files);
+    if (files.length) onUploadedRef.current(files);
   };
 
   return (
@@ -89,15 +91,16 @@ export function CloudinaryUpload({
           (resourceType === 'image' ? 10 * 1024 * 1024 : 100 * 1024 * 1024),
       }}
       onSuccess={(result) => {
-        if (result.event !== 'success') return;
+        if (result.event && result.event !== 'success') return;
         const info = result.info;
         if (!info || typeof info === 'string') return;
         const mapped = mapInfo(info as unknown as Record<string, unknown>);
-        if (mapped) collectedRef.current.push(mapped);
-        if (!multiple) flushCollected();
+        if (!mapped) return;
+        collectedRef.current.push(mapped);
+        flushCollected();
       }}
       onQueuesEnd={() => {
-        if (multiple) flushCollected();
+        flushCollected();
       }}
       onError={(error) => {
         collectedRef.current = [];

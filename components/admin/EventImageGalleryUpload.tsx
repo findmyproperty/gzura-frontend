@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { ImagePlus, Loader2, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CloudinaryUpload } from '@/components/cloudinary/CloudinaryUpload';
@@ -17,15 +18,17 @@ export function EventImageGalleryUpload({
   value,
   onChange,
 }: EventImageGalleryUploadProps) {
+  const valueRef = useRef(value);
+  valueRef.current = value;
   const remaining = Math.max(MAX_IMAGES - value.length, 0);
 
   const removeAt = (index: number) => {
-    onChange(value.filter((_, i) => i !== index));
+    onChange(valueRef.current.filter((_, i) => i !== index));
   };
 
   const setCover = (index: number) => {
     if (index === 0) return;
-    const next = [...value];
+    const next = [...valueRef.current];
     const [cover] = next.splice(index, 1);
     onChange([cover, ...next]);
   };
@@ -34,15 +37,22 @@ export function EventImageGalleryUpload({
     <CloudinaryUpload
       resourceType="image"
       multiple
-      maxFiles={remaining || 1}
+      maxFiles={MAX_IMAGES}
       folder="gzura/events"
       maxFileSize={5 * 1024 * 1024}
       onUploaded={(files) => {
-        const urls = files.map((file) => file.url).slice(0, remaining);
-        if (!urls.length) return;
-        onChange([...value, ...urls]);
+        const current = valueRef.current;
+        const slots = Math.max(MAX_IMAGES - current.length, 0);
+        const next = [...current];
+        for (const file of files) {
+          if (next.length >= MAX_IMAGES) break;
+          if (file.url && !next.includes(file.url)) next.push(file.url);
+        }
+        const added = next.length - current.length;
+        if (!added || slots <= 0) return;
+        onChange(next);
         toast({
-          title: urls.length === 1 ? 'Image uploaded' : `${urls.length} images uploaded`,
+          title: added === 1 ? 'Image uploaded' : `${added} images uploaded`,
         });
       }}
     >

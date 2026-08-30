@@ -173,8 +173,8 @@ export default function AdminRoleRequestsPage() {
       >
         <AdminTable minWidth={ADMIN_TABLE_MIN_WIDTH}>
           <AdminTableHead>
-            <AdminTableHeaderCell className={adminCol.primary}>Member</AdminTableHeaderCell>
-            <AdminTableHeaderCell className={adminCol.type}>Message</AdminTableHeaderCell>
+            <AdminTableHeaderCell className="min-w-[220px] w-[34%]">Member</AdminTableHeaderCell>
+            <AdminTableHeaderCell className="w-[28%]">Message</AdminTableHeaderCell>
             <AdminTableHeaderCell className={adminCol.status}>Status</AdminTableHeaderCell>
             <AdminTableHeaderCell className={adminCol.date}>Submitted</AdminTableHeaderCell>
             <AdminTableHeaderCell className="w-[72px] text-right md:w-[200px]">
@@ -187,7 +187,7 @@ export default function AdminRoleRequestsPage() {
               const busy = updatingId === row.id;
               return (
                 <AdminTableRow key={row.id}>
-                  <AdminTableCell className={adminCol.primary}>
+                  <AdminTableCell className="min-w-[220px] w-[34%]">
                     <AdminEntityCell
                       media={
                         <AdminAvatar
@@ -199,7 +199,7 @@ export default function AdminRoleRequestsPage() {
                       subtitle={row.user?.email}
                     />
                   </AdminTableCell>
-                  <AdminTableCell className={adminCol.type}>
+                  <AdminTableCell className="w-[28%]">
                     <span className="line-clamp-2 text-sm text-gray-600">
                       {row.message || '—'}
                     </span>

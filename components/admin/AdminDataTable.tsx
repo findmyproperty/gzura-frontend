@@ -531,9 +531,6 @@ export function AdminTable({
       className="h-auto w-full table-fixed border-collapse text-[14px] leading-5 font-sans"
       style={{ minWidth }}
     >
-      <colgroup>
-        <col style={{ width: 48 }} />
-      </colgroup>
       {children}
     </table>
   );
@@ -634,18 +631,23 @@ export function AdminTableCheckboxCell({
   header?: boolean;
 }) {
   const checkbox = (
-    <Checkbox
-      checked={checked}
-      onCheckedChange={(value) => onCheckedChange(value === true)}
-      aria-label={ariaLabel}
-      className="h-4 w-4 rounded-[4px] border-[#D1D5DB] shadow-none data-[state=checked]:border-gold-royal data-[state=checked]:bg-gold-royal data-[state=checked]:text-zinc-900"
-    />
+    <>
+      <span className="invisible inline-block h-4 w-0" aria-hidden />
+      <span className="absolute inset-0 flex items-center justify-center">
+        <Checkbox
+          checked={checked}
+          onCheckedChange={(value) => onCheckedChange(value === true)}
+          aria-label={ariaLabel}
+          className="inline-flex h-4 w-4 items-center justify-center rounded-[4px] border-[#D1D5DB] leading-none shadow-none data-[state=checked]:border-gold-royal data-[state=checked]:bg-gold-royal data-[state=checked]:text-zinc-900"
+        />
+      </span>
+    </>
   );
 
   if (header) {
     return (
       <th
-        className={cn(headerCellClass, 'w-12 p-0 text-center align-middle')}
+        className={cn(headerCellClass, 'relative w-12 p-0 align-middle')}
         onClick={(e) => e.stopPropagation()}
       >
         {checkbox}
@@ -655,7 +657,7 @@ export function AdminTableCheckboxCell({
 
   return (
     <td
-      className="w-12 border-b border-[#F3F4F6] p-0 text-center align-middle"
+      className="relative w-12 border-b border-[#F3F4F6] p-0 align-middle"
       onClick={(e) => e.stopPropagation()}
     >
       {checkbox}
