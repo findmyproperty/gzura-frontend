@@ -7,6 +7,7 @@ import CourseCardImage from '@/components/member/CourseCardImage';
 import RecommendedEvents from '@/components/member/RecommendedEvents';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/lib/api';
+import { getEventCardBadge } from '@/lib/event-status';
 import { formatEventPrice } from '@/lib/price';
 
 const ITEMS_PER_PAGE = 8;
@@ -148,7 +149,11 @@ export default function MemberCoursesHome({ events }: { events: Event[] }) {
               {paginatedEvents.map((event) => (
                 <Link key={event.id} href={`/home/events/${event.id}`} className="group block">
                   <article className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1">
-                    <CourseCardImage imageUrl={event.imageUrl} title={event.title} />
+                    <CourseCardImage
+                      imageUrl={event.imageUrl}
+                      title={event.title}
+                      badge={getEventCardBadge(event)}
+                    />
 
                     <div className="p-4 flex-1 flex flex-col">
                       <div className="flex items-center justify-between gap-2 mb-2">

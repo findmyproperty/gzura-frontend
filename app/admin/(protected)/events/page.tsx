@@ -32,7 +32,9 @@ import {
   needsAdminApproval,
   rejectEventReview,
 } from '@/lib/api';
+import { EventStatusPill } from '@/components/events/EventCornerBadge';
 import { revalidateEventsCache } from '@/lib/events-revalidate';
+import { getEventCardBadge } from '@/lib/event-status';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import {
   AdminBulkBar,
@@ -53,9 +55,10 @@ import {
   AdminTableRow,
   adminActionLabelClass,
   adminActionOutlineClass,
-  adminCol,
   adminFilterTriggerClass,
   adminMobileIconActionClass,
+  adminStickyActionsCellClass,
+  adminStickyActionsHeaderClass,
   formatAdminDate,
   getAvatarColor,
   getInitialsFromFullName,
@@ -755,7 +758,7 @@ export default function AdminEventsPage() {
           ) : null
         }
       >
-        <AdminTable minWidth="1100px">
+        <AdminTable minWidth={isAdmin ? '720px' : '600px'}>
           <AdminTableHead>
             <AdminTableCheckboxCell
               header
@@ -769,15 +772,23 @@ export default function AdminEventsPage() {
               }}
               ariaLabel="Select all events on this page"
             />
-            <AdminTableHeaderCell className={isAdmin ? adminCol.primary : 'w-[32%]'} sortable>
+            <AdminTableHeaderCell className={isAdmin ? 'w-[28%]' : 'w-[34%]'} sortable>
               Event
             </AdminTableHeaderCell>
-            {isAdmin && <AdminTableHeaderCell className={adminCol.person}>Host</AdminTableHeaderCell>}
-            <AdminTableHeaderCell className={adminCol.date}>Date</AdminTableHeaderCell>
-            <AdminTableHeaderCell className={adminCol.type}>Type</AdminTableHeaderCell>
-            <AdminTableHeaderCell className={adminCol.status}>Status</AdminTableHeaderCell>
-            <AdminTableHeaderCell className={adminCol.number}>Registrations</AdminTableHeaderCell>
-            <AdminTableHeaderCell className="w-[220px] text-right" />
+            {isAdmin && (
+              <AdminTableHeaderCell className="hidden w-[16%] lg:table-cell">
+                Host
+              </AdminTableHeaderCell>
+            )}
+            <AdminTableHeaderCell className="w-[14%]">Date</AdminTableHeaderCell>
+            <AdminTableHeaderCell className="w-[12%]">Type</AdminTableHeaderCell>
+            <AdminTableHeaderCell className="hidden w-[16%] sm:table-cell">
+              Status
+            </AdminTableHeaderCell>
+            <AdminTableHeaderCell className="hidden w-[10%] md:table-cell">
+              Registrations
+            </AdminTableHeaderCell>
+            <AdminTableHeaderCell className={adminStickyActionsHeaderClass} />
           </AdminTableHead>
           <AdminTableBody>
             {paginatedEvents.map((event) => {
@@ -816,10 +827,11 @@ export default function AdminEventsPage() {
                     }
                     title={event.title}
                     subtitle={event.location}
+                    badge={<EventStatusPill badge={getEventCardBadge(event)} />}
                   />
                 </AdminTableCell>
                 {isAdmin && (
-                  <AdminTableCell>
+                  <AdminTableCell className="hidden lg:table-cell">
                     {event.host ? (
                       <AdminEntityCell
                         title={`${event.host.firstName} ${event.host.lastName}`}
@@ -836,7 +848,7 @@ export default function AdminEventsPage() {
                 <AdminTableCell>
                   <PillBadge>{event.type}</PillBadge>
                 </AdminTableCell>
-                <AdminTableCell>
+                <AdminTableCell className="hidden sm:table-cell">
                   <div className="flex flex-col gap-1">
                     <StatusBadge label={statusBadge.label} tone={statusBadge.tone} />
                     {hasPendingEdits(event) ? (
@@ -850,46 +862,14 @@ export default function AdminEventsPage() {
                     ) : null}
                   </div>
                 </AdminTableCell>
-                <AdminTableCell className="tabular-nums font-medium text-gray-700">
+                <AdminTableCell className="hidden tabular-nums font-medium text-gray-700 md:table-cell">
                   {event._count?.registrations ?? 0}
                 </AdminTableCell>
                 <AdminTableCell
-                  className="px-3"
+                  className={adminStickyActionsCellClass}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center justify-end gap-2">
-                    {canReview ? (
-                      <>
-                        <Button
-                          size="sm"
-                          className="btn-admin h-8"
-                          disabled={busy}
-                          onClick={() => void handleApprove(event)}
-                        >
-                          {busy && !rejectTarget ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <>
-                              <Check className="w-3.5 h-3.5 mr-1" />
-                              Approve
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                          disabled={busy}
-                          onClick={() => {
-                            setRejectReason('');
-                            setRejectTarget(event);
-                          }}
-                        >
-                          <X className="w-3.5 h-3.5 mr-1" />
-                          Reject
-                        </Button>
-                      </>
-                    ) : null}
+                  <div className="flex items-center justify-end">
                     <AdminRowActions
                       menu={
                         <DropdownMenu>
@@ -897,6 +877,28 @@ export default function AdminEventsPage() {
                             <AdminMoreButton />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
+                            {canReview ? (
+                              <>
+                                <DropdownMenuItem
+                                  disabled={busy}
+                                  onClick={() => void handleApprove(event)}
+                                >
+                                  <Check className="w-4 h-4 mr-2" />
+                                  Approve
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  disabled={busy}
+                                  className="text-red-600 focus:text-red-600"
+                                  onClick={() => {
+                                    setRejectReason('');
+                                    setRejectTarget(event);
+                                  }}
+                                >
+                                  <X className="w-4 h-4 mr-2" />
+                                  Reject
+                                </DropdownMenuItem>
+                              </>
+                            ) : null}
                             {event.type === 'Offline' ? (
                               <DropdownMenuItem
                                 onClick={() =>

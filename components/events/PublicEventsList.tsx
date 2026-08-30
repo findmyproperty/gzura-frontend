@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { ArrowRight, Calendar, Clock, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EventsListSkeleton from '@/components/events/EventsListSkeleton';
+import { EventCornerBadge } from '@/components/events/EventCornerBadge';
 import { api, Event } from '@/lib/api';
 import { getEventCoverImage } from '@/lib/event-images';
+import { getEventCardBadge } from '@/lib/event-status';
 import { formatEventPrice } from '@/lib/price';
 import { richTextExcerpt } from '@/lib/rich-text';
 
@@ -48,6 +50,7 @@ export default function PublicEventsList() {
     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
       {events.map((event) => {
         const coverImage = getEventCoverImage(event);
+        const badge = getEventCardBadge(event);
 
         return (
           <article
@@ -70,6 +73,7 @@ export default function PublicEventsList() {
                   </div>
                 </div>
               )}
+              <EventCornerBadge badge={badge} />
             </div>
             <div className="flex flex-1 flex-col p-6">
               <div>

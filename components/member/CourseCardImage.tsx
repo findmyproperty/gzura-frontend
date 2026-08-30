@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Calendar, Sparkles } from 'lucide-react';
+import { EventCornerBadge } from '@/components/events/EventCornerBadge';
+import type { EventCardBadge } from '@/lib/event-status';
 
 const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
@@ -14,9 +16,11 @@ const FALLBACK_IMAGES = [
 export default function CourseCardImage({
   imageUrl,
   title,
+  badge,
 }: {
   imageUrl?: string | null;
   title: string;
+  badge?: EventCardBadge | null;
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -38,12 +42,13 @@ export default function CourseCardImage({
         onError={() => setFailed(true)}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-purple-950/80 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
-      {(!imageUrl || failed) && (
+      <EventCornerBadge badge={badge ?? null} />
+      {(!imageUrl || failed) && !badge ? (
         <div className="absolute top-2.5 right-2.5 rounded-full bg-black/40 backdrop-blur-md px-2 py-1 flex items-center gap-1 border border-white/20 text-[10px] text-amber-300 font-medium">
           <Sparkles className="w-3 h-3 text-amber-400" />
           <span>GZURA Event</span>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import EnrollmentSuccessDialog from '@/components/events/EnrollmentSuccessDialog';
 import EventPassQr from '@/components/events/EventPassQr';
 import { api, Event, EventRegistration } from '@/lib/api';
+import { getEventCardBadge } from '@/lib/event-status';
 import { isFreeEventPrice } from '@/lib/price';
 import { openRazorpayCheckout } from '@/lib/razorpay';
 import { toast } from '@/hooks/use-toast';
@@ -224,6 +225,15 @@ export default function EventDetailActions({ event }: { event: Event }) {
           registration={registration}
         />
       </>
+    );
+  }
+
+  const enrollmentBadge = getEventCardBadge(event);
+  if (enrollmentBadge) {
+    return (
+      <Button className="btn-secondary w-full" disabled>
+        {enrollmentBadge === 'expired' ? 'This event has ended' : 'Event is full'}
+      </Button>
     );
   }
 

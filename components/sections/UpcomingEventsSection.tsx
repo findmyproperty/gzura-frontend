@@ -5,7 +5,9 @@ import ScrollAnimate from '@/components/animations/ScrollAnimate';
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EventCornerBadge } from '@/components/events/EventCornerBadge';
 import { api, Event } from '@/lib/api';
+import { getEventCardBadge, eventCardBadgeLabel } from '@/lib/event-status';
 
 const colors = [
   'from-purple-800 to-purple-950',
@@ -52,9 +54,11 @@ export default function UpcomingEventsSection() {
             <p className="col-span-full text-center text-gray-500">Loading events...</p>
           ) : events.map((event, index) => {
             const color = colors[index % colors.length];
+            const badge = getEventCardBadge(event);
             return (
             <ScrollAnimate key={event.id} animation="fade-up" delay={index * 150}>
               <article className="group bg-white rounded-2xl shadow-lg shadow-purple-500/5 border border-gray-100 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col h-full">
+                <EventCornerBadge badge={badge} />
                 <div className={`h-2 bg-gradient-to-r ${color}`} aria-hidden="true" />
                 <div className="p-6 md:p-8 flex-1 flex flex-col">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4 group-hover:text-purple-700 transition-colors">
@@ -85,12 +89,21 @@ export default function UpcomingEventsSection() {
                   <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6 flex-1 line-clamp-3">
                     {event.description}
                   </p>
-                  <Link href={`/events/${event.id}/register`}>
-                    <Button className={`w-full bg-gradient-to-r ${color} hover:opacity-90 text-white font-semibold py-3`}>
-                      Register Now
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                  {badge ? (
+                    <Button
+                      disabled
+                      className="w-full bg-slate-200 text-slate-600 font-semibold py-3 hover:bg-slate-200"
+                    >
+                      {eventCardBadgeLabel(badge)}
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link href={`/events/${event.id}/register`}>
+                      <Button className={`w-full bg-gradient-to-r ${color} hover:opacity-90 text-white font-semibold py-3`}>
+                        Register Now
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </article>
             </ScrollAnimate>

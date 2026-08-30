@@ -775,16 +775,21 @@ export function AdminEntityCell({
   media,
   title,
   subtitle,
+  badge,
 }: {
   media?: React.ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
+  badge?: React.ReactNode;
 }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
       {media}
       <div className="min-w-0">
-        <p className="truncate text-[14px] font-semibold leading-5 text-zinc-900">{title}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="truncate text-[14px] font-semibold leading-5 text-zinc-900">{title}</p>
+          {badge}
+        </div>
         {subtitle ? (
           <p className="mt-0.5 truncate text-[12px] leading-4 text-gray-400">{subtitle}</p>
         ) : null}

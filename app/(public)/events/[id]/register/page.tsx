@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { eventCardBadgeLabel, getEventCardBadge } from '@/lib/event-status';
 import { formatEventPrice, isFreeEventPrice } from '@/lib/price';
 
 export default function EventRegisterPage() {
@@ -81,6 +82,27 @@ export default function EventRegisterPage() {
   }
 
   const isFree = isFreeEventPrice(event?.price);
+  const enrollmentBadge = event ? getEventCardBadge(event) : null;
+
+  if (enrollmentBadge) {
+    return (
+      <section className="min-h-screen gradient-bg flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl p-12 text-center max-w-md shadow-2xl">
+          <h1 className="text-2xl font-bold text-purple-deep mb-2">
+            {eventCardBadgeLabel(enrollmentBadge)}
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {enrollmentBadge === 'expired'
+              ? 'This event has ended and is no longer open for enrollment.'
+              : 'This event is full. No seats remaining.'}
+          </p>
+          <Link href={event ? `/events/${event.id}` : '/events'}>
+            <Button className="btn-primary w-full">Back to event</Button>
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   if (success) {
     return (

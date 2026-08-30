@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { EventCornerBadge } from '@/components/events/EventCornerBadge';
 import { Event } from '@/lib/api';
+import { getEventCardBadge } from '@/lib/event-status';
 import { getRecommendedEvents } from '@/lib/event-recommendations';
 import { getGoalLabel, getMemberPreferences } from '@/lib/member-onboarding';
 import { Button } from '@/components/ui/button';
@@ -76,6 +78,7 @@ export default function RecommendedEvents({ events }: { events: Event[] }) {
                       {event.type || 'Masterclass'}
                     </span>
                   </div>
+                  <EventCornerBadge badge={getEventCardBadge(event)} />
                 </div>
                 <h3 className="line-clamp-2 text-sm font-bold text-slate-900 transition-colors group-hover:text-purple-800 leading-snug">
                   {event.title}
