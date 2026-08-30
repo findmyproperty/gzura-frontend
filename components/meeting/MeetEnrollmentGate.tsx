@@ -37,6 +37,7 @@ export default function MeetEnrollmentGate({
           return;
         }
 
+        void api.markEventAttended(eventId).catch(() => {});
         setAllowed(true);
       })
       .catch(() => router.replace(`/home/events/${eventId}`));

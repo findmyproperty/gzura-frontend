@@ -190,6 +190,9 @@ export interface EventRegistration {
   razorpayOrderId?: string | null;
   razorpayPaymentId?: string | null;
   checkedInAt?: string | null;
+  attendedAt?: string | null;
+  certificateIssuedAt?: string | null;
+  certificateNumber?: string | null;
   createdAt: string;
   event?: Event;
 }
@@ -675,6 +678,13 @@ export const api = {
 
   getMyRegistrations: () =>
     fetchApi<EventRegistration[]>('/registrations/my', {}, true),
+
+  markEventAttended: (eventId: string) =>
+    fetchApi<EventRegistration>(
+      '/registrations/mark-attended',
+      { method: 'POST', body: JSON.stringify({ eventId }) },
+      true,
+    ),
 
   getMyInvoices: () =>
     fetchApi<EventInvoice[]>('/registrations/my/invoices', {}, true),

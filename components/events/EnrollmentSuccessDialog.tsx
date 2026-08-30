@@ -45,27 +45,29 @@ export default function EnrollmentSuccessDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {isOnline && meetUrl ? (
             <div className="rounded-xl border border-purple-100 bg-purple-50 p-4">
               <p className="mb-3 text-sm font-medium text-purple-deep">
                 Join this session on Google Meet
               </p>
-              <Link href={`/events/${event.id}/meet`}>
-                <Button className="btn-primary w-full">
-                  <Video className="mr-2 h-4 w-4" />
-                  Join Google Meet
-                </Button>
-              </Link>
-              <a
-                href={meetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 flex items-center justify-center gap-1 text-xs text-purple-deep hover:underline"
-              >
-                Open Meet link
-                <ExternalLink className="h-3 w-3" />
-              </a>
+              <div className="flex flex-col gap-3">
+                <Link href={`/events/${event.id}/meet`} className="block">
+                  <Button className="btn-primary w-full">
+                    <Video className="mr-2 h-4 w-4" />
+                    Join Google Meet
+                  </Button>
+                </Link>
+                <a
+                  href={meetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1 text-xs text-purple-deep hover:underline"
+                >
+                  Open Meet link
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             </div>
           ) : null}
 
@@ -87,20 +89,22 @@ export default function EnrollmentSuccessDialog({
             </div>
           ) : null}
 
-          {registration.paymentStatus === 'PAID' ? (
-            <Link href="/profile#invoices">
+          <div className="flex flex-col gap-3">
+            {registration.paymentStatus === 'PAID' ? (
+              <Link href="/profile#invoices" className="block">
+                <Button variant="outline" className="w-full">
+                  <Receipt className="mr-2 h-4 w-4" />
+                  View invoice
+                </Button>
+              </Link>
+            ) : null}
+
+            <Link href="/my-learnings" className="block">
               <Button variant="outline" className="w-full">
-                <Receipt className="mr-2 h-4 w-4" />
-                View invoice
+                View My Learnings
               </Button>
             </Link>
-          ) : null}
-
-          <Link href="/my-learnings">
-            <Button variant="outline" className="w-full">
-              View My Learnings
-            </Button>
-          </Link>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

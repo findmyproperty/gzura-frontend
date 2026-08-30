@@ -3,24 +3,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  ArrowRight,
-  Award,
-  Calendar,
-  Loader2,
-  MapPin,
-  Sparkles,
-} from 'lucide-react';
+import { Award, Loader2, Sparkles } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
+import {
+  CertificateCard,
+  LearningEventCard,
+} from '@/components/member/LearningEventCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api, EventRegistration } from '@/lib/api';
+import {
+  getLearningBucket,
+  hasCertificate,
+} from '@/lib/learning-status';
 import {
   getGoalLabel,
   getMemberPreferences,
   getProgramLabel,
 } from '@/lib/member-onboarding';
-import { cn } from '@/lib/utils';
 
 type LearningTab = 'in-progress' | 'completed' | 'certificates';
 
@@ -29,54 +29,6 @@ function getTimeGreeting() {
   if (hour < 12) return 'Good morning';
   if (hour < 17) return 'Good afternoon';
   return 'Good evening';
-}
-
-function isEventCompleted(reg: EventRegistration) {
-  const end = reg.event?.dateEnd ?? reg.event?.dateStart;
-  if (!end) return false;
-  return new Date(end) < new Date();
-}
-
-function EventCardImage({
-  imageUrl,
-  title,
-  compact = false,
-}: {
-  imageUrl?: string | null;
-  title: string;
-  compact?: boolean;
-}) {
-  const [failed, setFailed] = useState(false);
-
-  if (!imageUrl || failed) {
-    return (
-      <div
-        className={cn(
-          'bg-purple-50 flex items-center justify-center shrink-0',
-          compact ? 'w-28 h-[72px] rounded' : 'w-full aspect-[16/10]',
-        )}
-      >
-        <Calendar className={cn('text-purple-deep', compact ? 'w-6 h-6' : 'w-10 h-10')} />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        'overflow-hidden bg-gray-100 shrink-0',
-        compact ? 'w-28 h-[72px] rounded' : 'w-full aspect-[16/10]',
-      )}
-    >
-      <img
-        src={imageUrl}
-        alt={title}
-        className="w-full h-full object-cover"
-        loading="lazy"
-        onError={() => setFailed(true)}
-      />
-    </div>
-  );
 }
 
 function LearningIllustration() {
@@ -137,43 +89,6 @@ function EmptyLearningState({
   );
 }
 
-function EventListCard({ reg }: { reg: EventRegistration }) {
-  const event = reg.event;
-  if (!event) return null;
-
-  return (
-    <Link
-      href={`/home/events/${reg.eventId}`}
-      className="flex gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow group"
-    >
-      <EventCardImage imageUrl={event.imageUrl} title={event.title} compact />
-      <div className="flex-1 min-w-0 py-0.5">
-        <p className="text-xs text-gray-500 mb-1">{event.type}</p>
-        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-purple-deep transition-colors">
-          {event.title}
-        </h3>
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-          <span className="flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5" />
-            {new Date(event.dateStart).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </span>
-          <span className="flex items-center gap-1 truncate">
-            <MapPin className="w-3.5 h-3.5 shrink-0" />
-            {event.location}
-          </span>
-        </div>
-        <p className="text-sm text-purple-deep font-medium mt-2 flex items-center gap-1">
-          View event <ArrowRight className="w-3.5 h-3.5" />
-        </p>
-      </div>
-    </Link>
-  );
-}
-
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -193,14 +108,18 @@ export default function DashboardPage() {
       .finally(() => setDataLoading(false));
   }, [user]);
 
-  const { inProgress, completed } = useMemo(() => {
+  const { inProgress, completed, certificates } = useMemo(() => {
     const inProg: EventRegistration[] = [];
     const done: EventRegistration[] = [];
+    const certs: EventRegistration[] = [];
+
     for (const reg of registrations) {
-      if (isEventCompleted(reg)) done.push(reg);
+      if (hasCertificate(reg)) certs.push(reg);
+      if (getLearningBucket(reg) === 'completed') done.push(reg);
       else inProg.push(reg);
     }
-    return { inProgress: inProg, completed: done };
+
+    return { inProgress: inProg, completed: done, certificates: certs };
   }, [registrations]);
 
   if (loading || !user) {
@@ -295,7 +214,7 @@ export default function DashboardPage() {
             ) : inProgress.length > 0 ? (
               <div className="space-y-3 max-w-3xl">
                 {inProgress.map((reg) => (
-                  <EventListCard key={reg.id} reg={reg} />
+                  <LearningEventCard key={reg.id} reg={reg} />
                 ))}
               </div>
             ) : (
@@ -314,7 +233,7 @@ export default function DashboardPage() {
             ) : completed.length > 0 ? (
               <div className="space-y-3 max-w-3xl">
                 {completed.map((reg) => (
-                  <EventListCard key={reg.id} reg={reg} />
+                  <LearningEventCard key={reg.id} reg={reg} />
                 ))}
               </div>
             ) : (
@@ -341,12 +260,22 @@ export default function DashboardPage() {
               </Button>
             </div>
 
-            <EmptyLearningState
-              title="Your first certificate is waiting!"
-              description="Your next career move starts with a certificate. Complete a GZURA event and earn a credential you can proudly share."
-              actionLabel="Explore events"
-              actionHref="/events"
-            />
+            {dataLoading ? (
+              <div className="py-20 text-center text-gray-500">Loading certificates...</div>
+            ) : certificates.length > 0 ? (
+              <div className="space-y-3 max-w-3xl">
+                {certificates.map((reg) => (
+                  <CertificateCard key={reg.id} reg={reg} />
+                ))}
+              </div>
+            ) : (
+              <EmptyLearningState
+                title="Your first certificate is waiting!"
+                description="Your next career move starts with a certificate. Complete a GZURA event and earn a credential you can proudly share."
+                actionLabel="Explore events"
+                actionHref="/events"
+              />
+            )}
           </TabsContent>
         </Tabs>
       </section>

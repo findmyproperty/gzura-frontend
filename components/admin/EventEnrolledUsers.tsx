@@ -83,8 +83,14 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
   const somePageSelected = pageIds.some((id) => selectedIds.includes(id));
 
   const isOffline = event.type === 'Offline';
-  const colSpan = (isOffline ? 7 : 5) + 1;
-  const presentCount = registrations.filter((row) => row.checkedInAt).length;
+  const colSpan = isOffline ? 8 : 7;
+  const presentCount = registrations.filter((row) =>
+    isOffline ? row.checkedInAt : row.attendedAt,
+  ).length;
+
+  function attendanceAt(row: EventRegistration) {
+    return isOffline ? row.checkedInAt : row.attendedAt;
+  }
 
   return (
     <AdminDataTable
@@ -107,12 +113,12 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
           Enrolled: formatEnrolledAt(row.createdAt),
           Payment: row.paymentStatus === 'PAID' ? 'Paid' : 'Free',
           Amount: row.amountPaid ?? '',
-          Attendance: isOffline ? (row.checkedInAt ? 'Present' : 'Absent') : '',
-          'Checked in': row.checkedInAt ? formatAdminDateTime(row.checkedInAt) : '',
+          Attendance: attendanceAt(row) ? 'Present' : 'Absent',
+          'Checked in': attendanceAt(row) ? formatAdminDateTime(attendanceAt(row)!) : '',
         })),
       }}
       filters={
-        isOffline && registrations.length > 0 ? (
+        registrations.length > 0 ? (
           <span className="inline-flex h-9 items-center rounded-lg border border-[#E5E7EB] bg-white px-3 text-[13px] font-medium text-gray-700">
             {presentCount}/{registrations.length} present
           </span>
@@ -166,7 +172,7 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
           <AdminTableHeaderCell className="w-[12%]">Location</AdminTableHeaderCell>
           <AdminTableHeaderCell className="w-[16%]">Enrolled</AdminTableHeaderCell>
           <AdminTableHeaderCell className="w-[12%]">Payment</AdminTableHeaderCell>
-          {isOffline ? <AdminTableHeaderCell className={adminCol.status}>Attendance</AdminTableHeaderCell> : null}
+          <AdminTableHeaderCell className={adminCol.status}>Attendance</AdminTableHeaderCell>
           {isOffline ? <AdminTableHeaderCell className={adminCol.actions}>Pass</AdminTableHeaderCell> : null}
         </AdminTableHead>
         <AdminTableBody>
@@ -220,20 +226,18 @@ export default function EventEnrolledUsers({ event }: { event: Event }) {
                     <PillBadge>Free</PillBadge>
                   )}
                 </AdminTableCell>
-                {isOffline ? (
-                  <AdminTableCell>
-                    {row.checkedInAt ? (
-                      <div className="space-y-1">
-                        <StatusBadge label="Present" tone="success" />
-                        <p className="text-[11px] text-gray-500">
-                          {formatAdminDateTime(row.checkedInAt)}
-                        </p>
-                      </div>
-                    ) : (
-                      <StatusBadge label="Absent" tone="muted" />
-                    )}
-                  </AdminTableCell>
-                ) : null}
+                <AdminTableCell>
+                  {attendanceAt(row) ? (
+                    <div className="space-y-1">
+                      <StatusBadge label="Present" tone="success" />
+                      <p className="text-[11px] text-gray-500">
+                        {formatAdminDateTime(attendanceAt(row)!)}
+                      </p>
+                    </div>
+                  ) : (
+                    <StatusBadge label="Absent" tone="muted" />
+                  )}
+                </AdminTableCell>
                 {isOffline ? (
                   <AdminTableCell>
                     {row.passUrl ? (
