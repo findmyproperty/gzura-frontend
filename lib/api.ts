@@ -193,8 +193,22 @@ export interface EventRegistration {
   attendedAt?: string | null;
   certificateIssuedAt?: string | null;
   certificateNumber?: string | null;
+  attendanceStatus?: 'present' | 'absent' | null;
   createdAt: string;
   event?: Event;
+}
+
+export interface AttendanceSummaryRow {
+  registrationId: string;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  attendanceStatus: 'present' | 'absent' | null;
+  calculatedStatus: 'present' | 'absent';
+  firstJoinedAt: string | null;
+  lastLeftAt: string | null;
+  totalDurationSeconds: number;
+  sessionCount: number;
 }
 
 export interface EventInvoice {
@@ -683,6 +697,27 @@ export const api = {
     fetchApi<EventRegistration>(
       '/registrations/mark-attended',
       { method: 'POST', body: JSON.stringify({ eventId }) },
+      true,
+    ),
+
+  logMeetPing: (eventId: string, action: 'JOIN' | 'LEAVE') =>
+    fetchApi<{ success: boolean; action: string }>(
+      '/registrations/meet-ping',
+      { method: 'POST', body: JSON.stringify({ eventId, action }) },
+      true,
+    ),
+
+  getEventAttendance: (eventId: string) =>
+    fetchApi<AttendanceSummaryRow[]>(
+      `/registrations/attendance/${eventId}`,
+      {},
+      true,
+    ),
+
+  updateAttendanceStatus: (registrationId: string, status: 'present' | 'absent') =>
+    fetchApi<{ registrationId: string; attendanceStatus: string }>(
+      `/registrations/${registrationId}/attendance-status`,
+      { method: 'PATCH', body: JSON.stringify({ status }) },
       true,
     ),
 

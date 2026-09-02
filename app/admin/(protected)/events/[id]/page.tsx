@@ -25,6 +25,7 @@ import { EventActivityLogDialog } from '@/components/admin/EventActivityLogDialo
 import { GoogleMeetFields } from '@/components/admin/GoogleMeetFields';
 import EventContentManager from '@/components/admin/EventContentManager';
 import EventEnrolledUsers from '@/components/admin/EventEnrolledUsers';
+import EventAttendanceTab from '@/components/admin/EventAttendanceTab';
 import RichTextContent from '@/components/ui/rich-text-content';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -239,11 +240,11 @@ export default function AdminEventViewPage() {
             </>
           ) : null}
           {isOnline && meetLink ? (
-            <Button asChild variant="outline">
-              <a href={meetLink} target="_blank" rel="noreferrer">
+            <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white">
+              <Link href={`/admin/events/${event.id}/host-session`}>
                 <Video className="w-4 h-4 mr-2" />
-                Open Google Meet
-              </a>
+                Start Host Session
+              </Link>
             </Button>
           ) : null}
           {!isOnline ? (
@@ -430,6 +431,15 @@ export default function AdminEventViewPage() {
           >
             Course content
           </TabsTrigger>
+          {isOnline ? (
+            <TabsTrigger
+              value="attendance"
+              className="rounded-lg px-4 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Video className="w-3.5 h-3.5 mr-1.5" />
+              Attendance
+            </TabsTrigger>
+          ) : null}
         </TabsList>
 
         <TabsContent value="enrolled" className="mt-0">
@@ -471,6 +481,7 @@ export default function AdminEventViewPage() {
                     meetLink={meetLink}
                     totalSeats={event.maxAttendees}
                     seatsRemaining={event.seatsRemaining}
+                    eventId={event.id}
                   />
                 </div>
               ) : null}
@@ -501,6 +512,21 @@ export default function AdminEventViewPage() {
             <EventContentManager eventId={event.id} />
           </div>
         </TabsContent>
+
+        {isOnline ? (
+          <TabsContent value="attendance" className="mt-0">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <div className="mb-5">
+                <h3 className="text-lg font-semibold text-purple-deep">Meeting Attendance</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Tracks how long each participant spent on the Google Meet session page.
+                  First join time, last leave time, and total accumulated duration are shown per user.
+                </p>
+              </div>
+              <EventAttendanceTab eventId={event.id} eventTitle={event.title} />
+            </div>
+          </TabsContent>
+        ) : null}
       </Tabs>
 
       <EventActivityLogDialog

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Copy, ExternalLink, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,10 +11,12 @@ export function GoogleMeetFields({
   meetLink,
   totalSeats,
   seatsRemaining,
+  eventId,
 }: {
   meetLink?: string | null;
   totalSeats?: number | null;
   seatsRemaining?: number | null;
+  eventId?: string | null;
 }) {
   const copyLink = async () => {
     if (!meetLink) return;
@@ -71,11 +74,19 @@ export function GoogleMeetFields({
             <Button type="button" variant="outline" onClick={copyLink}>
               <Copy className="w-4 h-4" />
             </Button>
-            <Button type="button" variant="outline" asChild>
-              <a href={meetLink} target="_blank" rel="noreferrer">
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </Button>
+            {eventId ? (
+              <Button type="button" variant="outline" asChild>
+                <Link href={`/admin/events/${eventId}/host-session`}>
+                  <ExternalLink className="w-4 h-4" />
+                </Link>
+              </Button>
+            ) : (
+              <Button type="button" variant="outline" asChild>
+                <a href={meetLink} target="_blank" rel="noreferrer">
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </Button>
+            )}
           </div>
         </div>
       ) : (
