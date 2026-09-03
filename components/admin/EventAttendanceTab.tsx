@@ -8,6 +8,7 @@ import {
   RefreshCw,
   XCircle,
   Users,
+  Video,
 } from 'lucide-react';
 import { api, AttendanceSummaryRow } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ function exportToCsv(rows: AttendanceSummaryRow[], eventTitle: string) {
     'Phone',
     'Status (Manual)',
     'Calculated Status',
+    'Verification Source',
     'First Joined',
     'Last Left',
     'Total Duration',
@@ -54,6 +56,7 @@ function exportToCsv(rows: AttendanceSummaryRow[], eventTitle: string) {
     r.phone ?? '',
     r.attendanceStatus ?? r.calculatedStatus,
     r.calculatedStatus,
+    r.isGoogleVerified ? 'Google Meet API' : 'Platform Gate',
     r.firstJoinedAt ? new Date(r.firstJoinedAt).toLocaleString() : '',
     r.lastLeftAt ? new Date(r.lastLeftAt).toLocaleString() : '',
     formatDuration(r.totalDurationSeconds),
@@ -83,6 +86,7 @@ export default function EventAttendanceTab({
   const [rows, setRows] = useState<AttendanceSummaryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [syncingGoogle, setSyncingGoogle] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchData = useCallback(
@@ -106,6 +110,30 @@ export default function EventAttendanceTab({
     },
     [eventId],
   );
+
+  const handleSyncGoogle = async () => {
+    setSyncingGoogle(true);
+    try {
+      const res = await api.syncGoogleMeetAttendance(eventId);
+      if (res.summary) {
+        setRows(res.summary);
+      }
+      toast({
+        title: 'Google Meet Sync Complete',
+        description: res.message,
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Google Meet Sync Failed',
+        description:
+          err?.message ||
+          'Could not retrieve Google Meet conference records. Check if meeting has ended.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSyncingGoogle(false);
+    }
+  };
 
   useEffect(() => {
     void fetchData();
@@ -172,6 +200,16 @@ export default function EventAttendanceTab({
           <Button
             variant="outline"
             size="sm"
+            className="gap-2 bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 font-medium"
+            onClick={handleSyncGoogle}
+            disabled={syncingGoogle || refreshing}
+          >
+            <Video className={`h-4 w-4 text-emerald-600 ${syncingGoogle ? 'animate-spin' : ''}`} />
+            {syncingGoogle ? 'Syncing...' : 'Sync Google Meet'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             className="gap-2"
             onClick={() => void fetchData(true)}
             disabled={refreshing}
@@ -206,6 +244,7 @@ export default function EventAttendanceTab({
                 <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Name</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Email</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Status</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Source</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">
                   <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> First Joined</span>
                 </th>
@@ -262,6 +301,20 @@ export default function EventAttendanceTab({
                       </select>
                       {row.attendanceStatus !== null && (
                         <span className="ml-1.5 text-xs text-gray-400">(manual)</span>
+                      )}
+                    </td>
+
+                    {/* Source badge */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {row.isGoogleVerified ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 border border-emerald-200 px-2 py-0.5 rounded-full">
+                          <CheckCircle2 className="h-3 w-3 text-emerald-600 shrink-0" />
+                          Google Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                          Platform Gate
+                        </span>
                       )}
                     </td>
 

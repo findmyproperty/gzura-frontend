@@ -47,21 +47,19 @@ export default function MeetEnrollmentGate({
     }
 
     api
-      .getMyRegistrations()
-      .then((registrations) => {
-        const enrolled = registrations.some(
-          (registration) => registration.eventId === eventId,
-        );
-
-        if (!enrolled) {
-          router.replace(`/events/${eventId}/register`);
-          return;
-        }
-
+      .getMeetingAccess(eventId)
+      .then(() => {
         void api.markEventAttended(eventId).catch(() => {});
         setAllowed(true);
       })
-      .catch(() => router.replace(`/home/events/${eventId}`));
+      .catch((err: any) => {
+        const msg = err?.message?.toLowerCase() || '';
+        if (msg.includes('enroll') || msg.includes('register') || msg.includes('forbidden')) {
+          router.replace(`/events/${eventId}/register`);
+        } else {
+          router.replace(`/home/events/${eventId}`);
+        }
+      });
   }, [user, loading, eventId, router]);
 
   // Fire JOIN ping once the user is allowed in

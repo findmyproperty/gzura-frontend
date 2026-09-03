@@ -205,6 +205,7 @@ export interface AttendanceSummaryRow {
   phone?: string | null;
   attendanceStatus: 'present' | 'absent' | null;
   calculatedStatus: 'present' | 'absent';
+  isGoogleVerified?: boolean;
   firstJoinedAt: string | null;
   lastLeftAt: string | null;
   totalDurationSeconds: number;
@@ -718,6 +719,26 @@ export const api = {
     fetchApi<{ registrationId: string; attendanceStatus: string }>(
       `/registrations/${registrationId}/attendance-status`,
       { method: 'PATCH', body: JSON.stringify({ status }) },
+      true,
+    ),
+
+  getMeetingAccess: (eventId: string) =>
+    fetchApi<{
+      meetUrl: string;
+      eventTitle: string;
+      dateStart?: string;
+      timeLabel?: string | null;
+      isHost?: boolean;
+    }>(`/registrations/events/${eventId}/access-meet`, {}, true),
+
+  syncGoogleMeetAttendance: (eventId: string) =>
+    fetchApi<{
+      syncedCount: number;
+      message: string;
+      summary: AttendanceSummaryRow[];
+    }>(
+      `/registrations/events/${eventId}/sync-google-meet`,
+      { method: 'POST' },
       true,
     ),
 
