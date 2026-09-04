@@ -20,8 +20,8 @@ export default function PrivacyPage() {
         description="How GZURA collects, uses, and protects information when you join our community, register for events, or take part in our programs."
       />
       <LegalContent
-        lastUpdated="August 14, 2026"
-        intro="GZURA is a platform dedicated to leadership development, entrepreneurship training, mentorship, and community building. This Privacy Policy explains how we handle personal information when you visit gzura.com, create an account, join the community, register for events, host a course, or contact us."
+        lastUpdated="September 4, 2026"
+        intro="GZURA is a platform dedicated to leadership development, entrepreneurship training, mentorship, and community building. This Privacy Policy explains how we handle personal information when you visit gzura.com, create an account, join the community, register for in-person or online events, attend virtual Google Meet sessions, host a course, or contact us."
         sections={[
           {
             heading: '1. Who we are',
@@ -32,65 +32,75 @@ export default function PrivacyPage() {
           {
             heading: '2. Information we collect',
             paragraphs: [
-              'We collect information you provide and information generated when you use our services:',
+              'We collect information you provide directly as well as information generated automatically through platform usage:',
             ],
             bullets: [
-              'Account and profile details: name, email, phone number, password, city, country, profession, and interests such as leadership, entrepreneurship, mentorship, or career growth.',
-              'Community and membership data: plan selection (Basic, Premium, or Executive), newsletter preferences, and how you heard about GZURA.',
-              'Event and program activity: event registrations, attendance, digital pass information, course hosting details, invoices, and learning progress.',
-              'Communications: messages sent through our contact form or email, including your name, email, and inquiry.',
-              'Authentication data: session cookies (including gzura_token) and optional Google sign-in credentials used to keep you logged in.',
+              'Account and profile details: name, email, phone number, password, city, country, profession, and areas of interest.',
+              'Community and membership data: plan tier selection (Basic, Premium, or Executive), newsletter subscriptions, and onboarding responses.',
+              'Event and virtual session activity: event registrations, payment transactions, digital tickets, session join/leave telemetry, attendance duration logs, and issued certificates.',
+              'Third-party integration data: Google sign-in profile information, Google Meet attendance logs, and payment identifiers from payment processors (Razorpay).',
+              'Communications and inquiries: messages sent via contact forms, customer support inquiries, and feedback surveys.',
+              'Technical and session identifiers: encrypted authentication cookies (including gzura_token), IP address, and browser metadata.',
             ],
           },
           {
             heading: '3. How we use your information',
-            paragraphs: ['We use personal information to:'],
+            paragraphs: ['We process personal information to:'],
             bullets: [
-              'Create and manage your GZURA account, member dashboard, and onboarding.',
-              'Deliver programs, workshops, mentorship matching, and community events.',
-              'Process event registrations, host applications, invoices, and related confirmations.',
-              'Send service messages and, if you opt in, newsletters with updates and insights.',
-              'Respond to support requests and improve the safety and quality of our platform.',
+              'Administer your GZURA member or host account, profile, and security credentials.',
+              'Facilitate event enrollment, verify access at virtual meeting gates, and provide smooth Google Meet connectivity.',
+              'Track virtual event attendance and compute participation duration to generate verified course completion certificates.',
+              'Process transactions, generate official tax invoices, and maintain financial records.',
+              'Send transactional updates, event reminders, digital passes, and, if opted in, community newsletters.',
+              'Protect the platform against unauthorized access, fraud, and abusive conduct.',
             ],
           },
           {
-            heading: '4. Sharing of information',
+            heading: '4. Third-Party Integrations and Data Sharing',
             paragraphs: [
-              'We do not sell your personal information. We may share it with trusted service providers who help us run authentication, email, payments, and video sessions for events, and only as needed to operate GZURA. We may also share information if required by law or to protect our community.',
+              'We never sell your personal data. We disclose information strictly to trusted service partners necessary to provide our services:',
+            ],
+            bullets: [
+              'Google Workspace & Google Meet: For scheduling calendar events, generating meeting rooms, and synchronizing attendee conference logs.',
+              'Payment Processors (Razorpay): To safely process debit/credit card, UPI, and net-banking transactions (we do not store raw card credentials).',
+              'Email Service Providers (Nodemailer / SMTP): For sending enrollment confirmations, digital tickets, invoices, and password reset tokens.',
+              'Cloud & Infrastructure Providers: For secure data storage and operational continuity.',
+              'Legal & Regulatory Authorities: Only when mandatory under applicable legal processes.',
             ],
           },
           {
-            heading: '5. Cookies and similar technologies',
+            heading: '5. Cookies and Session Telemetry',
             paragraphs: [
-              'We use cookies to keep you signed in, remember preferences, and understand how the site is used. You can learn more in our Cookie Policy. You may control cookies through your browser, but disabling essential cookies can prevent login and member features from working.',
+              'We utilize cookies and session storage to keep you authenticated across page visits, remember preferences, and record keepalive heartbeat pings when you attend live online sessions. Disabling essential cookies may prevent login and meeting gate access.',
             ],
           },
           {
-            heading: '6. Data retention and security',
+            heading: '6. Data Security and Retention',
             paragraphs: [
-              'We keep account, registration, and invoice records for as long as needed to provide services and meet legal obligations. We use reasonable administrative and technical safeguards to protect your information, including encrypted sessions for signed-in users.',
+              'We employ industry-standard administrative, technical, and physical safeguards—including SSL/TLS data encryption in transit and hashed passwords—to safeguard your information.',
+              'Account and registration histories are retained for as long as your account remains active or as required by statutory record-keeping and tax regulations.',
             ],
           },
           {
-            heading: '7. Your choices',
+            heading: '7. Your Rights and Choices',
             paragraphs: [
-              'You may update profile details from your account, unsubscribe from newsletters, or request access, correction, or deletion of personal information by emailing teamgzura@gmail.com. If you signed in with Google, you can disconnect that access through your Google account settings.',
+              'You have the right to review, update, or request deletion of your personal data at any time. You can edit your profile directly in your account dashboard, unsubscribe from marketing communications, or contact us at teamgzura@gmail.com for data access or erasure requests.',
             ],
           },
           {
-            heading: '8. Children’s privacy',
+            heading: '8. Children’s Privacy',
             paragraphs: [
-              'GZURA programs and membership are intended for adults. We do not knowingly collect personal information from children under 16.',
+              'GZURA services and events are directed to adults and professionals. We do not knowingly collect personal information from individuals under the age of 16.',
             ],
           },
           {
-            heading: '9. Changes to this policy',
+            heading: '9. Updates to This Policy',
             paragraphs: [
-              'We may update this Privacy Policy as our programs and platform evolve. The “Last updated” date at the top of this page reflects the latest version. Continued use of GZURA after changes means you accept the updated policy.',
+              'We may periodically revise this Privacy Policy to reflect platform features, event formats, or regulatory requirements. The “Last updated” date indicates when the policy was last revised. Continued participation in GZURA events or services constitutes agreement to the current version.',
             ],
           },
         ]}
-        contactNote="If you have questions about this Privacy Policy or how GZURA handles your information, reach out to our team."
+        contactNote="If you have questions about this Privacy Policy or how GZURA handles your personal information, reach out to our team."
       />
     </>
   );

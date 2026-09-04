@@ -20,8 +20,8 @@ export default function TermsPage() {
         description="The rules for using GZURA’s website, community, programs, events, and member services."
       />
       <LegalContent
-        lastUpdated="August 14, 2026"
-        intro="These Terms of Service (“Terms”) govern your access to GZURA’s website and services, including community membership, leadership and entrepreneurship programs, mentorship, workshops, event registration, course hosting, and member or host dashboards. By creating an account, joining the community, or using our site, you agree to these Terms."
+        lastUpdated="September 4, 2026"
+        intro="These Terms of Service (“Terms”) govern your access to GZURA’s website and services, including community membership, leadership and entrepreneurship programs, mentorship, workshops, in-person and online event registration, virtual meeting attendance, course hosting, and member or host dashboards. By creating an account, joining the community, or using our site, you agree to these Terms."
         sections={[
           {
             heading: '1. Who may use GZURA',
@@ -37,64 +37,69 @@ export default function TermsPage() {
             ],
           },
           {
-            heading: '3. Programs, events, and hosting',
+            heading: '3. In-person & Online Events and Virtual Sessions',
             paragraphs: [
-              'GZURA offers leadership development, entrepreneurship, mentorship, workshops, and related events. Program duration, format, and outcomes described on the Programs page are informational and may vary by cohort.',
-              'Event registration is subject to availability, eligibility, and any stated fees. Digital passes and check-in tools are for the registered attendee only. If you host a course, you must provide accurate course details and conduct sessions in a professional, respectful manner consistent with our community values.',
+              'GZURA hosts both offline (in-person) and online virtual events, workshops, and courses. Event registration is subject to availability, eligibility, and any stated ticket fees.',
+              'For online events hosted via Google Meet or other integrated virtual conferencing platforms, access to the meeting room is strictly governed by our platform enrollment gate. Only authenticated attendees with a confirmed registration, authorized administrators, and assigned session hosts are granted access.',
+              'Digital event passes, check-in QR codes, and meeting URLs are non-transferable and strictly intended for the registered attendee only.',
             ],
           },
           {
-            heading: '4. Payments and invoices',
+            heading: '4. Virtual Attendance Tracking & Certification',
             paragraphs: [
-              'Paid memberships, programs, and events may generate invoices in your member account. Fees are due as stated at checkout or on the invoice. Unless a specific program policy says otherwise, fees are non-refundable after a program or event has begun.',
+              'To verify participation and grant verified certificates of completion, GZURA monitors online session attendance via platform heartbeat pings and Google Meet conference logs. Total time spent in the session determines your final attendance status (Present, Partial, or Absent).',
+              'Certificates are issued only to attendees who satisfy the minimum attendance duration criteria defined for the event.',
             ],
           },
           {
-            heading: '5. Acceptable use',
-            paragraphs: ['You agree not to:'],
+            heading: '5. Host and Instructor Responsibilities',
+            paragraphs: [
+              'Instructors and hosts are responsible for preparing their course curriculum, starting virtual sessions promptly, and conducting sessions in a professional, respectful manner aligned with our community values.',
+              'Hosts are assigned to specific events and may only access the host controls and start sessions for events they have been officially assigned to manage.',
+            ],
+          },
+          {
+            heading: '6. Payments, Cancellations, and Refunds',
+            paragraphs: [
+              'Paid memberships, programs, and events generate digital invoices in your member dashboard. Fees are processed via secure payment gateways (such as Razorpay) and are due upon registration.',
+              'Unless a specific program policy explicitly states otherwise, ticket fees are non-refundable once an event has commenced or after digital access passes have been issued.',
+            ],
+          },
+          {
+            heading: '7. Acceptable Use and Community Standards',
+            paragraphs: ['When participating in GZURA events and using our platform, you agree not to:'],
             bullets: [
-              'Share your account, event pass, or meeting links with others without permission.',
-              'Harass, discriminate against, or disrupt other members, mentors, hosts, or staff.',
-              'Misrepresent your identity, credentials, or course offerings.',
-              'Copy, scrape, or commercially exploit GZURA content, member data, or program materials without written consent.',
-              'Attempt to access admin, host, or member areas you are not authorized to use.',
+              'Share your account credentials, event pass, or meeting links with unauthorized third parties.',
+              'Disrupt, harass, discriminate against, or record other attendees, hosts, mentors, or staff without explicit consent.',
+              'Misrepresent your identity, credentials, or affiliations.',
+              'Attempt to bypass registration gates, scrape platform data, or tamper with attendance tracking systems.',
+              'Attempt unauthorized access to administrator, host, or other member dashboard areas.',
             ],
             after:
-              'We may suspend or terminate accounts that violate these rules to protect the community.',
+              'Violations of these standards may lead to immediate suspension or termination of your account and revocation of event privileges.',
           },
           {
-            heading: '6. Intellectual property',
+            heading: '8. Intellectual Property',
             paragraphs: [
-              'GZURA, our logo, program materials, website content, and related branding are owned by GZURA or our licensors. You may use them only as needed to participate in our services. Content you submit (such as course descriptions, profile information, or success stories) may be used by GZURA to operate and promote the community, with attribution where appropriate.',
+              'All platform branding, software, logos, program curricula, and materials provided by GZURA are protected under copyright and intellectual property laws. You may use them solely for personal, non-commercial educational purposes.',
             ],
           },
           {
-            heading: '7. Community standards',
+            heading: '9. Disclaimers and Limitation of Liability',
             paragraphs: [
-              'GZURA is built around people-centric, inclusive, and excellence-driven values. Members, mentors, and hosts are expected to treat one another with respect in events, video sessions, forums, and communications. We may remove content or revoke access that conflicts with those standards.',
+              'GZURA educational programs and mentorship sessions are provided for personal and professional development. GZURA does not guarantee specific career placement, funding, or commercial success.',
+              'Services are provided on an “as is” and “as available” basis. While we strive for 99.9% uptime, we are not liable for third-party service outages including internet failures or Google Meet disruptions.',
+              'To the fullest extent permitted by law, GZURA’s total liability for any claim arising from these Terms or your participation in events is limited to the amounts paid by you to GZURA in the preceding 12 months.',
             ],
           },
           {
-            heading: '8. Disclaimers',
+            heading: '10. Changes and Termination',
             paragraphs: [
-              'Programs, mentorship, and events are educational and professional-development services. GZURA does not guarantee specific career outcomes, funding results, or business success. Testimonials and impact figures on the site reflect community experience and are not promises of similar results.',
-              'The site is provided “as is.” We do not warrant uninterrupted availability of live sessions, dashboards, or third-party tools such as video meetings or sign-in services.',
-            ],
-          },
-          {
-            heading: '9. Limitation of liability',
-            paragraphs: [
-              'To the fullest extent permitted by law, GZURA is not liable for indirect, incidental, or consequential damages arising from your use of the site, programs, or events. Our total liability for any claim related to these Terms is limited to the amounts you paid to GZURA in the 12 months before the claim.',
-            ],
-          },
-          {
-            heading: '10. Changes and termination',
-            paragraphs: [
-              'We may update these Terms as our services change. The “Last updated” date shows the current version. You may stop using GZURA and request account closure at any time. We may end or limit access if you breach these Terms or if we discontinue a service.',
+              'We may periodically update these Terms to reflect service enhancements and regulatory changes. Continued use of GZURA after revisions signifies your acceptance of the updated Terms.',
             ],
           },
         ]}
-        contactNote="Questions about these Terms, membership, or a specific program or event can be sent to our team."
+        contactNote="Questions about these Terms, event registration, or virtual session policies can be sent to our team."
       />
     </>
   );
