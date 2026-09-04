@@ -239,7 +239,7 @@ export default function AdminEventViewPage() {
               </Button>
             </>
           ) : null}
-          {isOnline && meetLink ? (
+          {isOnline && meetLink && (isAdmin || (user && event.hostId === user.id)) ? (
             <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white">
               <Link href={`/admin/events/${event.id}/host-session`}>
                 <Video className="w-4 h-4 mr-2" />

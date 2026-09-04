@@ -106,7 +106,9 @@ export function middleware(request: NextRequest) {
     if (!token) {
       return redirectToLogin(request, pathname);
     }
-    if (isAdminAreaRole(role)) {
+    // Allow admins/hosts to access /events/:id/meet directly
+    const isMeetPage = /\/events\/[^/]+\/meet$/.test(pathname);
+    if (isAdminAreaRole(role) && !isMeetPage) {
       const url = request.nextUrl.clone();
       url.pathname = '/admin';
       return NextResponse.redirect(url);

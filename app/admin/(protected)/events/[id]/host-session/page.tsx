@@ -21,6 +21,7 @@ import { api, AttendanceSummaryRow, Event, getToken } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { isGoogleMeetLink } from '@/lib/meeting';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
@@ -86,17 +87,30 @@ export default function HostSessionPage() {
   const autoRefreshRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { user } = useAuth();
+
   // Load event
   useEffect(() => {
     api
       .getEvent(eventId, true)
-      .then(setEvent)
+      .then((evt) => {
+        if (user && user.role === 'HOST' && evt.hostId && evt.hostId !== user.id) {
+          toast({
+            title: 'Unauthorized',
+            description: 'Only the assigned host or an admin can host this session.',
+            variant: 'destructive',
+          });
+          router.replace('/admin/events');
+          return;
+        }
+        setEvent(evt);
+      })
       .catch(() => {
         toast({ title: 'Event not found', variant: 'destructive' });
         router.replace(`/admin/events`);
       })
       .finally(() => setPageLoading(false));
-  }, [eventId, router]);
+  }, [eventId, router, user]);
 
   // Session timer (counts up every second)
   useEffect(() => {
