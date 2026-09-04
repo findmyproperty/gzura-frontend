@@ -180,51 +180,51 @@ export default function EventAttendanceTab({
 
   return (
     <div className="space-y-4">
-      {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">
-            <CheckCircle2 className="h-4 w-4" />
+      {/* Header bar: Responsive stats and actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">
+            <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {presentCount} Present
           </div>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-red-700 bg-red-50 px-3 py-1.5 rounded-full">
-            <XCircle className="h-4 w-4" />
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-red-700 bg-red-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">
+            <XCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {absentCount} Absent
           </div>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">
-            <Users className="h-4 w-4" />
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-gray-600 bg-gray-100 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {rows.length} Total
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 font-medium"
+            className="flex-1 sm:flex-none gap-1.5 text-xs sm:text-sm bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 font-medium"
             onClick={handleSyncGoogle}
             disabled={syncingGoogle || refreshing}
           >
-            <Video className={`h-4 w-4 text-emerald-600 ${syncingGoogle ? 'animate-spin' : ''}`} />
-            {syncingGoogle ? 'Syncing...' : 'Sync Google Meet'}
+            <Video className={`h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 ${syncingGoogle ? 'animate-spin' : ''}`} />
+            {syncingGoogle ? 'Syncing...' : 'Sync Meet'}
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="flex-1 sm:flex-none gap-1.5 text-xs sm:text-sm"
             onClick={() => void fetchData(true)}
             disabled={refreshing}
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="flex-1 sm:flex-none gap-1.5 text-xs sm:text-sm"
             onClick={() => exportToCsv(rows, eventTitle)}
             disabled={rows.length === 0}
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Export CSV
           </Button>
         </div>
@@ -237,47 +237,29 @@ export default function EventAttendanceTab({
           <p className="text-gray-400 text-xs mt-1">Attendance data will appear once users join the meeting page.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-100">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Name</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Email</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Status</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Source</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">
-                  <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> First Joined</span>
-                </th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Last Left</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Total Duration</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Sessions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {rows.map((row) => {
-                const effectiveStatus = row.attendanceStatus ?? row.calculatedStatus;
-                const isPresent = effectiveStatus === 'present';
-                const isUpdating = updatingId === row.registrationId;
+        <>
+          {/* Mobile Card List View (Visible on <md screens) */}
+          <div className="md:hidden space-y-3">
+            {rows.map((row) => {
+              const effectiveStatus = row.attendanceStatus ?? row.calculatedStatus;
+              const isPresent = effectiveStatus === 'present';
+              const isUpdating = updatingId === row.registrationId;
 
-                return (
-                  <tr
-                    key={row.registrationId}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    {/* Name */}
-                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-                      {row.fullName}
-                    </td>
+              return (
+                <div
+                  key={`mobile-${row.registrationId}`}
+                  className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-gray-900 text-sm truncate">{row.fullName}</p>
+                      <p className="text-gray-500 text-xs truncate">{row.email}</p>
+                      {row.phone && <p className="text-gray-400 text-[11px] mt-0.5">{row.phone}</p>}
+                    </div>
 
-                    {/* Email */}
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                      {row.email}
-                    </td>
-
-                    {/* Status dropdown */}
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="flex flex-col items-end gap-1 shrink-0">
                       <select
-                        id={`attendance-status-${row.registrationId}`}
+                        id={`mobile-attendance-status-${row.registrationId}`}
                         value={effectiveStatus}
                         disabled={isUpdating}
                         onChange={(e) =>
@@ -287,7 +269,7 @@ export default function EventAttendanceTab({
                           )
                         }
                         className={`
-                          text-xs font-semibold rounded-full px-3 py-1.5 border-0 cursor-pointer
+                          text-xs font-semibold rounded-full px-2.5 py-1 border-0 cursor-pointer
                           appearance-none focus:outline-none focus:ring-2 focus:ring-purple-400
                           disabled:opacity-60 disabled:cursor-wait
                           ${isPresent
@@ -300,57 +282,165 @@ export default function EventAttendanceTab({
                         <option value="absent">✗ Absent</option>
                       </select>
                       {row.attendanceStatus !== null && (
-                        <span className="ml-1.5 text-xs text-gray-400">(manual)</span>
+                        <span className="text-[10px] text-gray-400">(manual)</span>
                       )}
-                    </td>
+                    </div>
+                  </div>
 
-                    {/* Source badge */}
-                    <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-50 text-xs">
+                    <div>
+                      <span className="text-gray-400 text-[11px] block">Duration</span>
+                      <span className={`font-semibold ${row.totalDurationSeconds > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
+                        {formatDuration(row.totalDurationSeconds)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 text-[11px] block">Sessions</span>
+                      <span className="text-gray-700 font-medium">
+                        {row.sessionCount > 0 ? `${row.sessionCount}×` : '—'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 text-[11px] block">First Joined</span>
+                      <span className="text-gray-600 text-[11px]">
+                        {formatDateTime(row.firstJoinedAt)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 text-[11px] block">Source</span>
                       {row.isGoogleVerified ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 border border-emerald-200 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 className="h-3 w-3 text-emerald-600 shrink-0" />
-                          Google Verified
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          <CheckCircle2 className="h-2.5 w-2.5 text-emerald-600" />
+                          Google
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                           Platform Gate
                         </span>
                       )}
-                    </td>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-                    {/* First joined */}
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap text-xs">
-                      {formatDateTime(row.firstJoinedAt)}
-                    </td>
+          {/* Desktop / Tablet Table View (Hidden on <md screens) */}
+          <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-100">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Name</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Email</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Source</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">
+                    <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> First Joined</span>
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Last Left</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Total Duration</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Sessions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {rows.map((row) => {
+                  const effectiveStatus = row.attendanceStatus ?? row.calculatedStatus;
+                  const isPresent = effectiveStatus === 'present';
+                  const isUpdating = updatingId === row.registrationId;
 
-                    {/* Last left */}
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap text-xs">
-                      {formatDateTime(row.lastLeftAt)}
-                    </td>
+                  return (
+                    <tr
+                      key={row.registrationId}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      {/* Name */}
+                      <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                        {row.fullName}
+                      </td>
 
-                    {/* Total duration */}
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`text-sm font-semibold ${row.totalDurationSeconds > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
-                        {formatDuration(row.totalDurationSeconds)}
-                      </span>
-                    </td>
+                      {/* Email */}
+                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                        {row.email}
+                      </td>
 
-                    {/* Session count */}
-                    <td className="px-4 py-3 whitespace-nowrap text-gray-600">
-                      {row.sessionCount > 0 ? (
-                        <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 font-medium rounded-full px-2 py-0.5">
-                          {row.sessionCount}×
+                      {/* Status dropdown */}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <select
+                          id={`attendance-status-${row.registrationId}`}
+                          value={effectiveStatus}
+                          disabled={isUpdating}
+                          onChange={(e) =>
+                            void handleStatusChange(
+                              row.registrationId,
+                              e.target.value as 'present' | 'absent',
+                            )
+                          }
+                          className={`
+                            text-xs font-semibold rounded-full px-3 py-1.5 border-0 cursor-pointer
+                            appearance-none focus:outline-none focus:ring-2 focus:ring-purple-400
+                            disabled:opacity-60 disabled:cursor-wait
+                            ${isPresent
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-red-100 text-red-800'
+                            }
+                          `}
+                        >
+                          <option value="present">✓ Present</option>
+                          <option value="absent">✗ Absent</option>
+                        </select>
+                        {row.attendanceStatus !== null && (
+                          <span className="ml-1.5 text-xs text-gray-400">(manual)</span>
+                        )}
+                      </td>
+
+                      {/* Source badge */}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {row.isGoogleVerified ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100/80 border border-emerald-200 px-2 py-0.5 rounded-full">
+                            <CheckCircle2 className="h-3 w-3 text-emerald-600 shrink-0" />
+                            Google Verified
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                            Platform Gate
+                          </span>
+                        )}
+                      </td>
+
+                      {/* First joined */}
+                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap text-xs">
+                        {formatDateTime(row.firstJoinedAt)}
+                      </td>
+
+                      {/* Last left */}
+                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap text-xs">
+                        {formatDateTime(row.lastLeftAt)}
+                      </td>
+
+                      {/* Total duration */}
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`text-sm font-semibold ${row.totalDurationSeconds > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
+                          {formatDuration(row.totalDurationSeconds)}
                         </span>
-                      ) : (
-                        <span className="text-gray-400 text-xs">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+
+                      {/* Session count */}
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-600">
+                        {row.sessionCount > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 font-medium rounded-full px-2 py-0.5">
+                            {row.sessionCount}×
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

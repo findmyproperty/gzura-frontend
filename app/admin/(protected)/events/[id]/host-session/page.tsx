@@ -377,110 +377,177 @@ export default function HostSessionPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/50">
-                    {['Attendee', 'Status', 'First Joined', 'Last Left', 'Total Time', 'Sessions'].map(
-                      (col) => (
-                        <th
-                          key={col}
-                          className="text-left px-5 py-3 text-gray-500 font-semibold text-xs uppercase tracking-wider whitespace-nowrap"
-                        >
-                          {col}
-                        </th>
-                      ),
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {attendees.map((row) => {
-                    const effectiveStatus =
-                      row.attendanceStatus ?? row.calculatedStatus;
-                    const isPresent = effectiveStatus === 'present';
+            <>
+              {/* Mobile Attendee Cards */}
+              <div className="md:hidden divide-y divide-gray-100">
+                {attendees.map((row) => {
+                  const effectiveStatus = row.attendanceStatus ?? row.calculatedStatus;
+                  const isPresent = effectiveStatus === 'present';
 
-                    return (
-                      <tr
-                        key={row.registrationId}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        {/* Attendee */}
-                        <td className="px-5 py-3 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-2 h-2 rounded-full shrink-0 ${
-                                isPresent ? 'bg-emerald-500' : 'bg-gray-200'
-                              }`}
-                            />
-                            <div>
-                              <p className="text-gray-900 font-medium">{row.fullName}</p>
-                              <p className="text-gray-500 text-xs">{row.email}</p>
-                            </div>
+                  return (
+                    <div key={`mobile-attendee-${row.registrationId}`} className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div
+                            className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                              isPresent ? 'bg-emerald-500' : 'bg-gray-200'
+                            }`}
+                          />
+                          <div className="min-w-0">
+                            <p className="text-gray-900 font-semibold text-sm truncate">{row.fullName}</p>
+                            <p className="text-gray-500 text-xs truncate">{row.email}</p>
                           </div>
-                        </td>
+                        </div>
 
-                        {/* Status badge */}
-                        <td className="px-5 py-3 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 ${
-                              isPresent
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-gray-100 text-gray-500'
-                            }`}
-                          >
-                            {isPresent ? (
-                              <CheckCircle2 className="w-3 h-3" />
-                            ) : (
-                              <XCircle className="w-3 h-3" />
-                            )}
-                            {isPresent ? 'Present' : 'Absent'}
-                          </span>
-                        </td>
+                        <span
+                          className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2.5 py-0.5 shrink-0 ${
+                            isPresent
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {isPresent ? (
+                            <CheckCircle2 className="w-3 h-3" />
+                          ) : (
+                            <XCircle className="w-3 h-3" />
+                          )}
+                          {isPresent ? 'Present' : 'Absent'}
+                        </span>
+                      </div>
 
-                        {/* First joined */}
-                        <td className="px-5 py-3 text-gray-600 text-xs whitespace-nowrap">
-                          {row.firstJoinedAt ? (
-                            <span className="flex items-center gap-1.5">
-                              <Clock className="w-3 h-3 text-emerald-600" />
-                              {formatJoinTime(row.firstJoinedAt)}
-                            </span>
-                          ) : '—'}
-                        </td>
-
-                        {/* Last left */}
-                        <td className="px-5 py-3 text-gray-600 text-xs whitespace-nowrap">
-                          {formatJoinTime(row.lastLeftAt)}
-                        </td>
-
-                        {/* Total duration */}
-                        <td className="px-5 py-3 whitespace-nowrap">
-                          <span
-                            className={`font-semibold text-sm ${
-                              row.totalDurationSeconds > 0
-                                ? 'text-purple-700'
-                                : 'text-gray-400'
-                            }`}
-                          >
+                      <div className="grid grid-cols-2 gap-2 pt-1 text-xs text-gray-600">
+                        <div>
+                          <span className="text-gray-400 text-[11px] block">Total Time</span>
+                          <span className={`font-semibold ${row.totalDurationSeconds > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
                             {formatDuration(row.totalDurationSeconds)}
                           </span>
-                        </td>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 text-[11px] block">Sessions</span>
+                          <span className="font-medium text-gray-800">
+                            {row.sessionCount > 0 ? `${row.sessionCount}×` : '—'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 text-[11px] block">First Joined</span>
+                          <span className="text-[11px]">{formatJoinTime(row.firstJoinedAt)}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 text-[11px] block">Last Left</span>
+                          <span className="text-[11px]">{formatJoinTime(row.lastLeftAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-                        {/* Session count */}
-                        <td className="px-5 py-3 whitespace-nowrap">
-                          {row.sessionCount > 0 ? (
-                            <span className="inline-flex items-center text-xs bg-purple-100 text-purple-800 font-medium rounded-full px-2 py-0.5">
-                              {row.sessionCount}×
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                      {['Attendee', 'Status', 'First Joined', 'Last Left', 'Total Time', 'Sessions'].map(
+                        (col) => (
+                          <th
+                            key={col}
+                            className="text-left px-5 py-3 text-gray-500 font-semibold text-xs uppercase tracking-wider whitespace-nowrap"
+                          >
+                            {col}
+                          </th>
+                        ),
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {attendees.map((row) => {
+                      const effectiveStatus =
+                        row.attendanceStatus ?? row.calculatedStatus;
+                      const isPresent = effectiveStatus === 'present';
+
+                      return (
+                        <tr
+                          key={row.registrationId}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          {/* Attendee */}
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-2 h-2 rounded-full shrink-0 ${
+                                  isPresent ? 'bg-emerald-500' : 'bg-gray-200'
+                                }`}
+                              />
+                              <div>
+                                <p className="text-gray-900 font-medium">{row.fullName}</p>
+                                <p className="text-gray-500 text-xs">{row.email}</p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Status badge */}
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 ${
+                                isPresent
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-gray-100 text-gray-500'
+                              }`}
+                            >
+                              {isPresent ? (
+                                <CheckCircle2 className="w-3 h-3" />
+                              ) : (
+                                <XCircle className="w-3 h-3" />
+                              )}
+                              {isPresent ? 'Present' : 'Absent'}
                             </span>
-                          ) : (
-                            <span className="text-gray-400 text-xs">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          </td>
+
+                          {/* First joined */}
+                          <td className="px-5 py-3 text-gray-600 text-xs whitespace-nowrap">
+                            {row.firstJoinedAt ? (
+                              <span className="flex items-center gap-1.5">
+                                <Clock className="w-3 h-3 text-emerald-600" />
+                                {formatJoinTime(row.firstJoinedAt)}
+                              </span>
+                            ) : '—'}
+                          </td>
+
+                          {/* Last left */}
+                          <td className="px-5 py-3 text-gray-600 text-xs whitespace-nowrap">
+                            {formatJoinTime(row.lastLeftAt)}
+                          </td>
+
+                          {/* Total duration */}
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            <span
+                              className={`font-semibold text-sm ${
+                                row.totalDurationSeconds > 0
+                                  ? 'text-purple-700'
+                                  : 'text-gray-400'
+                              }`}
+                            >
+                              {formatDuration(row.totalDurationSeconds)}
+                            </span>
+                          </td>
+
+                          {/* Session count */}
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            {row.sessionCount > 0 ? (
+                              <span className="inline-flex items-center text-xs bg-purple-100 text-purple-800 font-medium rounded-full px-2 py-0.5">
+                                {row.sessionCount}×
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-xs">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
 
