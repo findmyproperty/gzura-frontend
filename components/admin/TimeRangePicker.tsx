@@ -13,6 +13,7 @@ import { EventFormCard } from '@/components/admin/EventFormCard';
 import {
   formatTimeLabel,
   generateTimeOptions,
+  isValidTimeRange,
   parseTimeLabel,
   to12HourLabel,
 } from '@/lib/time-range';
@@ -38,8 +39,17 @@ export default function TimeRangePicker({
   const { start, end } = useMemo(() => parseTimeLabel(value), [value]);
 
   const updateRange = (nextStart: string, nextEnd: string) => {
+    // Clear end when it is no longer after start so equal ranges cannot be saved.
+    if (nextStart && nextEnd && !isValidTimeRange(nextStart, nextEnd)) {
+      onChange(formatTimeLabel(nextStart, ''));
+      return;
+    }
     onChange(formatTimeLabel(nextStart, nextEnd));
   };
+
+  const endOptions = start
+    ? TIME_OPTIONS.filter((time) => isValidTimeRange(start, time))
+    : TIME_OPTIONS;
 
   const fieldClass = (filled: boolean) =>
     cn(
@@ -90,7 +100,7 @@ export default function TimeRangePicker({
             <SelectValue placeholder="End time" />
           </SelectTrigger>
           <SelectContent className="max-h-60 border-purple-100">
-            {TIME_OPTIONS.map((time) => (
+            {endOptions.map((time) => (
               <SelectItem
                 key={`end-${time}`}
                 value={time}

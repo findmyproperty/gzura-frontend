@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const benefits = [
   'Access to exclusive leadership programs',
-  'Network with 5,000+ ambitious professionals',
+  'Network with ambitious professionals',
   'Free workshops and webinars monthly',
   'Mentorship matching program',
   'Priority event registration',
@@ -75,7 +75,7 @@ export default function CTASection() {
 
                 {/* Trust Badge */}
                 <p className="mt-6 md:mt-8 text-white/60 text-sm md:text-base">
-                  Join 5,000+ members from 50+ countries
+                  Join a growing community of leaders across India
                 </p>
               </div>
             </div>

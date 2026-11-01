@@ -65,9 +65,6 @@ export default function ContactPage() {
                     >
                       teamgzura@gmail.com
                     </a>
-                    <p className="text-gray-500 text-sm mt-1">
-                      support@gzura.com
-                    </p>
                   </div>
                 </div>
 
@@ -78,13 +75,13 @@ export default function ContactPage() {
                   <div>
                     <p className="text-gray-500 text-sm mb-1">Call Us</p>
                     <a
-                      href="tel:6360685656"
+                      href="tel:+916360685656"
                       className="text-gray-900 font-medium hover:text-purple-700 transition-colors"
                     >
-                      6360685656
+                      +91 63606 85656
                     </a>
                     <p className="text-gray-500 text-sm mt-1">
-                      Mon-Fri, 9am-6pm EST
+                      Mon-Fri, 9am-6pm IST
                     </p>
                   </div>
                 </div>
@@ -98,7 +95,7 @@ export default function ContactPage() {
                     <p className="text-gray-900 font-medium">
                       Monday - Friday
                     </p>
-                    <p className="text-gray-500">9:00 AM - 6:00 PM EST</p>
+                    <p className="text-gray-500">9:00 AM - 6:00 PM IST</p>
                   </div>
                 </div>
 

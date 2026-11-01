@@ -22,8 +22,8 @@ const values = [
   },
   {
     icon: Globe,
-    title: 'Global impact',
-    description: 'Our work connects leaders across countries and industries.',
+    title: 'National Level',
+    description: 'Our work connects leaders across communities and industries in India.',
   },
 ];
 
@@ -40,7 +40,7 @@ const openings = [
     team: 'Community',
     type: 'Full-time · Remote-friendly',
     summary:
-      'Grow member engagement across events, forums, newsletters, and success-story storytelling with our 5,000+ member community.',
+      'Grow member engagement across events, forums, newsletters, and success-story storytelling with our community.',
   },
   {
     title: 'Mentorship Lead',
@@ -76,9 +76,10 @@ export default function CareersPage() {
               Build with a <span className="gradient-text">mission-focused</span> team
             </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Since 2020, GZURA has delivered 200+ programs across 50+ countries.
-              We are looking for people who care about developing leaders,
-              supporting founders, and running a thoughtful community.
+              Since 2020, GZURA has grown a national community focused on
+              leadership and entrepreneurship in India. We are looking for
+              people who care about developing leaders, supporting founders,
+              and running a thoughtful community.
             </p>
           </div>
 

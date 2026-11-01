@@ -26,7 +26,7 @@ export default function PrivacyPage() {
           {
             heading: '1. Who we are',
             paragraphs: [
-              'GZURA (“we”, “us”, or “our”) operates this website and related member, host, and admin services. For privacy questions, contact teamgzura@gmail.com or call 6360685656 during office hours (Monday–Friday, 9:00 AM–6:00 PM EST).',
+              'GZURA (“we”, “us”, or “our”) operates this website and related member, host, and admin services. For privacy questions, contact teamgzura@gmail.com or call +91 63606 85656 during office hours (Monday–Friday, 9:00 AM–6:00 PM IST).',
             ],
           },
           {

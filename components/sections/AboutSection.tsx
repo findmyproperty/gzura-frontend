@@ -64,7 +64,7 @@ export default function AboutSection() {
 
             <p className="text-gray-600 mb-8 leading-relaxed text-base md:text-lg">
               Founded in 2020, we&apos;ve grown from a small community group to a
-              thriving network of over 5,000 members across the globe. Our
+              thriving national network of leaders and entrepreneurs. Our
               mission is simple: empower men and women to become confident
               leaders and successful entrepreneurs.
             </p>

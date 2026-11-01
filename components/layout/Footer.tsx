@@ -1,14 +1,6 @@
 import Link from 'next/link';
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Youtube,
-  Mail,
-  Phone,
-  MapPin,
-} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 
 const footerLinks = {
   company: [
@@ -35,13 +27,8 @@ const footerLinks = {
   ],
 };
 
-const socialLinks = [
-  { name: 'Facebook', icon: Facebook, href: '#' },
-  { name: 'Twitter', icon: Twitter, href: '#' },
-  { name: 'Instagram', icon: Instagram, href: '#' },
-  { name: 'LinkedIn', icon: Linkedin, href: '#' },
-  { name: 'YouTube', icon: Youtube, href: '#' },
-];
+/** Hidden until client provides real profile URLs (see docs/GZURA-Client-Questions.md). */
+const socialLinks: { name: string; icon: LucideIcon; href: string }[] = [];
 
 export default function Footer() {
   return (
@@ -64,18 +51,22 @@ export default function Footer() {
               entrepreneurship training, and community building. Together, we
               build stronger leaders and successful entrepreneurs.
             </p>
-            <div className="flex gap-4 mt-6">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.href}
-                  className="w-10 h-10 rounded-full bg-purple-800/50 flex items-center justify-center hover:bg-gold-500 hover:text-purple-950 transition-all duration-300"
-                  aria-label={social.name}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="flex gap-4 mt-6">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.name}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-full bg-purple-800/50 flex items-center justify-center hover:bg-gold-500 hover:text-purple-950 transition-all duration-300"
+                    aria-label={social.name}
+                  >
+                    <social.icon className="w-5 h-5" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Links Columns */}

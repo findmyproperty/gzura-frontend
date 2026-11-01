@@ -13,24 +13,24 @@ export const metadata: Metadata = {
 
 const featuredStories = [
   {
-    name: 'Sarah Chen',
-    role: 'CEO, TechVenture Inc.',
-    location: 'San Francisco, USA',
+    name: 'Ananya Rao',
+    role: 'Founder, Bengaluru',
+    location: 'Bengaluru, India',
     story:
-      'Before GZURA, I was a middle manager feeling stuck. The Leadership Development Program gave me the skills and confidence to start my own company. Today, TechVenture has raised $15M in funding and employs 80 people. The mentorship I received was invaluable - my mentor helped me navigate every major decision in my first year.',
-    achievement: 'From manager to CEO, raised $15M funding',
+      'Before GZURA, I was a middle manager feeling stuck. The Leadership Development Program gave me the skills and confidence to start my own company. The mentorship I received helped me navigate major decisions in my first year.',
+    achievement: 'From manager to founder',
     image: '/images/success-stories/sarah-chen.png',
     program: 'Leadership Development + Incubator',
     year: '2022',
     featured: true,
   },
   {
-    name: 'Marcus Williams',
+    name: 'Rohan Mehta',
     role: 'Founder, GreenTech Solutions',
-    location: 'London, UK',
+    location: 'Mumbai, India',
     story:
-      'The Entrepreneurship Incubator changed my life. I went from having a vague business idea to launching a company that now serves clients in 12 countries. The structured approach, expert mentors, and amazing community made all the difference. GZURA didn\'t just teach me business skills - it changed how I think.',
-    achievement: 'Launched company, now in 12 countries',
+      'The Entrepreneurship Incubator changed how I approach building a business. I went from a vague idea to launching with clearer structure, mentors, and a supportive community in India.',
+    achievement: 'Launched company with mentor support',
     image: '/images/success-stories/marcus-williams.png',
     program: 'Entrepreneurship Incubator',
     year: '2021',
@@ -41,10 +41,10 @@ const featuredStories = [
 const allStories = transformationStories;
 
 const stats = [
-  { value: '85%', label: 'Report career advancement' },
-  { value: '$15M+', label: 'Funding raised by alumni' },
-  { value: '150+', label: 'Businesses launched' },
-  { value: '92%', label: 'Member satisfaction' },
+  { value: 'Growing', label: 'Member community' },
+  { value: 'India', label: 'National focus' },
+  { value: 'Live', label: 'Programs & events' },
+  { value: 'Real', label: 'Member journeys' },
 ];
 
 export default function SuccessStoriesPage() {

@@ -41,9 +41,9 @@ const values = [
   },
   {
     icon: Globe,
-    title: 'Global Impact',
+    title: 'National Level',
     description:
-      'Building bridges across cultures and continents.',
+      'Building bridges across communities and industries in India.',
   },
 ];
 
@@ -255,20 +255,20 @@ export default function AboutPage() {
 
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center">
-              <p className="text-5xl font-bold text-gold-400 mb-2">5,000+</p>
+              <p className="text-5xl font-bold text-gold-400 mb-2">Growing</p>
               <p className="text-white/80">Active Members</p>
             </div>
             <div className="text-center">
-              <p className="text-5xl font-bold text-gold-400 mb-2">50+</p>
-              <p className="text-white/80">Countries</p>
+              <p className="text-5xl font-bold text-gold-400 mb-2">India</p>
+              <p className="text-white/80">National Focus</p>
             </div>
             <div className="text-center">
-              <p className="text-5xl font-bold text-gold-400 mb-2">200+</p>
-              <p className="text-white/80">Programs Delivered</p>
+              <p className="text-5xl font-bold text-gold-400 mb-2">Live</p>
+              <p className="text-white/80">Programs & Events</p>
             </div>
             <div className="text-center">
-              <p className="text-5xl font-bold text-gold-400 mb-2">$15M+</p>
-              <p className="text-white/80">Raised by Alumni</p>
+              <p className="text-5xl font-bold text-gold-400 mb-2">Real</p>
+              <p className="text-white/80">Member Outcomes</p>
             </div>
           </div>
         </div>

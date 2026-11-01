@@ -22,6 +22,12 @@ import { revalidateEventsCache } from '@/lib/events-revalidate';
 import { bioForHost, hostOptionLabel, labelForHost } from '@/lib/host-users';
 import { isFullAdmin } from '@/lib/user-roles';
 import { normalizeRichText } from '@/lib/rich-text';
+import {
+  MAX_EVENT_ATTENDEES,
+  MAX_EVENT_PRICE,
+  todayDateInputValue,
+  validateEventLimits,
+} from '@/lib/event-limits';
 import { parseEventPrice } from '@/lib/price';
 import { slugify } from '@/lib/slug';
 import { cn } from '@/lib/utils';
@@ -192,6 +198,30 @@ export default function CreateEventPage() {
       return;
     }
 
+    const price = parseEventPrice(form.price);
+    const maxAttendees =
+      form.type === 'Online'
+        ? parseInt(form.maxAttendees, 10)
+        : form.maxAttendees
+          ? parseInt(form.maxAttendees, 10)
+          : undefined;
+    const limitsError = validateEventLimits({
+      dateStart: form.dateStart,
+      timeLabel: form.timeLabel,
+      price,
+      maxAttendees: Number.isFinite(maxAttendees as number)
+        ? (maxAttendees as number)
+        : null,
+    });
+    if (limitsError) {
+      toast({
+        title: 'Invalid event details',
+        description: limitsError,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const offlineLocation =
@@ -209,13 +239,8 @@ export default function CreateEventPage() {
         speakerBio: form.speakerBio.trim() || undefined,
         galleryImages: form.imageUrls.length ? form.imageUrls : undefined,
         imageUrl: form.imageUrls[0] || undefined,
-        price: parseEventPrice(form.price),
-        maxAttendees:
-          form.type === 'Online'
-            ? parseInt(form.maxAttendees, 10)
-            : form.maxAttendees
-              ? parseInt(form.maxAttendees, 10)
-              : undefined,
+        price,
+        maxAttendees,
         meetingLink:
           form.type === 'Online' && form.meetingLink.trim()
             ? form.meetingLink.trim()
@@ -300,6 +325,7 @@ export default function CreateEventPage() {
                 <Label>Date</Label>
                 <Input
                   type="date"
+                  min={todayDateInputValue()}
                   value={form.dateStart}
                   onChange={(e) => setForm({ ...form, dateStart: e.target.value })}
                   required
@@ -310,6 +336,7 @@ export default function CreateEventPage() {
                 <Input
                   type="number"
                   min={0}
+                  max={MAX_EVENT_PRICE}
                   step="0.01"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -512,6 +539,7 @@ export default function CreateEventPage() {
                     <Input
                       type="number"
                       min={1}
+                      max={MAX_EVENT_ATTENDEES}
                       value={form.maxAttendees}
                       onChange={(e) => setForm({ ...form, maxAttendees: e.target.value })}
                       placeholder="e.g. 50"
@@ -556,9 +584,10 @@ export default function CreateEventPage() {
                     <Input
                       type="number"
                       min={1}
+                      max={MAX_EVENT_ATTENDEES}
                       value={form.maxAttendees}
                       onChange={(e) => setForm({ ...form, maxAttendees: e.target.value })}
-                      placeholder="Leave empty for unlimited"
+                      placeholder={`Leave empty for unlimited (max ${MAX_EVENT_ATTENDEES})`}
                     />
                   </div>
                   <TimeRangePicker

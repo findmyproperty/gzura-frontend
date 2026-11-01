@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 const benefits = [
   'Access to exclusive leadership programs',
   'Free monthly workshops and webinars',
-  'Network with 5,000+ ambitious professionals',
+  'Network with ambitious professionals',
   'Personalized mentorship matching',
   'Priority registration for events',
   'Member-only resources and tools',
-  'Private community forum access',
-  'Discounts on premium programs',
+  'Community updates and discussions',
+  'Program benefits that may apply in future',
 ];
 
 const membershipPlans = [
@@ -27,28 +27,28 @@ const membershipPlans = [
     features: [
       'Monthly webinars access',
       'Newsletter subscription',
-      'Community forum access',
+      'Community updates',
       'Event invitations',
     ],
     popular: false,
   },
   {
     name: 'Premium',
-    price: '$49/mo',
+    price: 'Pricing in INR — contact us',
     description: 'For serious growth seekers',
     features: [
       'All Basic features',
       'Priority event registration',
       'Mentorship matching',
-      'Program discounts',
       'Exclusive resources',
       'Direct support',
+      'Additional benefits may apply in future',
     ],
     popular: true,
   },
   {
     name: 'Executive',
-    price: '$199/mo',
+    price: 'Pricing in INR — contact us',
     description: 'For leaders ready to accelerate',
     features: [
       'All Premium features',
@@ -56,7 +56,7 @@ const membershipPlans = [
       'VIP event access',
       'Personalized development plan',
       'Exclusive networking',
-      'Unlimited program access',
+      'Additional benefits may apply in future',
     ],
     popular: false,
   },
@@ -225,7 +225,7 @@ export default function JoinPage() {
                   invaluable.&rdquo;
                 </p>
                 <p className="text-purple-700 font-semibold mt-3">
-                  — Sarah Chen, CEO
+                  — Ananya Rao, Founder
                 </p>
               </div>
             </div>

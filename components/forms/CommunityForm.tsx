@@ -117,7 +117,7 @@ export default function CommunityForm() {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
-            placeholder="john@example.com"
+            placeholder="name@gmail.com"
             required
             className="bg-white"
           />
@@ -132,7 +132,7 @@ export default function CommunityForm() {
             onChange={(e) =>
               setFormData({ ...formData, phone: e.target.value })
             }
-            placeholder="+1 (234) 567-890"
+            placeholder="+91 98765 43210"
             className="bg-white"
           />
         </div>
@@ -147,7 +147,7 @@ export default function CommunityForm() {
             onChange={(e) =>
               setFormData({ ...formData, city: e.target.value })
             }
-            placeholder="New York"
+            placeholder="Bengaluru"
             className="bg-white"
           />
         </div>
@@ -160,7 +160,7 @@ export default function CommunityForm() {
             onChange={(e) =>
               setFormData({ ...formData, country: e.target.value })
             }
-            placeholder="United States"
+            placeholder="India"
             className="bg-white"
           />
         </div>

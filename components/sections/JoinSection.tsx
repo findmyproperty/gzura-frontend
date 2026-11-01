@@ -2,7 +2,7 @@
 
 import ScrollAnimate from '@/components/animations/ScrollAnimate';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,9 +37,9 @@ const interestOptions = [
 ];
 
 const highlightStats = [
-  { value: '5K+', label: 'Members', icon: Users },
-  { value: '50+', label: 'Events', icon: BadgeCheck },
-  { value: '100+', label: 'Mentors', icon: Star },
+  { value: 'Growing', label: 'Community', icon: Users },
+  { value: 'Live', label: 'Events', icon: BadgeCheck },
+  { value: 'Expert', label: 'Mentors', icon: Star },
 ];
 
 const trustChips = [
@@ -58,20 +58,47 @@ const hostSteps = [
 const HERO_IMAGE =
   'https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1600';
 
+const HOST_DRAFT_KEY = 'gzura-host-application-draft';
+
+const emptyHostForm = {
+  fullName: '',
+  email: '',
+  phone: '',
+  gender: '',
+  profession: '',
+  interest: '',
+  preferredDate: '',
+  preferredTime: '',
+  message: '',
+};
+
 export default function JoinSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    gender: '',
-    profession: '',
-    interest: '',
-    preferredDate: '',
-    preferredTime: '',
-    message: '',
-  });
+  const [formData, setFormData] = useState(emptyHostForm);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(HOST_DRAFT_KEY);
+      if (raw) {
+        setFormData({ ...emptyHostForm, ...JSON.parse(raw) });
+      }
+    } catch {
+      /* ignore */
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || isSuccess) return;
+    const hasContent = Object.values(formData).some((v) => String(v).trim());
+    if (!hasContent) {
+      sessionStorage.removeItem(HOST_DRAFT_KEY);
+      return;
+    }
+    sessionStorage.setItem(HOST_DRAFT_KEY, JSON.stringify(formData));
+  }, [formData, hydrated, isSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,19 +127,10 @@ export default function JoinSection() {
       });
 
       setIsSuccess(true);
+      sessionStorage.removeItem(HOST_DRAFT_KEY);
 
       setTimeout(() => {
-        setFormData({
-          fullName: '',
-          email: '',
-          phone: '',
-          gender: '',
-          profession: '',
-          interest: '',
-          preferredDate: '',
-          preferredTime: '',
-          message: '',
-        });
+        setFormData(emptyHostForm);
       }, 2000);
     } catch (err) {
       toast({
@@ -352,7 +370,7 @@ export default function JoinSection() {
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="+1 (234) 567-890"
+                          placeholder="+91 98765 43210"
                           required
                           aria-required="true"
                           className="bg-gray-50/80 border-gray-200 h-11 rounded-xl focus-visible:ring-purple-500"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Send, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { isValidIndianPhone, normalizeIndianPhone } from '@/lib/phone';
+
+const DRAFT_KEY = 'gzura-contact-draft';
 
 const subjects = [
   'General Inquiry',
@@ -18,31 +21,103 @@ const subjects = [
   'Support',
 ];
 
+type ContactFormData = {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+};
+
+const emptyForm: ContactFormData = {
+  name: '',
+  email: '',
+  phone: '',
+  subject: '',
+  message: '',
+};
+
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: '',
-  });
+  const [formData, setFormData] = useState<ContactFormData>(emptyForm);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<ContactFormData>;
+        setFormData({ ...emptyForm, ...parsed });
+      }
+    } catch {
+      /* ignore */
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const hasContent = Object.values(formData).some((v) => v.trim());
+    if (!hasContent) {
+      sessionStorage.removeItem(DRAFT_KEY);
+      return;
+    }
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+  }, [formData, hydrated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.subject.trim()) {
+      toast({
+        title: 'Subject required',
+        description: 'Please select a subject.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.message.trim() || formData.message.trim().length < 10) {
+      toast({
+        title: 'Message too short',
+        description: 'Please write at least 10 characters.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!isValidIndianPhone(formData.phone)) {
+      toast({
+        title: 'Invalid phone number',
+        description: 'Use a valid Indian mobile number (e.g. +91 98765 43210).',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { api } = await import('@/lib/api');
-      await api.contact(formData);
+      const payload: Record<string, string> = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      };
+      if (formData.phone.trim()) {
+        payload.phone = normalizeIndianPhone(formData.phone);
+      }
+      await api.contact(payload);
 
       toast({
         title: 'Message Sent!',
-        description: 'We\'ll get back to you within 48 hours.',
+        description: "We'll get back to you within 48 hours.",
       });
 
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-    } catch (error) {
+      setFormData(emptyForm);
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to send message. Please try again.',
@@ -62,7 +137,7 @@ export default function ContactForm() {
             id="name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="John Doe"
+            placeholder="Rahul Sharma"
             required
             className="bg-white"
           />
@@ -75,7 +150,7 @@ export default function ContactForm() {
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="john@example.com"
+            placeholder="name@gmail.com"
             required
             className="bg-white"
           />
@@ -90,7 +165,7 @@ export default function ContactForm() {
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            placeholder="+1 (234) 567-890"
+            placeholder="+91 98765 43210"
             className="bg-white"
           />
         </div>
@@ -98,10 +173,11 @@ export default function ContactForm() {
         <div className="space-y-2">
           <Label htmlFor="subject">Subject *</Label>
           <Select
-            value={formData.subject}
+            value={formData.subject || undefined}
             onValueChange={(value) => setFormData({ ...formData, subject: value })}
+            required
           >
-            <SelectTrigger className="bg-white">
+            <SelectTrigger className="bg-white" id="subject">
               <SelectValue placeholder="Select a subject" />
             </SelectTrigger>
             <SelectContent>
@@ -123,6 +199,7 @@ export default function ContactForm() {
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
           placeholder="Tell us how we can help you..."
           required
+          minLength={10}
           rows={6}
           className="bg-white resize-none"
         />

@@ -22,7 +22,7 @@ const faqGroups = [
       {
         question: 'What is included in Premium and Executive plans?',
         answer:
-          'Premium ($49/mo) adds priority event registration, mentorship matching, program discounts, exclusive resources, and direct support. Executive ($199/mo) includes all Premium benefits plus 1-on-1 executive coaching, VIP event access, a personalized development plan, exclusive networking, and unlimited program access.',
+          'Premium and Executive plans add benefits such as priority event registration, mentorship matching, exclusive resources, and direct support. Executive may include coaching and VIP event access. Pricing is in INR — contact teamgzura@gmail.com for current rates. Some benefits may apply in future as the community grows.',
       },
       {
         question: 'Can I change or cancel my plan later?',
@@ -77,7 +77,7 @@ const faqGroups = [
       {
         question: 'How do I contact GZURA?',
         answer:
-          'Email teamgzura@gmail.com, call 6360685656 (Monday–Friday, 9:00 AM–6:00 PM EST), or send a message on the Contact page. For privacy or terms questions, see those pages in the footer.',
+          'Email teamgzura@gmail.com, call +91 63606 85656 (Monday–Friday, 9:00 AM–6:00 PM IST), or send a message on the Contact page. For privacy or terms questions, see those pages in the footer.',
       },
     ],
   },

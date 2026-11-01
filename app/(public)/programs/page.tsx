@@ -301,7 +301,7 @@ export default function ProgramsPage() {
               Ready to Transform Your Career?
             </h2>
             <p className="text-white/80 text-lg mb-8">
-              Join thousands of professionals who have accelerated their growth
+              Join professionals who are accelerating their growth
               through GZURA programs.
             </p>
             <div className="flex flex-wrap justify-center gap-4">

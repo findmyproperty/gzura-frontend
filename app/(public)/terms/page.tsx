@@ -33,7 +33,7 @@ export default function TermsPage() {
             heading: '2. Accounts and membership',
             paragraphs: [
               'You are responsible for the accuracy of your account information and for keeping your login credentials confidential. Membership plans currently include Basic (free), Premium, and Executive tiers, with benefits described on the Join Community page. We may change plan features or pricing with reasonable notice.',
-              'Community access, program discounts, mentorship matching, and event priority are privileges of the applicable plan and may be suspended if these Terms are violated.',
+              'Community access, mentorship matching, event priority, and other plan benefits (including any that may apply in future) are privileges of the applicable plan and may be suspended if these Terms are violated.',
             ],
           },
           {

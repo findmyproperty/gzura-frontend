@@ -64,3 +64,18 @@ export function formatTimeLabel(start: string, end: string): string {
   }
   return to12HourLabel(start || end);
 }
+
+/** True when both sides are set and end is strictly after start (24h HH:mm). */
+export function isValidTimeRange(start: string, end: string): boolean {
+  if (!start || !end) return false;
+  return start < end;
+}
+
+export function assertValidTimeLabel(label: string): string | null {
+  if (!label?.trim()) return null;
+  const { start, end } = parseTimeLabel(label);
+  if (start && end && !isValidTimeRange(start, end)) {
+    return 'End time must be after start time';
+  }
+  return null;
+}

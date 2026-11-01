@@ -11,18 +11,16 @@ export const metadata: Metadata = {
 
 const facts = [
   { label: 'Founded', value: '2020' },
-  { label: 'Active members', value: '5,000+' },
-  { label: 'Countries', value: '50+' },
-  { label: 'Programs delivered', value: '200+' },
-  { label: 'Raised by alumni', value: '$15M+' },
+  { label: 'Focus', value: 'India (National)' },
+  { label: 'Community', value: 'Growing' },
+  { label: 'Programs', value: 'Live & hybrid' },
+  { label: 'Based in', value: 'Bengaluru' },
 ];
 
 const leadership = [
-  { name: 'Founder', role: 'Founder' },
+  { name: 'Pramodhini', role: 'Founder' },
   { name: 'Yathish', role: 'Co-Founder' },
   { name: 'Vaishnavi Raj.An', role: 'Operation Head' },
-  { name: 'Priya Sharma', role: 'Director of Community' },
-  { name: 'James Williams', role: 'Head of Mentorship' },
 ];
 
 export default function PressPage() {
@@ -49,9 +47,9 @@ export default function PressPage() {
                   hybrid and in-person programs — including a Leadership
                   Development Program, Entrepreneurship Incubator, Mentorship
                   Network, and Success Accelerator — alongside workshops and
-                  community events. The organization serves 5,000+ members
-                  across 50+ countries and exists to help ambitious
-                  professionals turn potential into lasting impact.
+                  community events. GZURA focuses on national-level impact in
+                  India and exists to help ambitious professionals turn
+                  potential into lasting impact.
                 </p>
               </div>
 
@@ -114,13 +112,13 @@ export default function PressPage() {
                 </a>
                 <p className="text-sm text-gray-500 mt-4 mb-1">Phone</p>
                 <a
-                  href="tel:6360685656"
+                  href="tel:+916360685656"
                   className="text-purple-700 font-medium hover:underline"
                 >
-                  6360685656
+                  +91 63606 85656
                 </a>
                 <p className="text-sm text-gray-500 mt-4">
-                  Monday–Friday, 9:00 AM–6:00 PM EST
+                  Monday–Friday, 9:00 AM–6:00 PM IST
                 </p>
                 <Link href="/contact" className="btn-primary inline-flex mt-8">
                   Contact Us
